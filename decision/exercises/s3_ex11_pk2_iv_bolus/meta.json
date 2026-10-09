@@ -1,0 +1,568 @@
+{
+ "id": "s3_ex11_pk2_iv_bolus",
+ "index": 11,
+ "family": "pk2_iv_bolus",
+ "model": "pk2.iv_bolus",
+ "route": "iv_bolus",
+ "dose": {
+  "amount": 500,
+  "unit": "ug"
+ },
+ "units": {
+  "time": "h",
+  "conc": "ng/mL"
+ },
+ "n_points": 8,
+ "noise": {
+  "type": "proportional",
+  "cv": 0.1,
+  "distribution": "gaussian, clipped at +-2 sd",
+  "seed": 1618033911
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "cl": 6.5,
+   "vc": 33.8,
+   "q": 11.6,
+   "vp": 24.0
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 1,
+  "conc_factor_to_csv": 1,
+  "terminal_half_life_h": 6.842329424481267
+ },
+ "seed": 16180339,
+ "attempt": 0,
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "h"
+   },
+   {
+    "name": "conc",
+    "unit": "ng/mL"
+   }
+  ],
+  "worksheet_derived_units": {
+   "auc": "h*ng/mL",
+   "aumc": "h^2*ng/mL",
+   "half_life": "h",
+   "lambda_z": "1/h",
+   "mrt": "h"
+  },
+  "worksheet_unit_warnings": [
+   {
+    "code": "missing_unit",
+    "message": "the dose has no unit; derived units (AUC, clearance, volume) cannot be named"
+   }
+  ],
+  "nca": {
+   "linear": {
+    "nca_run_arguments": {
+     "dose": 500,
+     "route": "iv_bolus",
+     "options": {
+      "auc_method": "linear"
+     }
+    },
+    "parameters": {
+     "c0": {
+      "value": 18.02602718514716,
+      "unit": "ng/mL"
+     },
+     "cmax": {
+      "value": 13.34,
+      "unit": "ng/mL"
+     },
+     "tmax": {
+      "value": 0.38,
+      "unit": "h"
+     },
+     "tfirst": {
+      "value": 0.38,
+      "unit": "h"
+     },
+     "tlast": {
+      "value": 34.0,
+      "unit": "h"
+     },
+     "clast.obs": {
+      "value": 0.2377,
+      "unit": "ng/mL"
+     },
+     "auclast": {
+      "value": 76.87697516517797,
+      "unit": "h*ng/mL"
+     },
+     "aucall": {
+      "value": 76.87697516517797,
+      "unit": "h*ng/mL"
+     },
+     "aumclast": {
+      "value": 543.9362639999999,
+      "unit": "h^2*ng/mL"
+     },
+     "aumcall": {
+      "value": 543.9362639999999,
+      "unit": "h^2*ng/mL"
+     },
+     "lambda.z": {
+      "value": 0.09262937677244995,
+      "unit": "1/h"
+     },
+     "r.squared": {
+      "value": 0.9958382178542324,
+      "unit": ""
+     },
+     "adj.r.squared": {
+      "value": 0.9916764357084649,
+      "unit": ""
+     },
+     "lambda.z.time.first": {
+      "value": 9.4,
+      "unit": "h"
+     },
+     "lambda.z.time.last": {
+      "value": 34.0,
+      "unit": "h"
+     },
+     "lambda.z.n.points": {
+      "value": 3.0,
+      "unit": ""
+     },
+     "clast.pred": {
+      "value": 0.23073661055897582,
+      "unit": "ng/mL"
+     },
+     "half.life": {
+      "value": 7.483016778388849,
+      "unit": "h"
+     },
+     "span.ratio": {
+      "value": 3.287444185752123,
+      "unit": ""
+     },
+     "aucinf.obs": {
+      "value": 79.44311571672162,
+      "unit": "h*ng/mL"
+     },
+     "aucinf.pred": {
+      "value": 79.3679409753636,
+      "unit": "h*ng/mL"
+     },
+     "aumcinf.obs": {
+      "value": 658.8883550380408,
+      "unit": "h^2*ng/mL"
+     },
+     "aumcinf.pred": {
+      "value": 655.5208490348522,
+      "unit": "h^2*ng/mL"
+     },
+     "aucpext.obs": {
+      "value": 3.2301610131883596,
+      "unit": "%"
+     },
+     "aucpext.pred": {
+      "value": 3.1385037580335395,
+      "unit": "%"
+     },
+     "aumcpext.obs": {
+      "value": 17.44636859326556,
+      "unit": "%"
+     },
+     "aumcpext.pred": {
+      "value": 17.022278574227258,
+      "unit": "%"
+     },
+     "mrt.iv.last": {
+      "value": 7.075411888036669,
+      "unit": "h"
+     },
+     "mrt.iv.obs": {
+      "value": 8.293838290375039,
+      "unit": "h"
+     },
+     "mrt.iv.pred": {
+      "value": 8.259264899392196,
+      "unit": "h"
+     },
+     "cl.obs": {
+      "value": 6.293811559240711,
+      "unit": "dose unit/(h*ng/mL)"
+     },
+     "cl.pred": {
+      "value": 6.299772853565695,
+      "unit": "dose unit/(h*ng/mL)"
+     },
+     "vz.obs": {
+      "value": 67.9461719223467,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vz.pred": {
+      "value": 68.01052833423995,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.obs": {
+      "value": 52.19985530243564,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.pred": {
+      "value": 52.031492803598965,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.obs": {
+      "value": 52.19985530243564,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.pred": {
+      "value": 52.031492803598965,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.last": {
+      "value": 46.017756765497275,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "cmax.dn": {
+      "value": 0.02668,
+      "unit": "ng/mL/(dose unit)"
+     },
+     "clast.obs.dn": {
+      "value": 0.0004754,
+      "unit": "ng/mL/(dose unit)"
+     },
+     "auclast.dn": {
+      "value": 0.15375395033035594,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucall.dn": {
+      "value": 0.15375395033035594,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucinf.obs.dn": {
+      "value": 0.15888623143344324,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucinf.pred.dn": {
+      "value": 0.1587358819507272,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aumclast.dn": {
+      "value": 1.087872528,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcall.dn": {
+      "value": 1.087872528,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcinf.obs.dn": {
+      "value": 1.3177767100760815,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcinf.pred.dn": {
+      "value": 1.3110416980697044,
+      "unit": "h^2*ng/mL/(dose unit)"
+     }
+    },
+    "not_calculated": {
+     "tlag": "not_applicable_to_route",
+     "mrt.last": "not_applicable_to_route",
+     "mrt.obs": "not_applicable_to_route",
+     "mrt.pred": "not_applicable_to_route",
+     "aucivlast": "no_start_concentration",
+     "aucivall": "no_start_concentration",
+     "aucivinf.obs": "no_start_concentration",
+     "aucivinf.pred": "no_start_concentration",
+     "aucivpbextlast": "no_start_concentration",
+     "aucivpbextall": "no_start_concentration",
+     "aucivpbextinf.obs": "no_start_concentration",
+     "aucivpbextinf.pred": "no_start_concentration"
+    },
+    "not_calculated_messages": {
+     "aucivall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "mrt.last": "not defined for this route of administration",
+     "mrt.obs": "not defined for this route of administration",
+     "mrt.pred": "not defined for this route of administration",
+     "tlag": "not defined for this route of administration"
+    },
+    "flags": [],
+    "flag_messages": [],
+    "lambda_z_regression": {
+     "adj_r_squared": 0.9916764357084649,
+     "intercept": 1.6829203772339805,
+     "lambda_z": 0.09262937677244995,
+     "n_points": 3,
+     "r_squared": 0.9958382178542324,
+     "replaced_points": 0,
+     "selected": true,
+     "time_first": 9.4,
+     "time_last": 34.0,
+     "valid": true
+    }
+   },
+   "lin_up_log_down": {
+    "nca_run_arguments": {
+     "dose": 500,
+     "route": "iv_bolus",
+     "options": {
+      "auc_method": "lin_up_log_down"
+     }
+    },
+    "parameters": {
+     "c0": {
+      "value": 18.02602718514716,
+      "unit": "ng/mL"
+     },
+     "cmax": {
+      "value": 13.34,
+      "unit": "ng/mL"
+     },
+     "tmax": {
+      "value": 0.38,
+      "unit": "h"
+     },
+     "tfirst": {
+      "value": 0.38,
+      "unit": "h"
+     },
+     "tlast": {
+      "value": 34.0,
+      "unit": "h"
+     },
+     "clast.obs": {
+      "value": 0.2377,
+      "unit": "ng/mL"
+     },
+     "auclast": {
+      "value": 73.6422997335342,
+      "unit": "h*ng/mL"
+     },
+     "aucall": {
+      "value": 73.6422997335342,
+      "unit": "h*ng/mL"
+     },
+     "aumclast": {
+      "value": 551.0521126209993,
+      "unit": "h^2*ng/mL"
+     },
+     "aumcall": {
+      "value": 551.0521126209993,
+      "unit": "h^2*ng/mL"
+     },
+     "lambda.z": {
+      "value": 0.09262937677244995,
+      "unit": "1/h"
+     },
+     "r.squared": {
+      "value": 0.9958382178542324,
+      "unit": ""
+     },
+     "adj.r.squared": {
+      "value": 0.9916764357084649,
+      "unit": ""
+     },
+     "lambda.z.time.first": {
+      "value": 9.4,
+      "unit": "h"
+     },
+     "lambda.z.time.last": {
+      "value": 34.0,
+      "unit": "h"
+     },
+     "lambda.z.n.points": {
+      "value": 3.0,
+      "unit": ""
+     },
+     "clast.pred": {
+      "value": 0.23073661055897582,
+      "unit": "ng/mL"
+     },
+     "half.life": {
+      "value": 7.483016778388849,
+      "unit": "h"
+     },
+     "span.ratio": {
+      "value": 3.287444185752123,
+      "unit": ""
+     },
+     "aucinf.obs": {
+      "value": 76.20844028507786,
+      "unit": "h*ng/mL"
+     },
+     "aucinf.pred": {
+      "value": 76.13326554371983,
+      "unit": "h*ng/mL"
+     },
+     "aumcinf.obs": {
+      "value": 666.0042036590402,
+      "unit": "h^2*ng/mL"
+     },
+     "aumcinf.pred": {
+      "value": 662.6366976558515,
+      "unit": "h^2*ng/mL"
+     },
+     "aucpext.obs": {
+      "value": 3.3672655442682276,
+      "unit": "%"
+     },
+     "aucpext.pred": {
+      "value": 3.2718494240276397,
+      "unit": "%"
+     },
+     "aumcpext.obs": {
+      "value": 17.259964787983595,
+      "unit": "%"
+     },
+     "aumcpext.pred": {
+      "value": 16.839481638972707,
+      "unit": "%"
+     },
+     "mrt.iv.last": {
+      "value": 7.482820534053324,
+      "unit": "h"
+     },
+     "mrt.iv.obs": {
+      "value": 8.739244644919578,
+      "unit": "h"
+     },
+     "mrt.iv.pred": {
+      "value": 8.703642132299313,
+      "unit": "h"
+     },
+     "cl.obs": {
+      "value": 6.560953066741919,
+      "unit": "dose unit/(h*ng/mL)"
+     },
+     "cl.pred": {
+      "value": 6.567431416860387,
+      "unit": "dose unit/(h*ng/mL)"
+     },
+     "vz.obs": {
+      "value": 70.83015448607976,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vz.pred": {
+      "value": 70.90009288299225,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.obs": {
+      "value": 57.337773954093,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.pred": {
+      "value": 57.16057278077224,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.obs": {
+      "value": 57.337773954093,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.pred": {
+      "value": 57.16057278077224,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "vss.iv.last": {
+      "value": 50.805179639480365,
+      "unit": "dose unit/(ng/mL)"
+     },
+     "cmax.dn": {
+      "value": 0.02668,
+      "unit": "ng/mL/(dose unit)"
+     },
+     "clast.obs.dn": {
+      "value": 0.0004754,
+      "unit": "ng/mL/(dose unit)"
+     },
+     "auclast.dn": {
+      "value": 0.1472845994670684,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucall.dn": {
+      "value": 0.1472845994670684,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucinf.obs.dn": {
+      "value": 0.1524168805701557,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aucinf.pred.dn": {
+      "value": 0.15226653108743965,
+      "unit": "h*ng/mL/(dose unit)"
+     },
+     "aumclast.dn": {
+      "value": 1.1021042252419986,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcall.dn": {
+      "value": 1.1021042252419986,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcinf.obs.dn": {
+      "value": 1.3320084073180802,
+      "unit": "h^2*ng/mL/(dose unit)"
+     },
+     "aumcinf.pred.dn": {
+      "value": 1.325273395311703,
+      "unit": "h^2*ng/mL/(dose unit)"
+     }
+    },
+    "not_calculated": {
+     "tlag": "not_applicable_to_route",
+     "mrt.last": "not_applicable_to_route",
+     "mrt.obs": "not_applicable_to_route",
+     "mrt.pred": "not_applicable_to_route",
+     "aucivlast": "no_start_concentration",
+     "aucivall": "no_start_concentration",
+     "aucivinf.obs": "no_start_concentration",
+     "aucivinf.pred": "no_start_concentration",
+     "aucivpbextlast": "no_start_concentration",
+     "aucivpbextall": "no_start_concentration",
+     "aucivpbextinf.obs": "no_start_concentration",
+     "aucivpbextinf.pred": "no_start_concentration"
+    },
+    "not_calculated_messages": {
+     "aucivall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "aucivpbextlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+     "mrt.last": "not defined for this route of administration",
+     "mrt.obs": "not defined for this route of administration",
+     "mrt.pred": "not defined for this route of administration",
+     "tlag": "not defined for this route of administration"
+    },
+    "flags": [],
+    "flag_messages": [],
+    "lambda_z_regression": {
+     "adj_r_squared": 0.9916764357084649,
+     "intercept": 1.6829203772339805,
+     "lambda_z": 0.09262937677244995,
+     "n_points": 3,
+     "r_squared": 0.9958382178542324,
+     "replaced_points": 0,
+     "selected": true,
+     "time_first": 9.4,
+     "time_last": 34.0,
+     "valid": true
+    }
+   }
+  },
+  "fit_parameters": {
+   "cl": 6.5,
+   "vc": 33.8,
+   "q": 11.6,
+   "vp": 24.0
+  }
+ }
+}
