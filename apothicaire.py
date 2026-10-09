@@ -39,7 +39,7 @@ NCA_OPTIONS_KEPT = ["auc_method", "start", "lambda_z", "quality"]
 SYSTEM_ADDITION = """
 
 You are Apothicaire, a DMPK assistant. Never compute pharmacokinetic numbers yourself: import the data and call Caladrius tools, then explain the results in the user's language, with units, and mention quality flags.
-Caladrius workflow: data_import (CSV text in `csv`; give the units the user states in `columns`, e.g. {"name":"time","unit":"h"}) returns a worksheet id; nca_run(worksheet, dose, route, options) returns an analysis id and the parameters by PKNCA name; to redo an analysis with other options call nca_run again. Worksheets and analyses persist during the chat: reuse their ids, do not import the same data twice. NCA parameters come with their unit (aucpext.* are percentages); when the dose unit is unknown to Caladrius, CL and V are in dose unit/(...): if you convert them, show the factor. Quote numbers exactly as the tools return them (you may round, saying so) and never state a value that no tool returned."""
+Caladrius workflow: data_import (CSV text in `csv`; give the units the user states in `columns`, e.g. {"name":"time","unit":"h"}) returns a worksheet id; nca_run(worksheet, dose, route, options) returns an analysis id and the parameters by PKNCA name; to redo an analysis with other options call nca_run again. Worksheets and analyses persist during the chat: reuse their ids, do not import the same data twice. NCA parameters come with their unit (aucpext.* are percentages); when the dose unit is unknown to Caladrius, CL and V are in dose unit/(...). Quote tool values verbatim and never convert units (no mg to ug, no h to min, no L/h from dose unit/...); if a unit is missing, say so. You may round a value, saying so. Never state a value that no tool returned."""
 
 # ---------------------------------------------------------------- MCP stdio client
 class MCPError(Exception): pass
@@ -104,8 +104,11 @@ def to_openai(tool):
         opts["properties"] = {k: v for k, v in opts["properties"].items() if k in NCA_OPTIONS_KEPT}
         opts["description"] = ("NCA conventions, all optional. auc_method: linear = linear trapezoids, "
                                "lin_up_log_down = linear-up/log-down. Other options (blq, missing...) exist but are not shown.")
-        params["properties"]["route"] = {"type": "string", "enum": ["extravascular", "iv_bolus"],
-                                         "description": "oral = extravascular"}
+        params["properties"]["route"] = {
+            "anyOf": [{"type": "string", "enum": ["extravascular", "iv_bolus"]},
+                      {"type": "object", "properties": {"iv_infusion": {"type": "object", "properties": {
+                          "duration": {"type": "number"}}, "required": ["duration"]}}, "required": ["iv_infusion"]}],
+            "description": "oral = extravascular; infusion = {\"iv_infusion\": {\"duration\": <time>}}"}
         params["properties"]["dose"] = {"type": "number", "description": "Dose amount in the unit the user gives (10 mg -> 10)."}
         params["properties"]["subject"] = {"description": "One subject label; omit for all subjects."}
     if tool["name"] == "data_import":
@@ -145,9 +148,12 @@ def digest_analysis(d, units=None):
     opts = spec.get("options", {})
     out = {"analysis": d.get("id"), "label": d.get("label"), "status": (d.get("status") or {}).get("state"),
            "options_used": {"auc_method": opts.get("auc_method"), "lambda_z": opts.get("lambda_z"),
-                            "quality_thresholds": opts.get("quality")},
+                            "quality_thresholds": opts.get("quality"),
+                            "blq": opts.get("blq"), "missing": opts.get("missing"),
+                            "negative": opts.get("negative"), "start": opts.get("start")},
            "subjects": []}
     u = units or {}
+    out["unit_warnings"] = u.get("warnings", [])
     out["dose_unit"] = u.get("dose") or "unknown to Caladrius (no dose column): CL and V are in dose unit/..."
     for s in res.get("subjects", []):
         o = {"subject": s.get("subject"), "dose": s.get("dose"), "route": s.get("route")}
@@ -161,8 +167,14 @@ def digest_analysis(d, units=None):
                     vals[p["name"]] = f"{_sig(v['value'])} {un}".strip() if un else _sig(v["value"])
                 else: nc.setdefault(str(v.get("not_calculated")), []).append(p["name"])
             o["flags"] = ok.get("flags", [])
+            o["flag_messages"] = s.get("flag_messages", [])
             o["parameters"] = vals
             o["not_calculated"] = nc
+            # the engine's wording per not-calculated parameter, grouped by identical text (one line per
+            # distinct message instead of ~20 repeated ones)
+            ncm = {}
+            for pname, msg in (s.get("not_calculated_messages") or {}).items(): ncm.setdefault(msg, []).append(pname)
+            o["not_calculated_messages"] = ncm
             sel = [c for c in ok.get("lambda_z_candidates", []) if c.get("selected")]
             if sel: o["lambda_z_regression"] = {k: _sig(v) for k, v in sel[0].items() if k not in ("selected", "valid")}
             if ok.get("removed"): o["removed_points"] = ok["removed"]
@@ -182,7 +194,8 @@ def render_tool_result(name, ok, text, units):
         if isinstance(ws, dict) and "derived_units" in ws:          # remember units per worksheet
             roles = {col.get("role"): col.get("unit") for col in ws.get("columns", [])}
             units[ws.get("id")] = {"time": roles.get("time"), "conc": roles.get("concentration"),
-                                   "dose": roles.get("dose"), "derived": ws["derived_units"]}
+                                   "dose": roles.get("dose"), "derived": ws["derived_units"],
+                                   "warnings": ws.get("unit_warnings", [])}
         if isinstance(d, dict) and d.get("kind") == "nca" and "result" in d:
             wid = (d.get("spec") or {}).get("worksheet")
             d = digest_analysis(d, units.get(wid))

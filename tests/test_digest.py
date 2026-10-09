@@ -114,7 +114,7 @@ def digest_of(g):
     ws = g["data_import_result"]["worksheet"]
     cols = {c["role"]: c.get("unit") for c in ws["columns"]}
     units = {"time": cols.get("time"), "conc": cols.get("concentration"), "dose": cols.get("dose"),
-             "derived": ws["derived_units"]}
+             "derived": ws["derived_units"], "warnings": ws.get("unit_warnings", [])}
     return apothicaire.digest_analysis(g["nca_run_result"], units), units
 
 # ---------------------------------------------------------------- tests
@@ -212,7 +212,12 @@ class TestGoldenDigest(unittest.TestCase):
                 self.assertEqual(d["status"], g["nca_run_result"]["status"]["state"])
                 self.assertEqual(d["options_used"], {"auc_method": spec["options"]["auc_method"],
                                                      "lambda_z": spec["options"]["lambda_z"],
-                                                     "quality_thresholds": spec["options"]["quality"]})
+                                                     "quality_thresholds": spec["options"]["quality"],
+                                                     "blq": spec["options"]["blq"],
+                                                     "missing": spec["options"]["missing"],
+                                                     "negative": spec["options"]["negative"],
+                                                     "start": spec["options"]["start"]})
+                self.assertEqual(d["unit_warnings"], g["data_import_result"]["worksheet"].get("unit_warnings", []))
                 self.assertEqual(d["options_used"]["auc_method"], g["calls"][1]["arguments"]["options"]["auc_method"])
                 if units["dose"]: self.assertEqual(d["dose_unit"], units["dose"])
                 else: self.assertTrue(d["dose_unit"].startswith("unknown to Caladrius"))
@@ -223,6 +228,12 @@ class TestGoldenDigest(unittest.TestCase):
                     if ok is None:
                         self.assertEqual(sd["outcome"], sp["outcome"]); continue
                     self.assertEqual(sd["flags"], ok["flags"])
+                    self.assertEqual(sd["flag_messages"], sp["flag_messages"])
+                    grouped = {}
+                    for pname, msg in sp["not_calculated_messages"].items(): grouped.setdefault(msg, []).append(pname)
+                    self.assertEqual(sd["not_calculated_messages"], grouped)
+                    self.assertEqual({n for ns in sd["not_calculated_messages"].values() for n in ns},
+                                     {n for ns in sd["not_calculated"].values() for n in ns})
                     if ok["removed"]: self.assertEqual(sd["removed_points"], ok["removed"])
                     else: self.assertNotIn("removed_points", sd)
 
@@ -231,6 +242,33 @@ class TestGoldenDigest(unittest.TestCase):
         codes = {f["code"] for sd in d["subjects"] for f in sd["flags"]}
         self.assertEqual(codes, {"short_span", "high_extrapolation"})
         self.assertIn("blq", {r["reason"] for sd in d["subjects"] for r in sd.get("removed_points", [])})
+
+    def test_messages_and_unit_warnings_are_carried(self):
+        """flag_messages (with their numbers), not_calculated_messages and the worksheet's unit_warnings
+        reach the model; a dose with no unit gives a missing_unit warning, a clean worksheet none."""
+        d, _ = digest_of(GOLDENS["theoph_s1_oral_dose_arg"])
+        self.assertEqual([w["code"] for w in d["unit_warnings"]], ["missing_unit"])
+        sd = d["subjects"][0]
+        self.assertTrue(any("31.2 %" in m for m in sd["flag_messages"]), sd["flag_messages"])
+        self.assertIn("not defined for this route of administration", sd["not_calculated_messages"])
+        self.assertIn("c0", sd["not_calculated_messages"]["not defined for this route of administration"])
+        d, _ = digest_of(GOLDENS["edge_blq_6_subjects"])
+        self.assertEqual(d["unit_warnings"], [])
+        self.assertEqual(d["options_used"]["blq"], {"position": {"first": "keep", "last": "keep", "middle": "drop"}})
+        self.assertEqual((d["options_used"]["missing"], d["options_used"]["negative"], d["options_used"]["start"]),
+                         ("drop", "error", "c0"))
+
+    def test_mass_mismatch_warning_reaches_the_digest(self):
+        """A synthetic worksheet answer carrying a mass_mismatch (dose in mg, concentration per ng) is
+        remembered by render_tool_result and printed in the next digest."""
+        g = GOLDENS["theoph_s1_oral_dose_arg"]
+        ws = copy.deepcopy(g["data_import_result"])
+        warn = {"code": "mass_mismatch", "message": "dose in mg but concentration per ng"}
+        ws["worksheet"]["unit_warnings"] = [warn]
+        units = {}
+        apothicaire.render_tool_result("data_import", True, json.dumps(ws), units)
+        shown = json.loads(apothicaire.render_tool_result("nca_run", True, json.dumps(g["nca_run_result"]), units))
+        self.assertEqual(shown["unit_warnings"], [warn])
 
     def test_subject_errors_are_reproduced(self):
         g = GOLDENS["edge_negative_subject_errors"]
@@ -356,7 +394,8 @@ class TestSchemaFlattening(unittest.TestCase):
                          {"minimum": 3, "type": "integer"})
         q = f["options"]["properties"]["quality"]["properties"]
         self.assertEqual(set(q), {"max_extrapolated_percent", "min_adj_r_squared", "min_points", "min_span_ratio"})
-        self.assertEqual(f["route"]["enum"], ["extravascular", "iv_bolus"])
+        self.assertEqual(f["route"]["anyOf"][0]["enum"], ["extravascular", "iv_bolus"])
+        self.assertEqual(f["route"]["anyOf"][1]["required"], ["iv_infusion"])           # an infusion can be expressed
         self.assertEqual(f["dose"]["type"], "number")
         self.assertEqual(f["worksheet"]["minimum"], 1); self.assertEqual(f["worksheet"]["type"], "integer")
         self.assertEqual(f["analysis"]["type"], "integer")
