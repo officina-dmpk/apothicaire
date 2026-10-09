@@ -1,0 +1,50 @@
+{
+ "id": "oodx12_iv_infusion_mcg",
+ "index": null,
+ "family": "iv_infusion",
+ "model": "pk1.iv_infusion",
+ "route": {
+  "iv_infusion": {
+   "duration": 1.0
+  }
+ },
+ "dose": {
+  "amount": 750,
+  "unit": "ug"
+ },
+ "units": {
+  "time": "h",
+  "conc": "ng/mL"
+ },
+ "n_points": 9,
+ "noise": {
+  "type": "none",
+  "note": "deterministic, no random noise"
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "cl": 3.0,
+   "v": 25.0,
+   "dur": 1.0
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 1,
+  "conc_factor_to_csv": 1000,
+  "terminal_half_life_h": 5.7762
+ },
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "h"
+   },
+   {
+    "name": "conc",
+    "unit": "ng/mL"
+   }
+  ],
+  "oracle_note": "Part 1 is written blind of the engine: the NCA oracle (ground_truth.nca of the benchmark exercises) was not generated here. The truth carried by this file is route, dose, units and model; regenerate the oracle with Caladrius before comparing values.",
+  "source": "decision/ood/make_ood_exercises.py"
+ }
+}

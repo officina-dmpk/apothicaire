@@ -1,0 +1,48 @@
+{
+ "id": "oodx07_urine",
+ "index": null,
+ "family": "urine",
+ "model": "urine_recovery",
+ "route": "unknown",
+ "dose": {
+  "amount": 50,
+  "unit": "mg"
+ },
+ "units": {
+  "time": "h",
+  "conc": null
+ },
+ "n_points": 8,
+ "noise": {
+  "type": "none",
+  "note": "deterministic, no random noise"
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "note": "urine recovery: cumulative amount (mg) and volume (mL), no concentration column"
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 1,
+  "conc_factor_to_csv": 1,
+  "terminal_half_life_h": null
+ },
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "h"
+   },
+   {
+    "name": "volume",
+    "unit": "mL"
+   },
+   {
+    "name": "amount",
+    "unit": "mg"
+   }
+  ],
+  "oracle_note": "Part 1 is written blind of the engine: the NCA oracle (ground_truth.nca of the benchmark exercises) was not generated here. The truth carried by this file is route, dose, units and model; regenerate the oracle with Caladrius before comparing values.",
+  "source": "decision/ood/make_ood_exercises.py"
+ }
+}

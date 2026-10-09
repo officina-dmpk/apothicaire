@@ -1,0 +1,45 @@
+{
+ "id": "oodx02_iv_bolus_tlag",
+ "index": null,
+ "family": "iv_bolus",
+ "model": "pk1.iv_bolus",
+ "route": "iv_bolus",
+ "dose": {
+  "amount": 120,
+  "unit": "mg"
+ },
+ "units": {
+  "time": "h",
+  "conc": "mg/L"
+ },
+ "n_points": 9,
+ "noise": {
+  "type": "none",
+  "note": "deterministic, no random noise"
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "cl": 3.1,
+   "v": 22
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 1,
+  "conc_factor_to_csv": 1,
+  "terminal_half_life_h": 4.9191
+ },
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "h"
+   },
+   {
+    "name": "conc",
+    "unit": "mg/L"
+   }
+  ],
+  "oracle_note": "Part 1 is written blind of the engine: the NCA oracle (ground_truth.nca of the benchmark exercises) was not generated here. The truth carried by this file is route, dose, units and model; regenerate the oracle with Caladrius before comparing values.",
+  "source": "decision/ood/make_ood_exercises.py"
+ }
+}

@@ -1,0 +1,46 @@
+{
+ "id": "oodx09_oral_min_ng",
+ "index": null,
+ "family": "oral_1",
+ "model": "pk1.oral_1",
+ "route": "extravascular",
+ "dose": {
+  "amount": 1200,
+  "unit": "mg"
+ },
+ "units": {
+  "time": "min",
+  "conc": "ng/mL"
+ },
+ "n_points": 10,
+ "noise": {
+  "type": "none",
+  "note": "deterministic, no random noise"
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "cl": 7.0,
+   "v": 50.0,
+   "ka": 0.8
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 60,
+  "conc_factor_to_csv": 1000,
+  "terminal_half_life_h": 4.9511
+ },
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "min"
+   },
+   {
+    "name": "conc",
+    "unit": "ng/mL"
+   }
+  ],
+  "oracle_note": "Part 1 is written blind of the engine: the NCA oracle (ground_truth.nca of the benchmark exercises) was not generated here. The truth carried by this file is route, dose, units and model; regenerate the oracle with Caladrius before comparing values.",
+  "source": "decision/ood/make_ood_exercises.py"
+ }
+}

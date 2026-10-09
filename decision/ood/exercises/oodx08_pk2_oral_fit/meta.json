@@ -1,0 +1,48 @@
+{
+ "id": "oodx08_pk2_oral_fit",
+ "index": null,
+ "family": "pk2_oral_1",
+ "model": "pk2.oral_1",
+ "route": "extravascular",
+ "dose": {
+  "amount": 400,
+  "unit": "mg"
+ },
+ "units": {
+  "time": "h",
+  "conc": "ng/mL"
+ },
+ "n_points": 10,
+ "noise": {
+  "type": "none",
+  "note": "deterministic, no random noise"
+ },
+ "blq": null,
+ "simulation": {
+  "parameters": {
+   "a": 0.008,
+   "alpha": 1.6,
+   "b": 0.006,
+   "beta": 0.12,
+   "ka": 0.8
+  },
+  "parameter_units": "times and rates in h, volumes in L, clearances in L/h, dose in the dose unit",
+  "time_scale_to_csv": 1,
+  "conc_factor_to_csv": 1,
+  "terminal_half_life_h": null
+ },
+ "ground_truth": {
+  "data_import_columns": [
+   {
+    "name": "time",
+    "unit": "h"
+   },
+   {
+    "name": "conc",
+    "unit": "ng/mL"
+   }
+  ],
+  "oracle_note": "Part 1 is written blind of the engine: the NCA oracle (ground_truth.nca of the benchmark exercises) was not generated here. The truth carried by this file is route, dose, units and model; regenerate the oracle with Caladrius before comparing values.",
+  "source": "decision/ood/make_ood_exercises.py"
+ }
+}
