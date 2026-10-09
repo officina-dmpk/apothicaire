@@ -1,0 +1,5857 @@
+{
+ "engine_commit": "f4bcacd04b284ec78833a58fb1be21b4ba89e375",
+ "server": {
+  "name": "caladrius-mcp",
+  "title": "Caladrius",
+  "version": "0.1.0"
+ },
+ "tools": [
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Preview a CSV before importing it"
+   },
+   "description": "Preview a CSV before importing it. Command `data.preview`. Reads CSV text without storing anything and returns every admissible reading of it: each delimiter (comma, semicolon, tab) with each decimal mark that gives a numeric time column and a numeric concentration column, with the columns, the first rows, what was guessed and the checks on the result (time going back, duplicated times). The first reading is recommended. `needs_choice` is true when the file can be read more than one way or the recommended reading has failed checks: the caller should show the readings and let the person choose, then pass the chosen `delimiter` and `decimal_comma` to data.import. Nothing is imported.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "csv": {
+      "description": "The CSV text.",
+      "type": "string"
+     },
+     "decimal_comma": {
+      "type": "boolean"
+     },
+     "delimiter": {
+      "maxLength": 1,
+      "minLength": 1,
+      "type": "string"
+     },
+     "rows": {
+      "description": "Rows of each reading to return; at most 200 (a larger number is capped at 200).",
+      "maximum": 200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "csv"
+    ],
+    "title": "data.preview parameters",
+    "type": "object"
+   },
+   "name": "data_preview",
+   "outputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "ambiguous": {
+      "type": "boolean"
+     },
+     "needs_choice": {
+      "type": "boolean"
+     },
+     "readings": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "checks": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "code": {
+            "type": "string"
+           },
+           "message": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "code",
+           "message"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "columns": {
+         "items": {
+          "additionalProperties": true,
+          "properties": {
+           "missing": {
+            "type": "integer"
+           },
+           "name": {
+            "type": "string"
+           },
+           "role": {
+            "$ref": "#/$defs/ColumnRole"
+           },
+           "type": {
+            "enum": [
+             "number",
+             "text"
+            ],
+            "type": "string"
+           },
+           "unit": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           }
+          },
+          "required": [
+           "name",
+           "role",
+           "unit",
+           "type",
+           "missing"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "decimal_comma": {
+         "type": "boolean"
+        },
+        "delimiter": {
+         "type": "string"
+        },
+        "notes": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        },
+        "preview": {
+         "items": {
+          "type": "array"
+         },
+         "type": "array"
+        },
+        "rows": {
+         "type": "integer"
+        }
+       },
+       "required": [
+        "delimiter",
+        "decimal_comma",
+        "rows",
+        "columns",
+        "preview",
+        "notes",
+        "checks"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "recommended": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "readings",
+     "recommended",
+     "ambiguous",
+     "needs_choice"
+    ],
+    "title": "data.preview result",
+    "type": "object"
+   },
+   "title": "Preview a CSV before importing it"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Import a CSV into a new worksheet"
+   },
+   "description": "Import a CSV into a new worksheet. Command `data.import`. Reads CSV text (header line, one line per row; comma, semicolon or tab; a decimal comma is understood with a semicolon) into a new worksheet. Roles (time, concentration, subject, dose, route) and units written in the headers, such as `Conc (ng/mL)`, are recognised; `notes` lists what was guessed or ignored. Use `columns` to set a role or a unit explicitly.",
+   "inputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "description": "Explicit role or unit for named columns; a null unit clears it.",
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "role": {
+         "$ref": "#/$defs/ColumnRole"
+        },
+        "unit": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "csv": {
+      "description": "The CSV text.",
+      "type": "string"
+     },
+     "decimal_comma": {
+      "type": "boolean"
+     },
+     "delimiter": {
+      "maxLength": 1,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "csv"
+    ],
+    "title": "data.import parameters",
+    "type": "object"
+   },
+   "name": "data_import",
+   "outputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "UnitWarning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "code",
+       "message"
+      ],
+      "type": "object"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "delimiter": {
+      "type": "string"
+     },
+     "notes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "worksheet": {
+      "additionalProperties": false,
+      "properties": {
+       "columns": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "missing": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "role": {
+           "$ref": "#/$defs/ColumnRole"
+          },
+          "type": {
+           "enum": [
+            "number",
+            "text"
+           ],
+           "type": "string"
+          },
+          "unit": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "name",
+          "role",
+          "unit",
+          "type",
+          "missing"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "derived_units": {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "name": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "integer"
+       },
+       "rows": {
+        "type": "integer"
+       },
+       "subjects": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "unit_warnings": {
+        "items": {
+         "$ref": "#/$defs/UnitWarning"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "revision",
+       "rows",
+       "subjects",
+       "columns",
+       "unit_warnings",
+       "derived_units"
+      ],
+      "type": "object"
+     }
+    },
+    "required": [
+     "worksheet",
+     "delimiter",
+     "notes"
+    ],
+    "title": "data.import result",
+    "type": "object"
+   },
+   "title": "Import a CSV into a new worksheet"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Describe a worksheet"
+   },
+   "description": "Describe a worksheet. Command `data.describe`. Columns with role, unit, type, missing count and range; subjects; unit warnings (dose, concentration and time checked together); the derived units (AUC, clearance, volume); and the first rows.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "preview_rows": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet"
+    ],
+    "title": "data.describe parameters",
+    "type": "object"
+   },
+   "name": "data_describe",
+   "outputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "UnitWarning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "code",
+       "message"
+      ],
+      "type": "object"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "preview": {
+      "additionalProperties": false,
+      "properties": {
+       "columns": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "rows": {
+        "items": {
+         "type": "array"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "columns",
+       "rows"
+      ],
+      "type": "object"
+     },
+     "worksheet": {
+      "additionalProperties": false,
+      "properties": {
+       "columns": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "missing": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "role": {
+           "$ref": "#/$defs/ColumnRole"
+          },
+          "type": {
+           "enum": [
+            "number",
+            "text"
+           ],
+           "type": "string"
+          },
+          "unit": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "name",
+          "role",
+          "unit",
+          "type",
+          "missing"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "derived_units": {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "name": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "integer"
+       },
+       "rows": {
+        "type": "integer"
+       },
+       "subjects": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "unit_warnings": {
+        "items": {
+         "$ref": "#/$defs/UnitWarning"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "revision",
+       "rows",
+       "subjects",
+       "columns",
+       "unit_warnings",
+       "derived_units"
+      ],
+      "type": "object"
+     }
+    },
+    "required": [
+     "worksheet",
+     "preview"
+    ],
+    "title": "data.describe result",
+    "type": "object"
+   },
+   "title": "Describe a worksheet"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Set the role or the unit of a column"
+   },
+   "description": "Set the role or the unit of a column. Command `data.set_column`. Gives a column a role (time, concentration, subject, dose, route, other) and/or a unit. A role held by another column moves to this one. A change marks the results of the analyses that read the worksheet as stale.",
+   "inputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "role": {
+      "$ref": "#/$defs/ColumnRole"
+     },
+     "unit": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The unit text; null or empty clears it."
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet",
+     "column"
+    ],
+    "title": "data.set_column parameters",
+    "type": "object"
+   },
+   "name": "data_set_column",
+   "outputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "UnitWarning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "code",
+       "message"
+      ],
+      "type": "object"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "stale_analyses": {
+      "description": "Analyses whose result no longer matches the data; run them again.",
+      "items": {
+       "$ref": "#/$defs/Id"
+      },
+      "type": "array"
+     },
+     "worksheet": {
+      "additionalProperties": false,
+      "properties": {
+       "columns": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "missing": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "role": {
+           "$ref": "#/$defs/ColumnRole"
+          },
+          "type": {
+           "enum": [
+            "number",
+            "text"
+           ],
+           "type": "string"
+          },
+          "unit": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "name",
+          "role",
+          "unit",
+          "type",
+          "missing"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "derived_units": {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "name": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "integer"
+       },
+       "rows": {
+        "type": "integer"
+       },
+       "subjects": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "unit_warnings": {
+        "items": {
+         "$ref": "#/$defs/UnitWarning"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "revision",
+       "rows",
+       "subjects",
+       "columns",
+       "unit_warnings",
+       "derived_units"
+      ],
+      "type": "object"
+     }
+    },
+    "required": [
+     "worksheet",
+     "stale_analyses"
+    ],
+    "title": "data.set_column result",
+    "type": "object"
+   },
+   "title": "Set the role or the unit of a column"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Change one cell of a worksheet"
+   },
+   "description": "Change one cell of a worksheet. Command `data.set_cell`. Sets the value of one cell (row counted from 0). A number column takes a number, text with a point or a comma as the decimal mark (the answer says which number was read in `understood`), or null for a missing value; a text column takes a string. The results of the analyses that read the worksheet become stale.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "row": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet",
+     "column",
+     "row",
+     "value"
+    ],
+    "title": "data.set_cell parameters",
+    "type": "object"
+   },
+   "name": "data_set_cell",
+   "outputSchema": {
+    "$defs": {
+     "ColumnRole": {
+      "enum": [
+       "time",
+       "concentration",
+       "subject",
+       "dose",
+       "route",
+       "other"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "UnitWarning": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "code",
+       "message"
+      ],
+      "type": "object"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "stale_analyses": {
+      "description": "Analyses whose result no longer matches the data; run them again.",
+      "items": {
+       "$ref": "#/$defs/Id"
+      },
+      "type": "array"
+     },
+     "understood": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The number read from the value, null for a missing value; present for a number column."
+     },
+     "worksheet": {
+      "additionalProperties": false,
+      "properties": {
+       "columns": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "missing": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "role": {
+           "$ref": "#/$defs/ColumnRole"
+          },
+          "type": {
+           "enum": [
+            "number",
+            "text"
+           ],
+           "type": "string"
+          },
+          "unit": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "name",
+          "role",
+          "unit",
+          "type",
+          "missing"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "derived_units": {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "name": {
+        "type": "string"
+       },
+       "revision": {
+        "type": "integer"
+       },
+       "rows": {
+        "type": "integer"
+       },
+       "subjects": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "unit_warnings": {
+        "items": {
+         "$ref": "#/$defs/UnitWarning"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "revision",
+       "rows",
+       "subjects",
+       "columns",
+       "unit_warnings",
+       "derived_units"
+      ],
+      "type": "object"
+     }
+    },
+    "required": [
+     "worksheet",
+     "stale_analyses"
+    ],
+    "title": "data.set_cell result",
+    "type": "object"
+   },
+   "title": "Change one cell of a worksheet"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Run a non-compartmental analysis"
+   },
+   "description": "Run a non-compartmental analysis. Command `nca.run`. Runs the NCA on the profiles of a worksheet (one subject, or all) and stores the result in an analysis object (new, or `analysis` updated). Each subject gives its parameters by PKNCA name, each a value or `not_calculated` with a reason, or an error saying what to fix. The route and dose come from the arguments or from the route and dose columns.",
+   "inputSchema": {
+    "$defs": {
+     "BlqAction": {
+      "oneOf": [
+       {
+        "enum": [
+         "keep",
+         "drop"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "set": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "set"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "BlqPolicy": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "position": {
+          "additionalProperties": false,
+          "properties": {
+           "first": {
+            "$ref": "#/$defs/BlqAction"
+           },
+           "last": {
+            "$ref": "#/$defs/BlqAction"
+           },
+           "middle": {
+            "$ref": "#/$defs/BlqAction"
+           }
+          },
+          "required": [
+           "first",
+           "middle",
+           "last"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "position"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "tmax": {
+          "additionalProperties": false,
+          "properties": {
+           "after": {
+            "$ref": "#/$defs/BlqAction"
+           },
+           "before": {
+            "$ref": "#/$defs/BlqAction"
+           }
+          },
+          "required": [
+           "before",
+           "after"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "tmax"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NcaOptions": {
+      "additionalProperties": false,
+      "description": "Conventions of the NCA; every field is optional and defaults to the documented value.",
+      "properties": {
+       "auc_method": {
+        "enum": [
+         "linear",
+         "lin_up_log_down",
+         "lin_log"
+        ],
+        "type": "string"
+       },
+       "blq": {
+        "$ref": "#/$defs/BlqPolicy"
+       },
+       "lambda_z": {
+        "additionalProperties": false,
+        "properties": {
+         "adj_r_squared_factor": {
+          "minimum": 0,
+          "type": "number"
+         },
+         "allow_tmax": {
+          "type": "boolean"
+         },
+         "min_points": {
+          "minimum": 3,
+          "type": "integer"
+         }
+        },
+        "required": [],
+        "type": "object"
+       },
+       "lambda_z_selection": {
+        "additionalProperties": false,
+        "properties": {
+         "exclude": {
+          "items": {
+           "type": "number"
+          },
+          "type": "array"
+         },
+         "exclude_replaced": {
+          "type": "boolean"
+         },
+         "manual": {
+          "anyOf": [
+           {
+            "oneOf": [
+             {
+              "additionalProperties": false,
+              "properties": {
+               "times": {
+                "items": {
+                 "type": "number"
+                },
+                "type": "array"
+               }
+              },
+              "required": [
+               "times"
+              ],
+              "type": "object"
+             },
+             {
+              "additionalProperties": false,
+              "properties": {
+               "range": {
+                "additionalProperties": false,
+                "properties": {
+                 "end": {
+                  "type": "number"
+                 },
+                 "start": {
+                  "type": "number"
+                 }
+                },
+                "required": [
+                 "start",
+                 "end"
+                ],
+                "type": "object"
+               }
+              },
+              "required": [
+               "range"
+              ],
+              "type": "object"
+             }
+            ]
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "positive_filter_first": {
+          "type": "boolean"
+         },
+         "tie_rule": {
+          "enum": [
+           "tolerance",
+           "bonus"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [],
+        "type": "object"
+       },
+       "missing": {
+        "oneOf": [
+         {
+          "enum": [
+           "drop"
+          ],
+          "type": "string"
+         },
+         {
+          "additionalProperties": false,
+          "properties": {
+           "replace": {
+            "minimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "replace"
+          ],
+          "type": "object"
+         }
+        ]
+       },
+       "negative": {
+        "enum": [
+         "error",
+         "allow",
+         "set_zero"
+        ],
+        "type": "string"
+       },
+       "quality": {
+        "additionalProperties": false,
+        "properties": {
+         "max_extrapolated_percent": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "min_adj_r_squared": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "min_points": {
+          "anyOf": [
+           {
+            "minimum": 0,
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "min_span_ratio": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         }
+        },
+        "required": [],
+        "type": "object"
+       },
+       "start": {
+        "enum": [
+         "none",
+         "zero",
+         "c0"
+        ],
+        "type": "string"
+       },
+       "tmax_tie": {
+        "enum": [
+         "first",
+         "last"
+        ],
+        "type": "string"
+       },
+       "units": {
+        "anyOf": [
+         {
+          "additionalProperties": false,
+          "description": "Units of time, concentration (mass/volume: ng, µg (ug, mcg), mg, g per mL or L) and dose (a mass). Results then carry a unit each; CL and volumes are in L. Absent: unitless results, flagged units_missing.",
+          "properties": {
+           "concentration": {
+            "type": "string"
+           },
+           "dose": {
+            "type": "string"
+           },
+           "time": {
+            "enum": [
+             "s",
+             "min",
+             "h",
+             "d"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "time",
+           "concentration",
+           "dose"
+          ],
+          "type": "object"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [],
+      "type": "object"
+     },
+     "Route": {
+      "description": "Route of administration.",
+      "oneOf": [
+       {
+        "enum": [
+         "extravascular",
+         "iv_bolus"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "iv_infusion": {
+          "additionalProperties": false,
+          "properties": {
+           "duration": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "duration"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "iv_infusion"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id",
+      "description": "Update and re-run this analysis instead of creating a new one."
+     },
+     "dose": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "options": {
+      "$ref": "#/$defs/NcaOptions"
+     },
+     "route": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Route"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "One subject, a label as text or number; omitted or null: every subject (NCA) or the only subject (fit)."
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet"
+    ],
+    "title": "nca.run parameters",
+    "type": "object"
+   },
+   "name": "nca_run",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisResult": {
+      "oneOf": [
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "nca"
+         },
+         "subjects": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "dose": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "flag_messages": {
+             "items": {
+              "type": "string"
+             },
+             "type": "array"
+            },
+            "not_calculated_messages": {
+             "additionalProperties": {
+              "type": "string"
+             },
+             "type": "object"
+            },
+            "outcome": {
+             "oneOf": [
+              {
+               "additionalProperties": false,
+               "properties": {
+                "ok": {
+                 "$ref": "#/$defs/NcaResult"
+                }
+               },
+               "required": [
+                "ok"
+               ],
+               "type": "object"
+              },
+              {
+               "additionalProperties": false,
+               "properties": {
+                "error": {
+                 "type": "string"
+                }
+               },
+               "required": [
+                "error"
+               ],
+               "type": "object"
+              }
+             ]
+            },
+            "route": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Route"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "subject": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "subject",
+            "dose",
+            "route",
+            "outcome"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "subjects"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "dose": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "flag_messages": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "kind": {
+          "const": "fit"
+         },
+         "n_missing": {
+          "type": "integer"
+         },
+         "n_observations": {
+          "type": "integer"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/FitResult"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "status_message": {
+          "type": "string"
+         },
+         "subject": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "kind",
+         "subject",
+         "n_observations",
+         "n_missing",
+         "outcome"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "simulation"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/ModelOutput"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "times": {
+          "items": {
+           "type": "number"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "times",
+         "outcome"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisSpec": {
+      "properties": {
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "type": "object"
+     },
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisView": {
+      "additionalProperties": false,
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "result": {
+        "anyOf": [
+         {
+          "$ref": "#/$defs/AnalysisResult"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "spec": {
+        "$ref": "#/$defs/AnalysisSpec"
+       },
+       "status": {
+        "$ref": "#/$defs/AnalysisStatus"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "name",
+       "kind",
+       "spec",
+       "status",
+       "result"
+      ],
+      "type": "object"
+     },
+     "FitResult": {
+      "additionalProperties": true,
+      "properties": {
+       "curve": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "conc": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "conc"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "observations": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "observed": {
+           "type": "number"
+          },
+          "predicted": {
+           "type": "number"
+          },
+          "residual": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "observed",
+          "predicted",
+          "residual"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "partials": {
+        "items": {
+         "items": {
+          "type": "number"
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       "status": {
+        "enum": [
+         "converged",
+         "max_iterations",
+         "no_decrease",
+         "singular",
+         "non_finite",
+         "at_bound"
+        ],
+        "type": "string"
+       },
+       "trace": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "values": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "status",
+       "parameters",
+       "values",
+       "observations",
+       "curve",
+       "trace",
+       "partials"
+      ],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelOutput": {
+      "additionalProperties": false,
+      "properties": {
+       "auc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "conc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "secondary": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "conc",
+       "auc",
+       "secondary"
+      ],
+      "type": "object"
+     },
+     "NcaResult": {
+      "additionalProperties": true,
+      "properties": {
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "lambda_z_candidates": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "unit": {
+           "type": "string"
+          },
+          "value": {
+           "maxProperties": 1,
+           "minProperties": 1,
+           "properties": {
+            "not_calculated": {
+             "type": "string"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "required": [
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "profile": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "removed": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "units_missing": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "parameters",
+       "profile",
+       "removed",
+       "lambda_z_candidates"
+      ],
+      "type": "object"
+     },
+     "Route": {
+      "description": "Route of administration.",
+      "oneOf": [
+       {
+        "enum": [
+         "extravascular",
+         "iv_bolus"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "iv_infusion": {
+          "additionalProperties": false,
+          "properties": {
+           "duration": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "duration"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "iv_infusion"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "$ref": "#/$defs/AnalysisView",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "nca.run result"
+   },
+   "title": "Run a non-compartmental analysis"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Get an analysis"
+   },
+   "description": "Get an analysis. Command `analysis.get`. The options, the last result and the status of an analysis: `no_result`, `fresh`, or `stale` with the reasons (the data or the options changed since the run).",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "analysis"
+    ],
+    "title": "analysis.get parameters",
+    "type": "object"
+   },
+   "name": "analysis_get",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisResult": {
+      "oneOf": [
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "nca"
+         },
+         "subjects": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "dose": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "flag_messages": {
+             "items": {
+              "type": "string"
+             },
+             "type": "array"
+            },
+            "not_calculated_messages": {
+             "additionalProperties": {
+              "type": "string"
+             },
+             "type": "object"
+            },
+            "outcome": {
+             "oneOf": [
+              {
+               "additionalProperties": false,
+               "properties": {
+                "ok": {
+                 "$ref": "#/$defs/NcaResult"
+                }
+               },
+               "required": [
+                "ok"
+               ],
+               "type": "object"
+              },
+              {
+               "additionalProperties": false,
+               "properties": {
+                "error": {
+                 "type": "string"
+                }
+               },
+               "required": [
+                "error"
+               ],
+               "type": "object"
+              }
+             ]
+            },
+            "route": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Route"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "subject": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "subject",
+            "dose",
+            "route",
+            "outcome"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "subjects"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "dose": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "flag_messages": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "kind": {
+          "const": "fit"
+         },
+         "n_missing": {
+          "type": "integer"
+         },
+         "n_observations": {
+          "type": "integer"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/FitResult"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "status_message": {
+          "type": "string"
+         },
+         "subject": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "kind",
+         "subject",
+         "n_observations",
+         "n_missing",
+         "outcome"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "simulation"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/ModelOutput"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "times": {
+          "items": {
+           "type": "number"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "times",
+         "outcome"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisSpec": {
+      "properties": {
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "type": "object"
+     },
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisView": {
+      "additionalProperties": false,
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "result": {
+        "anyOf": [
+         {
+          "$ref": "#/$defs/AnalysisResult"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "spec": {
+        "$ref": "#/$defs/AnalysisSpec"
+       },
+       "status": {
+        "$ref": "#/$defs/AnalysisStatus"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "name",
+       "kind",
+       "spec",
+       "status",
+       "result"
+      ],
+      "type": "object"
+     },
+     "FitResult": {
+      "additionalProperties": true,
+      "properties": {
+       "curve": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "conc": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "conc"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "observations": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "observed": {
+           "type": "number"
+          },
+          "predicted": {
+           "type": "number"
+          },
+          "residual": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "observed",
+          "predicted",
+          "residual"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "partials": {
+        "items": {
+         "items": {
+          "type": "number"
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       "status": {
+        "enum": [
+         "converged",
+         "max_iterations",
+         "no_decrease",
+         "singular",
+         "non_finite",
+         "at_bound"
+        ],
+        "type": "string"
+       },
+       "trace": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "values": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "status",
+       "parameters",
+       "values",
+       "observations",
+       "curve",
+       "trace",
+       "partials"
+      ],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelOutput": {
+      "additionalProperties": false,
+      "properties": {
+       "auc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "conc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "secondary": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "conc",
+       "auc",
+       "secondary"
+      ],
+      "type": "object"
+     },
+     "NcaResult": {
+      "additionalProperties": true,
+      "properties": {
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "lambda_z_candidates": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "unit": {
+           "type": "string"
+          },
+          "value": {
+           "maxProperties": 1,
+           "minProperties": 1,
+           "properties": {
+            "not_calculated": {
+             "type": "string"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "required": [
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "profile": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "removed": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "units_missing": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "parameters",
+       "profile",
+       "removed",
+       "lambda_z_candidates"
+      ],
+      "type": "object"
+     },
+     "Route": {
+      "description": "Route of administration.",
+      "oneOf": [
+       {
+        "enum": [
+         "extravascular",
+         "iv_bolus"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "iv_infusion": {
+          "additionalProperties": false,
+          "properties": {
+           "duration": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "duration"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "iv_infusion"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "$ref": "#/$defs/AnalysisView",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "analysis.get result"
+   },
+   "title": "Get an analysis"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Initial estimates from the data"
+   },
+   "description": "Initial estimates from the data. Command `fit.initial_estimates`. Estimates the starting values of a model's parameters from one subject's profile (log-linear regression, curve stripping, terminal phase). Reads only: nothing is stored. A zero-order input model needs its duration among `fixed`.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelId": {
+      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "enum": [
+       "pk1.iv_bolus",
+       "pk1.iv_infusion",
+       "pk1.oral_1",
+       "pk1.oral_1_lag",
+       "pk1.oral_0",
+       "pk1.oral_0_lag"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "dose": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "fixed": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object"
+     },
+     "model": {
+      "$ref": "#/$defs/ModelId"
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet",
+     "model"
+    ],
+    "title": "fit.initial_estimates parameters",
+    "type": "object"
+   },
+   "name": "fit_initial_estimates",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "dose": {
+      "type": "number"
+     },
+     "initial": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object"
+     },
+     "n_observations": {
+      "type": "integer"
+     },
+     "subject": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "subject",
+     "dose",
+     "n_observations",
+     "initial"
+    ],
+    "title": "fit.initial_estimates result",
+    "type": "object"
+   },
+   "title": "Initial estimates from the data"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Objective at the starting values"
+   },
+   "description": "Objective at the starting values. Command `fit.evaluate`. The weighted sum of squares of one subject's observations for the given starting values (or the generated ones when none are given), as the first row of a fit's trace. Reads only: nothing is stored. A page uses it to show how far the starting curve is from the data while the person edits the estimates.",
+   "inputSchema": {
+    "$defs": {
+     "FitOptions": {
+      "additionalProperties": false,
+      "description": "Options of the fit; every field is optional and defaults to the documented value.",
+      "properties": {
+       "bounds": {
+        "additionalProperties": {
+         "additionalProperties": false,
+         "properties": {
+          "lower": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "upper": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [],
+         "type": "object"
+        },
+        "type": "object"
+       },
+       "confidence_level": {
+        "exclusiveMaximum": 1,
+        "exclusiveMinimum": 0,
+        "type": "number"
+       },
+       "convergence": {
+        "maximum": 0.1,
+        "minimum": 0,
+        "type": "number"
+       },
+       "criterion": {
+        "enum": [
+         "relative_decrease",
+         "relative_offset"
+        ],
+        "type": "string"
+       },
+       "derivatives": {
+        "enum": [
+         "forward_difference",
+         "analytic"
+        ],
+        "type": "string"
+       },
+       "fixed": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       },
+       "flags": {
+        "additionalProperties": false,
+        "properties": {
+         "max_abs_correlation": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "max_condition_number": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "max_cv_percent": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "min_degrees_of_freedom": {
+          "anyOf": [
+           {
+            "minimum": 0,
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         }
+        },
+        "required": [],
+        "type": "object"
+       },
+       "increment": {
+        "exclusiveMinimum": 0,
+        "maximum": 0.1,
+        "type": "number"
+       },
+       "max_iterations": {
+        "maximum": 100000,
+        "minimum": 1,
+        "type": "integer"
+       },
+       "n_curve": {
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+       }
+      },
+      "required": [],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelId": {
+      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "enum": [
+       "pk1.iv_bolus",
+       "pk1.iv_infusion",
+       "pk1.oral_1",
+       "pk1.oral_1_lag",
+       "pk1.oral_0",
+       "pk1.oral_0_lag"
+      ],
+      "type": "string"
+     },
+     "Weighting": {
+      "enum": [
+       "uniform",
+       "inv_y",
+       "inv_y2",
+       "inv_yhat",
+       "inv_yhat2"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "dose": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "initial": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (see fit.initial_estimates).",
+      "type": "object"
+     },
+     "model": {
+      "$ref": "#/$defs/ModelId"
+     },
+     "options": {
+      "$ref": "#/$defs/FitOptions"
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "weighting": {
+      "$ref": "#/$defs/Weighting"
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet",
+     "model"
+    ],
+    "title": "fit.evaluate parameters",
+    "type": "object"
+   },
+   "name": "fit_evaluate",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "dose": {
+      "type": "number"
+     },
+     "n_observations": {
+      "type": "integer"
+     },
+     "starting_values": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object"
+     },
+     "subject": {
+      "type": "string"
+     },
+     "wrss": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "subject",
+     "dose",
+     "n_observations",
+     "wrss",
+     "starting_values"
+    ],
+    "title": "fit.evaluate result",
+    "type": "object"
+   },
+   "title": "Objective at the starting values"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Fit a model to a profile"
+   },
+   "description": "Fit a model to a profile. Command `fit.run`. Weighted least-squares fit (Gauss-Newton with the Levenberg and Hartley modification) of a one-compartment model to the profile of one subject; stores the result in an analysis object. The result has the status (converged or why not), estimates with standard error, CV% and confidence intervals, diagnostics, observed and predicted values, the smooth curve, the trace, and quality flags. A fit that cannot start is an error and stores nothing.",
+   "inputSchema": {
+    "$defs": {
+     "FitOptions": {
+      "additionalProperties": false,
+      "description": "Options of the fit; every field is optional and defaults to the documented value.",
+      "properties": {
+       "bounds": {
+        "additionalProperties": {
+         "additionalProperties": false,
+         "properties": {
+          "lower": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "upper": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [],
+         "type": "object"
+        },
+        "type": "object"
+       },
+       "confidence_level": {
+        "exclusiveMaximum": 1,
+        "exclusiveMinimum": 0,
+        "type": "number"
+       },
+       "convergence": {
+        "maximum": 0.1,
+        "minimum": 0,
+        "type": "number"
+       },
+       "criterion": {
+        "enum": [
+         "relative_decrease",
+         "relative_offset"
+        ],
+        "type": "string"
+       },
+       "derivatives": {
+        "enum": [
+         "forward_difference",
+         "analytic"
+        ],
+        "type": "string"
+       },
+       "fixed": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       },
+       "flags": {
+        "additionalProperties": false,
+        "properties": {
+         "max_abs_correlation": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "max_condition_number": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "max_cv_percent": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "min_degrees_of_freedom": {
+          "anyOf": [
+           {
+            "minimum": 0,
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         }
+        },
+        "required": [],
+        "type": "object"
+       },
+       "increment": {
+        "exclusiveMinimum": 0,
+        "maximum": 0.1,
+        "type": "number"
+       },
+       "max_iterations": {
+        "maximum": 100000,
+        "minimum": 1,
+        "type": "integer"
+       },
+       "n_curve": {
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "integer"
+       }
+      },
+      "required": [],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelId": {
+      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "enum": [
+       "pk1.iv_bolus",
+       "pk1.iv_infusion",
+       "pk1.oral_1",
+       "pk1.oral_1_lag",
+       "pk1.oral_0",
+       "pk1.oral_0_lag"
+      ],
+      "type": "string"
+     },
+     "Weighting": {
+      "enum": [
+       "uniform",
+       "inv_y",
+       "inv_y2",
+       "inv_yhat",
+       "inv_yhat2"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id",
+      "description": "Update and re-run this analysis instead of creating a new one."
+     },
+     "dose": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "initial": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (see fit.initial_estimates).",
+      "type": "object"
+     },
+     "model": {
+      "$ref": "#/$defs/ModelId"
+     },
+     "name": {
+      "type": "string"
+     },
+     "options": {
+      "$ref": "#/$defs/FitOptions"
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "One subject, a label as text or number; omitted or null: every subject (NCA) or the only subject (fit)."
+     },
+     "weighting": {
+      "$ref": "#/$defs/Weighting"
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet",
+     "model"
+    ],
+    "title": "fit.run parameters",
+    "type": "object"
+   },
+   "name": "fit_run",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisResult": {
+      "oneOf": [
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "nca"
+         },
+         "subjects": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "dose": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "flag_messages": {
+             "items": {
+              "type": "string"
+             },
+             "type": "array"
+            },
+            "not_calculated_messages": {
+             "additionalProperties": {
+              "type": "string"
+             },
+             "type": "object"
+            },
+            "outcome": {
+             "oneOf": [
+              {
+               "additionalProperties": false,
+               "properties": {
+                "ok": {
+                 "$ref": "#/$defs/NcaResult"
+                }
+               },
+               "required": [
+                "ok"
+               ],
+               "type": "object"
+              },
+              {
+               "additionalProperties": false,
+               "properties": {
+                "error": {
+                 "type": "string"
+                }
+               },
+               "required": [
+                "error"
+               ],
+               "type": "object"
+              }
+             ]
+            },
+            "route": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Route"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "subject": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "subject",
+            "dose",
+            "route",
+            "outcome"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "subjects"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "dose": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "flag_messages": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "kind": {
+          "const": "fit"
+         },
+         "n_missing": {
+          "type": "integer"
+         },
+         "n_observations": {
+          "type": "integer"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/FitResult"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "status_message": {
+          "type": "string"
+         },
+         "subject": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "kind",
+         "subject",
+         "n_observations",
+         "n_missing",
+         "outcome"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "simulation"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/ModelOutput"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "times": {
+          "items": {
+           "type": "number"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "times",
+         "outcome"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisSpec": {
+      "properties": {
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "type": "object"
+     },
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisView": {
+      "additionalProperties": false,
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "result": {
+        "anyOf": [
+         {
+          "$ref": "#/$defs/AnalysisResult"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "spec": {
+        "$ref": "#/$defs/AnalysisSpec"
+       },
+       "status": {
+        "$ref": "#/$defs/AnalysisStatus"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "name",
+       "kind",
+       "spec",
+       "status",
+       "result"
+      ],
+      "type": "object"
+     },
+     "FitResult": {
+      "additionalProperties": true,
+      "properties": {
+       "curve": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "conc": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "conc"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "observations": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "observed": {
+           "type": "number"
+          },
+          "predicted": {
+           "type": "number"
+          },
+          "residual": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "observed",
+          "predicted",
+          "residual"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "partials": {
+        "items": {
+         "items": {
+          "type": "number"
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       "status": {
+        "enum": [
+         "converged",
+         "max_iterations",
+         "no_decrease",
+         "singular",
+         "non_finite",
+         "at_bound"
+        ],
+        "type": "string"
+       },
+       "trace": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "values": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "status",
+       "parameters",
+       "values",
+       "observations",
+       "curve",
+       "trace",
+       "partials"
+      ],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelOutput": {
+      "additionalProperties": false,
+      "properties": {
+       "auc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "conc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "secondary": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "conc",
+       "auc",
+       "secondary"
+      ],
+      "type": "object"
+     },
+     "NcaResult": {
+      "additionalProperties": true,
+      "properties": {
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "lambda_z_candidates": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "unit": {
+           "type": "string"
+          },
+          "value": {
+           "maxProperties": 1,
+           "minProperties": 1,
+           "properties": {
+            "not_calculated": {
+             "type": "string"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "required": [
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "profile": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "removed": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "units_missing": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "parameters",
+       "profile",
+       "removed",
+       "lambda_z_candidates"
+      ],
+      "type": "object"
+     },
+     "Route": {
+      "description": "Route of administration.",
+      "oneOf": [
+       {
+        "enum": [
+         "extravascular",
+         "iv_bolus"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "iv_infusion": {
+          "additionalProperties": false,
+          "properties": {
+           "duration": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "duration"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "iv_infusion"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "$ref": "#/$defs/AnalysisView",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "fit.run result"
+   },
+   "title": "Fit a model to a profile"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Evaluate a model on a time grid"
+   },
+   "description": "Evaluate a model on a time grid. Command `model.simulate`. Concentration and AUC of a one-compartment model at the given times (a list, or a regular grid), and its secondary parameters (half-life, clearance, AUC to infinity, MRT, predicted Cmax and Tmax...). Nothing is stored unless `store` is true (with `analysis`, that simulation is updated instead of a new one being created), so it can be called at every change of a parameter for a live curve.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelId": {
+      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "enum": [
+       "pk1.iv_bolus",
+       "pk1.iv_infusion",
+       "pk1.oral_1",
+       "pk1.oral_1_lag",
+       "pk1.oral_0",
+       "pk1.oral_0_lag"
+      ],
+      "type": "string"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id",
+      "description": "With `store`: update and re-run this simulation instead of creating a new one."
+     },
+     "dose": {
+      "minimum": 0,
+      "type": "number"
+     },
+     "grid": {
+      "additionalProperties": false,
+      "properties": {
+       "end": {
+        "type": "number"
+       },
+       "points": {
+        "maximum": 100000,
+        "minimum": 2,
+        "type": "integer"
+       },
+       "start": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "start",
+       "end",
+       "points"
+      ],
+      "type": "object"
+     },
+     "model": {
+      "$ref": "#/$defs/ModelId"
+     },
+     "name": {
+      "type": "string"
+     },
+     "params": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "description": "Parameters by name: `v`; exactly one of `cl` and `k`; `ka`, `dur`, `tlag` as the model needs.",
+      "type": "object"
+     },
+     "store": {
+      "type": "boolean"
+     },
+     "times": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "model",
+     "dose",
+     "params"
+    ],
+    "title": "model.simulate parameters",
+    "type": "object"
+   },
+   "name": "model_simulate",
+   "outputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/Id"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "auc": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "conc": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "secondary": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object"
+     },
+     "times": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "analysis",
+     "times",
+     "conc",
+     "auc",
+     "secondary"
+    ],
+    "title": "model.simulate result",
+    "type": "object"
+   },
+   "title": "Evaluate a model on a time grid"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Run an analysis again"
+   },
+   "description": "Run an analysis again. Command `analysis.run`. Re-runs an analysis with its stored options on the current data; use it when its status is stale.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "analysis"
+    ],
+    "title": "analysis.run parameters",
+    "type": "object"
+   },
+   "name": "analysis_run",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisResult": {
+      "oneOf": [
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "nca"
+         },
+         "subjects": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "dose": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "flag_messages": {
+             "items": {
+              "type": "string"
+             },
+             "type": "array"
+            },
+            "not_calculated_messages": {
+             "additionalProperties": {
+              "type": "string"
+             },
+             "type": "object"
+            },
+            "outcome": {
+             "oneOf": [
+              {
+               "additionalProperties": false,
+               "properties": {
+                "ok": {
+                 "$ref": "#/$defs/NcaResult"
+                }
+               },
+               "required": [
+                "ok"
+               ],
+               "type": "object"
+              },
+              {
+               "additionalProperties": false,
+               "properties": {
+                "error": {
+                 "type": "string"
+                }
+               },
+               "required": [
+                "error"
+               ],
+               "type": "object"
+              }
+             ]
+            },
+            "route": {
+             "anyOf": [
+              {
+               "$ref": "#/$defs/Route"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "subject": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "subject",
+            "dose",
+            "route",
+            "outcome"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "subjects"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "dose": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "flag_messages": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "kind": {
+          "const": "fit"
+         },
+         "n_missing": {
+          "type": "integer"
+         },
+         "n_observations": {
+          "type": "integer"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/FitResult"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "status_message": {
+          "type": "string"
+         },
+         "subject": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "kind",
+         "subject",
+         "n_observations",
+         "n_missing",
+         "outcome"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": true,
+        "properties": {
+         "kind": {
+          "const": "simulation"
+         },
+         "outcome": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "ok": {
+              "$ref": "#/$defs/ModelOutput"
+             }
+            },
+            "required": [
+             "ok"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "error": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "error"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "times": {
+          "items": {
+           "type": "number"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "kind",
+         "times",
+         "outcome"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisSpec": {
+      "properties": {
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "type": "object"
+     },
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "AnalysisView": {
+      "additionalProperties": false,
+      "properties": {
+       "id": {
+        "$ref": "#/$defs/Id"
+       },
+       "kind": {
+        "enum": [
+         "nca",
+         "fit",
+         "simulation"
+        ],
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "result": {
+        "anyOf": [
+         {
+          "$ref": "#/$defs/AnalysisResult"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "spec": {
+        "$ref": "#/$defs/AnalysisSpec"
+       },
+       "status": {
+        "$ref": "#/$defs/AnalysisStatus"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "name",
+       "kind",
+       "spec",
+       "status",
+       "result"
+      ],
+      "type": "object"
+     },
+     "FitResult": {
+      "additionalProperties": true,
+      "properties": {
+       "curve": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "conc": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "conc"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "observations": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "observed": {
+           "type": "number"
+          },
+          "predicted": {
+           "type": "number"
+          },
+          "residual": {
+           "type": "number"
+          },
+          "time": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "time",
+          "observed",
+          "predicted",
+          "residual"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "partials": {
+        "items": {
+         "items": {
+          "type": "number"
+         },
+         "type": "array"
+        },
+        "type": "array"
+       },
+       "status": {
+        "enum": [
+         "converged",
+         "max_iterations",
+         "no_decrease",
+         "singular",
+         "non_finite",
+         "at_bound"
+        ],
+        "type": "string"
+       },
+       "trace": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "values": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "status",
+       "parameters",
+       "values",
+       "observations",
+       "curve",
+       "trace",
+       "partials"
+      ],
+      "type": "object"
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ModelOutput": {
+      "additionalProperties": false,
+      "properties": {
+       "auc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "conc": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "secondary": {
+        "additionalProperties": {
+         "type": "number"
+        },
+        "type": "object"
+       }
+      },
+      "required": [
+       "conc",
+       "auc",
+       "secondary"
+      ],
+      "type": "object"
+     },
+     "NcaResult": {
+      "additionalProperties": true,
+      "properties": {
+       "flags": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "lambda_z_candidates": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "parameters": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "unit": {
+           "type": "string"
+          },
+          "value": {
+           "maxProperties": 1,
+           "minProperties": 1,
+           "properties": {
+            "not_calculated": {
+             "type": "string"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "type": "object"
+          }
+         },
+         "required": [
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "profile": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "removed": {
+        "items": {
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "units_missing": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "parameters",
+       "profile",
+       "removed",
+       "lambda_z_candidates"
+      ],
+      "type": "object"
+     },
+     "Route": {
+      "description": "Route of administration.",
+      "oneOf": [
+       {
+        "enum": [
+         "extravascular",
+         "iv_bolus"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "iv_infusion": {
+          "additionalProperties": false,
+          "properties": {
+           "duration": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+           }
+          },
+          "required": [
+           "duration"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "iv_infusion"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "$ref": "#/$defs/AnalysisView",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "analysis.run result"
+   },
+   "title": "Run an analysis again"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Export a result table"
+   },
+   "description": "Export a result table. Command `export.table`. A table of a worksheet or of the last result of an analysis, as columns and rows and as CSV text (the caller writes the file). `status` says whether the analysis result is fresh or stale. Tables: worksheet; nca.parameters (one row per subject and parameter); fit.parameters, fit.values, fit.observations, fit.curve, fit.trace; simulation.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id"
+     },
+     "table": {
+      "enum": [
+       "worksheet",
+       "nca.parameters",
+       "fit.parameters",
+       "fit.values",
+       "fit.observations",
+       "fit.curve",
+       "fit.trace",
+       "simulation"
+      ],
+      "type": "string"
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "table"
+    ],
+    "title": "export.table parameters",
+    "type": "object"
+   },
+   "name": "export_table",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "csv": {
+      "type": "string"
+     },
+     "file_name": {
+      "type": "string"
+     },
+     "rows": {
+      "items": {
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "fresh",
+         "stale",
+         "no_result"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "table",
+     "file_name",
+     "status",
+     "columns",
+     "rows",
+     "csv"
+    ],
+    "title": "export.table result",
+    "type": "object"
+   },
+   "title": "Export a result table"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Describe the project"
+   },
+   "description": "Describe the project. Command `project.describe`. The worksheets (with their revision) and the analyses (labelled from their content, with their status: no_result, fresh or stale), and the length of the history.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "title": "project.describe parameters",
+    "type": "object"
+   },
+   "name": "project_describe",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analyses": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "kind": {
+         "enum": [
+          "nca",
+          "fit",
+          "simulation"
+         ],
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "status": {
+         "$ref": "#/$defs/AnalysisStatus"
+        }
+       },
+       "required": [
+        "id",
+        "label",
+        "kind",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "history_length": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "worksheets": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "columns": {
+         "type": "integer"
+        },
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "name": {
+         "type": "string"
+        },
+        "revision": {
+         "type": "integer"
+        },
+        "rows": {
+         "type": "integer"
+        },
+        "subjects": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "rows",
+        "columns",
+        "subjects",
+        "revision"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "worksheets",
+     "analyses",
+     "history_length"
+    ],
+    "title": "project.describe result",
+    "type": "object"
+   },
+   "title": "Describe the project"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Save the project"
+   },
+   "description": "Save the project. Command `project.save`. The whole project (worksheets, analyses with options and results) and the history of the commands executed so far (under `history`, without this save) as a JSON document, and a suggested file name; the caller writes the file. `Engine::save_bytes` gives the same document as bytes, including the save in the history. Stale results are saved as such.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "title": "project.save parameters",
+    "type": "object"
+   },
+   "name": "project_save",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "file_name": {
+      "type": "string"
+     },
+     "project": {
+      "type": "object"
+     }
+    },
+    "required": [
+     "file_name",
+     "project"
+    ],
+    "title": "project.save result",
+    "type": "object"
+   },
+   "title": "Save the project"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "List the executed commands"
+   },
+   "description": "List the executed commands. Command `history.list`. The commands executed so far, oldest first, with their parameters and whether they succeeded. The history is append-only: entries are never changed or removed. Failed commands are recorded too.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "from": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "limit": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [],
+    "title": "history.list parameters",
+    "type": "object"
+   },
+   "name": "history_list",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "entries": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "changed_project": {
+         "type": "boolean"
+        },
+        "command": {
+         "type": "string"
+        },
+        "error": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "properties": {
+            "code": {
+             "type": "string"
+            },
+            "message": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "code",
+            "message"
+           ],
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "ok": {
+         "type": "boolean"
+        },
+        "params": {},
+        "seq": {
+         "minimum": 1,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "seq",
+        "command",
+        "params",
+        "ok",
+        "error",
+        "changed_project"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "total": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "total",
+     "entries"
+    ],
+    "title": "history.list result",
+    "type": "object"
+   },
+   "title": "List the executed commands"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Remove an analysis"
+   },
+   "description": "Remove an analysis. Command `analysis.remove`. Removes an analysis object with its options and result. Returns the project overview and what was removed.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "analysis"
+    ],
+    "title": "analysis.remove parameters",
+    "type": "object"
+   },
+   "name": "analysis_remove",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analyses": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "kind": {
+         "enum": [
+          "nca",
+          "fit",
+          "simulation"
+         ],
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "status": {
+         "$ref": "#/$defs/AnalysisStatus"
+        }
+       },
+       "required": [
+        "id",
+        "label",
+        "kind",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "history_length": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "removed": {
+      "additionalProperties": false,
+      "properties": {
+       "analyses": {
+        "items": {
+         "$ref": "#/$defs/Id"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "analyses"
+      ],
+      "type": "object"
+     },
+     "worksheets": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "columns": {
+         "type": "integer"
+        },
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "name": {
+         "type": "string"
+        },
+        "revision": {
+         "type": "integer"
+        },
+        "rows": {
+         "type": "integer"
+        },
+        "subjects": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "rows",
+        "columns",
+        "subjects",
+        "revision"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "worksheets",
+     "analyses",
+     "history_length",
+     "removed"
+    ],
+    "title": "analysis.remove result",
+    "type": "object"
+   },
+   "title": "Remove an analysis"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Remove a worksheet"
+   },
+   "description": "Remove a worksheet. Command `data.remove`. Removes a worksheet. It is refused while analyses read it, and the error names them; with `remove_analyses` those analyses are removed too. Returns the project overview and what was removed.",
+   "inputSchema": {
+    "$defs": {
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "remove_analyses": {
+      "type": "boolean"
+     },
+     "worksheet": {
+      "$ref": "#/$defs/Id"
+     }
+    },
+    "required": [
+     "worksheet"
+    ],
+    "title": "data.remove parameters",
+    "type": "object"
+   },
+   "name": "data_remove",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analyses": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "kind": {
+         "enum": [
+          "nca",
+          "fit",
+          "simulation"
+         ],
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "status": {
+         "$ref": "#/$defs/AnalysisStatus"
+        }
+       },
+       "required": [
+        "id",
+        "label",
+        "kind",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "history_length": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "removed": {
+      "additionalProperties": false,
+      "properties": {
+       "analyses": {
+        "items": {
+         "$ref": "#/$defs/Id"
+        },
+        "type": "array"
+       },
+       "worksheet": {
+        "$ref": "#/$defs/Id"
+       }
+      },
+      "required": [
+       "worksheet",
+       "analyses"
+      ],
+      "type": "object"
+     },
+     "worksheets": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "columns": {
+         "type": "integer"
+        },
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "name": {
+         "type": "string"
+        },
+        "revision": {
+         "type": "integer"
+        },
+        "rows": {
+         "type": "integer"
+        },
+        "subjects": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "rows",
+        "columns",
+        "subjects",
+        "revision"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "worksheets",
+     "analyses",
+     "history_length",
+     "removed"
+    ],
+    "title": "data.remove result",
+    "type": "object"
+   },
+   "title": "Remove a worksheet"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Start a new empty project"
+   },
+   "description": "Start a new empty project. Command `project.new`. Replaces the current project by an empty one. Save first if the current one matters. The history is kept.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [],
+    "title": "project.new parameters",
+    "type": "object"
+   },
+   "name": "project_new",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analyses": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "kind": {
+         "enum": [
+          "nca",
+          "fit",
+          "simulation"
+         ],
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "status": {
+         "$ref": "#/$defs/AnalysisStatus"
+        }
+       },
+       "required": [
+        "id",
+        "label",
+        "kind",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "history_length": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "worksheets": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "columns": {
+         "type": "integer"
+        },
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "name": {
+         "type": "string"
+        },
+        "revision": {
+         "type": "integer"
+        },
+        "rows": {
+         "type": "integer"
+        },
+        "subjects": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "rows",
+        "columns",
+        "subjects",
+        "revision"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "worksheets",
+     "analyses",
+     "history_length"
+    ],
+    "title": "project.new result",
+    "type": "object"
+   },
+   "title": "Start a new empty project"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": false,
+    "title": "Load a project"
+   },
+   "description": "Load a project. Command `project.load`. Replaces the current project by a saved one, given as the document (`project`) or its JSON text (`text`). The file is checked first; a refused file changes nothing. The history saved with the project is adopted when this session has none yet (`history_restored`), so a project keeps its provenance across sessions; a session that already has a history keeps it, and loading is one more entry.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "oneOf": [
+     {
+      "required": [
+       "project"
+      ]
+     },
+     {
+      "required": [
+       "text"
+      ]
+     }
+    ],
+    "properties": {
+     "project": {
+      "type": "object"
+     },
+     "text": {
+      "type": "string"
+     }
+    },
+    "required": [],
+    "title": "project.load parameters",
+    "type": "object"
+   },
+   "name": "project_load",
+   "outputSchema": {
+    "$defs": {
+     "AnalysisStatus": {
+      "oneOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "no_result"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "state": {
+          "const": "fresh"
+         }
+        },
+        "required": [
+         "state"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "reasons": {
+          "items": {
+           "additionalProperties": true,
+           "properties": {
+            "code": {
+             "enum": [
+              "input_changed",
+              "options_changed",
+              "worksheet_missing"
+             ],
+             "type": "string"
+            }
+           },
+           "required": [
+            "code"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "state": {
+          "const": "stale"
+         }
+        },
+        "required": [
+         "state",
+         "reasons"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "Id": {
+      "description": "Identifier of a worksheet or an analysis, as returned by the command that created it.",
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+     "analyses": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "kind": {
+         "enum": [
+          "nca",
+          "fit",
+          "simulation"
+         ],
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "status": {
+         "$ref": "#/$defs/AnalysisStatus"
+        }
+       },
+       "required": [
+        "id",
+        "label",
+        "kind",
+        "status"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "history_length": {
+      "type": "integer"
+     },
+     "history_note": {
+      "type": "string"
+     },
+     "history_restored": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "worksheets": {
+      "items": {
+       "additionalProperties": false,
+       "properties": {
+        "columns": {
+         "type": "integer"
+        },
+        "id": {
+         "$ref": "#/$defs/Id"
+        },
+        "name": {
+         "type": "string"
+        },
+        "revision": {
+         "type": "integer"
+        },
+        "rows": {
+         "type": "integer"
+        },
+        "subjects": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "rows",
+        "columns",
+        "subjects",
+        "revision"
+       ],
+       "type": "object"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "worksheets",
+     "analyses",
+     "history_length",
+     "history_restored"
+    ],
+    "title": "project.load result",
+    "type": "object"
+   },
+   "title": "Load a project"
+  }
+ ]
+}

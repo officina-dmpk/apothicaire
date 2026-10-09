@@ -1,0 +1,733 @@
+{
+ "case": "indometh_s1_iv_bolus",
+ "source": "indometh.csv, subject 1, dose column (25 mg, a test constant of the oracle data)",
+ "server": {
+  "name": "caladrius-mcp",
+  "title": "Caladrius",
+  "version": "0.1.0"
+ },
+ "engine_commit": "f4bcacd04b284ec78833a58fb1be21b4ba89e375",
+ "calls": [
+  {
+   "tool": "data_import",
+   "arguments": {
+    "name": "indometh_s1",
+    "csv": "subject,time,conc,dose\n1,0.25,1.5,25\n1,0.5,0.94,25\n1,0.75,0.78,25\n1,1,0.48,25\n1,1.25,0.37,25\n1,2,0.19,25\n1,3,0.12,25\n1,4,0.11,25\n1,5,0.08,25\n1,6,0.07,25\n1,8,0.05,25\n",
+    "columns": [
+     {
+      "name": "time",
+      "unit": "h"
+     },
+     {
+      "name": "conc",
+      "unit": "mg/L"
+     },
+     {
+      "name": "dose",
+      "unit": "mg"
+     }
+    ]
+   }
+  },
+  {
+   "tool": "nca_run",
+   "arguments": {
+    "worksheet": 1,
+    "route": "iv_bolus",
+    "options": {
+     "auc_method": "lin_up_log_down"
+    }
+   }
+  }
+ ],
+ "data_import_result": {
+  "delimiter": ",",
+  "notes": [],
+  "worksheet": {
+   "columns": [
+    {
+     "max": 1.0,
+     "min": 1.0,
+     "missing": 0,
+     "name": "subject",
+     "role": "subject",
+     "type": "number",
+     "unit": null
+    },
+    {
+     "max": 8.0,
+     "min": 0.25,
+     "missing": 0,
+     "name": "time",
+     "role": "time",
+     "type": "number",
+     "unit": "h"
+    },
+    {
+     "max": 1.5,
+     "min": 0.05,
+     "missing": 0,
+     "name": "conc",
+     "role": "concentration",
+     "type": "number",
+     "unit": "mg/L"
+    },
+    {
+     "max": 25.0,
+     "min": 25.0,
+     "missing": 0,
+     "name": "dose",
+     "role": "dose",
+     "type": "number",
+     "unit": "mg"
+    }
+   ],
+   "derived_units": {
+    "auc": "h*mg/L",
+    "aumc": "h^2*mg/L",
+    "cl": "L/h",
+    "half_life": "h",
+    "lambda_z": "1/h",
+    "mrt": "h",
+    "v": "L"
+   },
+   "id": 1,
+   "name": "indometh_s1",
+   "revision": 0,
+   "rows": 11,
+   "subjects": [
+    "1"
+   ],
+   "unit_warnings": []
+  }
+ },
+ "nca_run_result": {
+  "id": 2,
+  "kind": "nca",
+  "label": "NCA of indometh_s1, all subjects",
+  "name": null,
+  "result": {
+   "kind": "nca",
+   "subjects": [
+    {
+     "dose": 25.0,
+     "flag_messages": [
+      "the terminal phase spans 0.69 half-lives (< 2); λz and the extrapolated values are uncertain, sample longer if possible"
+     ],
+     "not_calculated_messages": {
+      "aucivall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivpbextall": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivpbextinf.obs": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivpbextinf.pred": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "aucivpbextlast": "there is no concentration at the dose time; add a sample at time 0 or choose a start policy",
+      "mrt.last": "not defined for this route of administration",
+      "mrt.obs": "not defined for this route of administration",
+      "mrt.pred": "not defined for this route of administration",
+      "tlag": "not defined for this route of administration"
+     },
+     "outcome": {
+      "ok": {
+       "flags": [
+        {
+         "code": "short_span",
+         "threshold": 2.0,
+         "value": 0.6852245244901696
+        }
+       ],
+       "lambda_z_candidates": [
+        {
+         "adj_r_squared": 0.9941334548524328,
+         "intercept": -1.7242105963964622,
+         "lambda_z": 0.15832048240029675,
+         "n_points": 3,
+         "r_squared": 0.9970667274262164,
+         "replaced_points": 0,
+         "selected": true,
+         "time_first": 5.0,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.956053458566954,
+         "intercept": -1.5139059384653626,
+         "lambda_z": 0.1883640049618824,
+         "n_points": 4,
+         "r_squared": 0.9707023057113027,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 4.0,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9729541936684658,
+         "intercept": -1.5540562352914957,
+         "lambda_z": 0.1822299318356676,
+         "n_points": 5,
+         "r_squared": 0.9797156452513494,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 3.0,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9480942603385925,
+         "intercept": -1.373606810792669,
+         "lambda_z": 0.21169106236608823,
+         "n_points": 6,
+         "r_squared": 0.958475408270874,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 2.0,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.8689730851348244,
+         "intercept": -1.0452415810835614,
+         "lambda_z": 0.2682581817697581,
+         "n_points": 7,
+         "r_squared": 0.8908109042790203,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 1.25,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.8631749190069976,
+         "intercept": -0.8283067194629883,
+         "lambda_z": 0.30647134888352556,
+         "n_points": 8,
+         "r_squared": 0.8827213591488551,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 1.0,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.8383989827449253,
+         "intercept": -0.5890825838141998,
+         "lambda_z": 0.3498041988516534,
+         "n_points": 9,
+         "r_squared": 0.8585991099018097,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 0.75,
+         "time_last": 8.0,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.8406584933159269,
+         "intercept": -0.4180830537844582,
+         "lambda_z": 0.3818005804635733,
+         "n_points": 10,
+         "r_squared": 0.8583631051697128,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 0.5,
+         "time_last": 8.0,
+         "valid": true
+        }
+       ],
+       "parameters": [
+        {
+         "name": "c0",
+         "value": {
+          "value": 2.393617021276596
+         }
+        },
+        {
+         "name": "cmax",
+         "value": {
+          "value": 1.5
+         }
+        },
+        {
+         "name": "tmax",
+         "value": {
+          "value": 0.25
+         }
+        },
+        {
+         "name": "tfirst",
+         "value": {
+          "value": 0.25
+         }
+        },
+        {
+         "name": "tlag",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "tlast",
+         "value": {
+          "value": 8.0
+         }
+        },
+        {
+         "name": "clast.obs",
+         "value": {
+          "value": 0.05
+         }
+        },
+        {
+         "name": "auclast",
+         "value": {
+          "value": 2.0098984364047285
+         }
+        },
+        {
+         "name": "aucall",
+         "value": {
+          "value": 2.0098984364047285
+         }
+        },
+        {
+         "name": "aumclast",
+         "value": {
+          "value": 3.304796065433612
+         }
+        },
+        {
+         "name": "aumcall",
+         "value": {
+          "value": 3.304796065433612
+         }
+        },
+        {
+         "name": "lambda.z",
+         "value": {
+          "value": 0.15832048240029675
+         }
+        },
+        {
+         "name": "r.squared",
+         "value": {
+          "value": 0.9970667274262164
+         }
+        },
+        {
+         "name": "adj.r.squared",
+         "value": {
+          "value": 0.9941334548524328
+         }
+        },
+        {
+         "name": "lambda.z.time.first",
+         "value": {
+          "value": 5.0
+         }
+        },
+        {
+         "name": "lambda.z.time.last",
+         "value": {
+          "value": 8.0
+         }
+        },
+        {
+         "name": "lambda.z.n.points",
+         "value": {
+          "value": 3.0
+         }
+        },
+        {
+         "name": "clast.pred",
+         "value": {
+          "value": 0.050248506413514284
+         }
+        },
+        {
+         "name": "half.life",
+         "value": {
+          "value": 4.378127012065282
+         }
+        },
+        {
+         "name": "span.ratio",
+         "value": {
+          "value": 0.6852245244901696
+         }
+        },
+        {
+         "name": "aucinf.obs",
+         "value": {
+          "value": 2.3257135428391584
+         }
+        },
+        {
+         "name": "aucinf.pred",
+         "value": {
+          "value": 2.3272831844278317
+         }
+        },
+        {
+         "name": "aumcinf.obs",
+         "value": {
+          "value": 7.8261005459528565
+         }
+        },
+        {
+         "name": "aumcinf.pred",
+         "value": {
+          "value": 7.848572009170054
+         }
+        },
+        {
+         "name": "aucpext.obs",
+         "value": {
+          "value": 13.579277955654534
+         }
+        },
+        {
+         "name": "aucpext.pred",
+         "value": {
+          "value": 13.637564613828157
+         }
+        },
+        {
+         "name": "aumcpext.obs",
+         "value": {
+          "value": 57.77212360065276
+         }
+        },
+        {
+         "name": "aumcpext.pred",
+         "value": {
+          "value": 57.89302739947624
+         }
+        },
+        {
+         "name": "mrt.last",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.iv.last",
+         "value": {
+          "value": 1.6442602300567852
+         }
+        },
+        {
+         "name": "mrt.iv.obs",
+         "value": {
+          "value": 3.365032022129001
+         }
+        },
+        {
+         "name": "mrt.iv.pred",
+         "value": {
+          "value": 3.372418131874074
+         }
+        },
+        {
+         "name": "cl.obs",
+         "value": {
+          "value": 10.749389182934705
+         }
+        },
+        {
+         "name": "cl.pred",
+         "value": {
+          "value": 10.742139232250892
+         }
+        },
+        {
+         "name": "vz.obs",
+         "value": {
+          "value": 67.89638977827266
+         }
+        },
+        {
+         "name": "vz.pred",
+         "value": {
+          "value": 67.8505968993356
+         }
+        },
+        {
+         "name": "vss.iv.obs",
+         "value": {
+          "value": 36.17203881890238
+         }
+        },
+        {
+         "name": "vss.iv.pred",
+         "value": {
+          "value": 36.226985121958755
+         }
+        },
+        {
+         "name": "vss.obs",
+         "value": {
+          "value": 36.17203881890238
+         }
+        },
+        {
+         "name": "vss.pred",
+         "value": {
+          "value": 36.226985121958755
+         }
+        },
+        {
+         "name": "vss.iv.last",
+         "value": {
+          "value": 20.45203131007467
+         }
+        },
+        {
+         "name": "cmax.dn",
+         "value": {
+          "value": 0.06
+         }
+        },
+        {
+         "name": "clast.obs.dn",
+         "value": {
+          "value": 0.002
+         }
+        },
+        {
+         "name": "auclast.dn",
+         "value": {
+          "value": 0.08039593745618914
+         }
+        },
+        {
+         "name": "aucall.dn",
+         "value": {
+          "value": 0.08039593745618914
+         }
+        },
+        {
+         "name": "aucinf.obs.dn",
+         "value": {
+          "value": 0.09302854171356634
+         }
+        },
+        {
+         "name": "aucinf.pred.dn",
+         "value": {
+          "value": 0.09309132737711327
+         }
+        },
+        {
+         "name": "aumclast.dn",
+         "value": {
+          "value": 0.13219184261734448
+         }
+        },
+        {
+         "name": "aumcall.dn",
+         "value": {
+          "value": 0.13219184261734448
+         }
+        },
+        {
+         "name": "aumcinf.obs.dn",
+         "value": {
+          "value": 0.31304402183811425
+         }
+        },
+        {
+         "name": "aumcinf.pred.dn",
+         "value": {
+          "value": 0.3139428803668022
+         }
+        },
+        {
+         "name": "aucivlast",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivall",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivinf.obs",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivinf.pred",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivpbextlast",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivpbextall",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivpbextinf.obs",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        },
+        {
+         "name": "aucivpbextinf.pred",
+         "value": {
+          "not_calculated": "no_start_concentration"
+         }
+        }
+       ],
+       "profile": [
+        {
+         "conc": 2.393617021276596,
+         "index": null,
+         "origin": "inserted_start",
+         "time": 0.0
+        },
+        {
+         "conc": 1.5,
+         "index": 0,
+         "origin": "observed",
+         "time": 0.25
+        },
+        {
+         "conc": 0.94,
+         "index": 1,
+         "origin": "observed",
+         "time": 0.5
+        },
+        {
+         "conc": 0.78,
+         "index": 2,
+         "origin": "observed",
+         "time": 0.75
+        },
+        {
+         "conc": 0.48,
+         "index": 3,
+         "origin": "observed",
+         "time": 1.0
+        },
+        {
+         "conc": 0.37,
+         "index": 4,
+         "origin": "observed",
+         "time": 1.25
+        },
+        {
+         "conc": 0.19,
+         "index": 5,
+         "origin": "observed",
+         "time": 2.0
+        },
+        {
+         "conc": 0.12,
+         "index": 6,
+         "origin": "observed",
+         "time": 3.0
+        },
+        {
+         "conc": 0.11,
+         "index": 7,
+         "origin": "observed",
+         "time": 4.0
+        },
+        {
+         "conc": 0.08,
+         "index": 8,
+         "origin": "observed",
+         "time": 5.0
+        },
+        {
+         "conc": 0.07,
+         "index": 9,
+         "origin": "observed",
+         "time": 6.0
+        },
+        {
+         "conc": 0.05,
+         "index": 10,
+         "origin": "observed",
+         "time": 8.0
+        }
+       ],
+       "removed": [],
+       "units_missing": true
+      }
+     },
+     "route": "iv_bolus",
+     "subject": "1"
+    }
+   ]
+  },
+  "spec": {
+   "dose": null,
+   "kind": "nca",
+   "options": {
+    "auc_method": "lin_up_log_down",
+    "blq": {
+     "position": {
+      "first": "keep",
+      "last": "keep",
+      "middle": "drop"
+     }
+    },
+    "lambda_z": {
+     "adj_r_squared_factor": 0.0001,
+     "allow_tmax": false,
+     "min_points": 3
+    },
+    "lambda_z_selection": {
+     "exclude": [],
+     "exclude_replaced": false,
+     "manual": null,
+     "positive_filter_first": false,
+     "tie_rule": "tolerance"
+    },
+    "missing": "drop",
+    "negative": "error",
+    "quality": {
+     "max_extrapolated_percent": 20.0,
+     "min_adj_r_squared": 0.9,
+     "min_points": 3,
+     "min_span_ratio": 2.0
+    },
+    "start": "c0",
+    "tmax_tie": "first",
+    "units": null
+   },
+   "route": "iv_bolus",
+   "subject": null,
+   "worksheet": 1
+  },
+  "status": {
+   "state": "fresh"
+  }
+ }
+}
