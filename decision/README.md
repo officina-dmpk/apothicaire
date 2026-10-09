@@ -178,3 +178,57 @@ deterministic: regeneration is byte-identical); the exercises are versioned.
 - `route` = `unknown` and `dose_has_unit` = false come from synthetic omissions in the sentence, not from the exercise data.
 - Exercises are single-subject, one dose, simulated one- and two-compartment models with proportional noise; no multi-subject files,
   no wrong-unit CSV headers, no data error.
+
+## Step 4: harness with gold decisions (upper bound)
+
+`decision/harness.py` is the deterministic part of the decision path. It holds one Caladrius MCP session, using the client of `apothicaire.py`.
+On each turn it builds the state with `make_dataset.make_state` and `split_first_message`, the same code that writes the dataset rows. It asks
+`decide(state, questions)` for answers and then acts on them: `data_import` once, `nca_run` with the decided route and AUC method,
+`analysis_get` for the parameter asked, `analysis_compare` on the decided pair, or a stated refusal. Finally it renders French templates. The only
+numbers in an answer are engine values, shown as in the digests of `apothicaire.py`. No language model is used and no arithmetic is done on engine
+values. When the route, the dose, the dose unit or the infusion duration is missing, the template asks for it. A duration in a time unit other
+than the data's is asked for again in the data's unit. `decision/run_harness.py` runs the 25 benchmark exercises with the 8 scripted turns. It
+writes the per-exercise JSON and `report.md` of `bench/run_bench.py`, scored by the unchanged `bench/score.py`:
+
+```
+python decision/run_harness.py --decider gold          # answers = gold labels of data/bench.jsonl; or --decider module:function
+python -m unittest tests.test_decision_harness         # templates (golden strings), action mapping, refusals, state, real engine
+```
+
+Gold run (`runs/2026-10-09-harness-gold/report.md`), next to the 27B pipeline on the same exercises (`bench/runs/2026-10-09b`):
+
+| pipeline | oracle-correct turns | oracle-correct numbers | invalid or failed tool calls | gate: unverified numbers | time per turn |
+|---|---|---|---|---|---|
+| 27B + gate (2026-10-09b) | 170 / 175 | 549 / 556 | 0 / 160 | 0 / 926 | 10.4 s |
+| decision harness, gold decisions | **175 / 175** | **558 / 558** | **0 / 250** | 0 / 1698 | 1.4 ms (no model) |
+
+- 558 against 556 numbers: the compare turn also expects the engine's difference and percentage when `analysis_compare` was usable. That was
+  the case for 25 of 25 turns here and 24 of 25 for the 27B.
+- The time covers the engine calls and the rendering only. Add about 1.1 s per exercise for the MCP start and the scorer's chance baseline,
+  plus the decision model's own latency in steps 2 and 3. There are no prompt tokens and no VRAM.
+- The scorer and the oracle agree on every turn (0 disagreements). The tool-argument audit finds 0 deviating calls in 75. Over the 200 turns
+  the harness made 225 decide calls, because the compare turn is decided again after its re-run (see below). There were no harness notes:
+  `is_not_available` was never overruled by the engine.
+
+**Failures, one by one.** The first pass scored 171 / 175 turns and 550 / 558 numbers. All 4 failing turns and 8 numbers had one cause, of
+class **template**: AUC values above one million were printed as the digest gives them, e.g. "1701680.0". The digest rounds to 6
+significant digits and Python adds ".0", so the number claims 8 digits, and the oracle rightly rejected it (`missing_value`). The cases:
+ex18_pk2_iv_bolus t1 (AUC(0-tlast), AUC(0-inf)), ex18 t7 (both AUC(0-tlast)), ex23_iv_bolus t1 (AUC(0-tlast), AUC(0-inf)) and ex23 t7 (both
+AUC(0-tlast)). The fix is in `value_text`, which drops the trailing ".0" of an integral float. This is a display change and the digits are
+never altered; a test covers it. The rerun above has no failure, so the counts are engine option 0, scorer label 0, other 0. The ceiling is
+above the 27B's 170. Its 5 failures do not occur here: the recall writes the dose unit taken from the user's sentence (3 `missing_unit` for
+the 27B), and the compare turn always calls `analysis_compare` and labels both AUC (2 `missing_value` for the 27B).
+
+What this ceiling does not measure:
+- **`parameter_asked` = `several` cannot say which parameters.** The harness answers it with the standard table of 13 parameters, so turns 2
+  to 5 ("Cmax et Tmax ?") give more than was asked. Neither the scorer nor the oracle penalises answering more. A multi-label question (one
+  `noul` per parameter) would close this gap if step 3 wants exact answers.
+- **The gold decider is not a model.** It finds the scripted row by the state without its analyses: the dataset draws some reading turns
+  "late", and it describes the compare turn after the re-run. On the first ask of every compare turn its `compare_pair` ("2+3") is outside
+  the offered options (25 / 25). This is expected and the harness does not use it: the pair is decided on the state after the re-run.
+- **The style of the answers follows the engine.** Numbers keep the engine's decimal point. Engine messages (reasons, unit warnings) are
+  quoted in English. The dose unit is never sent to Caladrius, as in the 27B pipeline, so CL and V are in "dose unit/(...)"; the recall
+  says so.
+- **What is not covered.** `fit_pk1`, `fit_pk2` and `simulate` are not wired; the template says so, and the benchmark never asks for them.
+  The dose, the infusion duration and the column units are read from the user's text with fixed patterns, and anything outside them is
+  asked for.

@@ -224,6 +224,31 @@ def split_ids(exercises):
     held = set(random.Random(SPLIT_SEED).sample(new, HELDOUT_N))
     return (sorted(i for i in new if i not in held), sorted(held), sorted(m["id"] for m, _, bench in exercises if bench))
 
+# ---------------------------------------------------------------- the state (shared with decision/harness.py)
+def _is_data_row(line):
+    """A CSV row of numbers (the rows of a pasted data table, not its header)."""
+    cells = [c.strip() for c in line.split(",")]
+    try: return all(c != "" and float(c) is not None for c in cells)
+    except ValueError: return False
+
+def split_first_message(text):
+    """The parts of a first user message written like the benchmark's (bench/scripts.py, turn 1): {"intro": the dose / route / units
+    sentence (first line), "csv": the header line that follows and the numeric rows under it, "notes": the lines between the data and
+    the request (the BLQ sentence), "request": the last line}. "csv" is "" when the second line is not followed by a numeric row."""
+    lines = text.strip().split(chr(10))
+    body = lines[1:-1] if len(lines) > 2 else []
+    k = 1
+    while k < len(body) and _is_data_row(body[k]): k += 1
+    if k == 1: return {"intro": lines[0], "csv": "", "notes": body, "request": lines[-1]}
+    return {"intro": lines[0], "csv": chr(10).join(body[:k]), "notes": body[k:], "request": lines[-1]}
+
+def make_state(csv_text, intro, notes, request, analyses):
+    """The state of one turn: the header and first five rows of the CSV, its row count, the dose / route / units sentence as the user
+    wrote it, the notes (BLQ), the request of the turn, the analyses already in the project ([{"id", "kind", "auc_method"}])."""
+    rows = csv_text.strip().splitlines()
+    return {"analyses": analyses, "data": {"first_rows": rows[1:6], "header": rows[0], "n_rows": len(rows) - 1, "n_subjects": 1},
+            "notes": notes, "request": request, "user_dose_sentence": intro}
+
 # ---------------------------------------------------------------- one row
 def route_phrase(meta, rng):
     kind = scripts.kind_of(meta)
@@ -240,12 +265,12 @@ def build_row(meta, csv, bench, kind, j, wording, rng):
     cl, vz = ("CL/F", "Vz/F") if route_kind == "oral" else ("CL", "Vz")
     scripted = wording is None
     # the dose / route / units sentence of the first message (the scripted one, or a hand-written variant that may omit unit / route)
-    t1 = script["import_nca"]["question"].split(chr(10))
+    first = split_first_message(script["import_nca"]["question"])
     omit_unit = not scripted and rng.random() < P_UNIT_OMITTED
     omit_route = not scripted and kind != "not_available" and rng.random() < P_ROUTE_OMITTED
     intro_variant = -1
     if scripted:
-        intro = t1[0]
+        intro = first["intro"]
     else:
         intro_variant = rng.randrange(len(INTROS))
         dose = scripts.fr(meta["dose"]["amount"]) + ("" if omit_unit else " " + scripts.UNIT_FR[meta["dose"]["unit"]])
@@ -253,10 +278,10 @@ def build_row(meta, csv, bench, kind, j, wording, rng):
         intro = INTROS[intro_variant].format(dr=dr, t=u["time"], c=u["conc"])
     notes = []
     if meta.get("blq"):
-        notes.append(t1[-2] if scripted else rng.choice(BLQ_NOTES).format(l=scripts.fr(meta["blq"]["lloq"]), c=u["conc"]))
+        notes.append(first["notes"][0] if scripted else rng.choice(BLQ_NOTES).format(l=scripts.fr(meta["blq"]["lloq"]), c=u["conc"]))
     # the request of the turn and the parameters it asks
     if scripted:
-        request = t1[-1] if kind == "import_nca" else script[kind]["question"]
+        request = first["request"] if kind == "import_nca" else script[kind]["question"]
         params = scripted_params(kind, route_kind, what)
     else:
         text, params = WORDINGS[pool_key(kind, route_kind)][wording]
@@ -269,9 +294,7 @@ def build_row(meta, csv, bench, kind, j, wording, rng):
     elif kind in ("compare", "not_available") or late: analyses = [a1, a2]
     elif kind == "simulate": analyses = [a1, {"id": 3, "kind": "fit_pk2" if meta["family"].startswith("pk2") else "fit_pk1"}]
     else: analyses = [a1]
-    rows = csv.strip().splitlines()
-    state = {"analyses": analyses, "data": {"first_rows": rows[1:6], "header": rows[0], "n_rows": len(rows) - 1, "n_subjects": 1},
-             "notes": notes, "request": request, "user_dose_sentence": intro}
+    state = make_state(csv, intro, notes, request, analyses)
     ids = sorted(a["id"] for a in analyses)
     qs = questions_for(ids)
     pair = f"{ids[0]}+{ids[1]}" if kind == "compare" else "not_applicable"
