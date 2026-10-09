@@ -1,5 +1,5 @@
 {
- "engine_commit": "f4bcacd04b284ec78833a58fb1be21b4ba89e375",
+ "engine_commit": "be3625e43254984dc47fafb878cb0c911c050309+uncommitted changes in crates/apps",
  "server": {
   "name": "caladrius-mcp",
   "title": "Caladrius",
@@ -2672,7 +2672,7 @@
     "readOnlyHint": true,
     "title": "Initial estimates from the data"
    },
-   "description": "Initial estimates from the data. Command `fit.initial_estimates`. Estimates the starting values of a model's parameters from one subject's profile (log-linear regression, curve stripping, terminal phase). Reads only: nothing is stored. A zero-order input model needs its duration among `fixed`.",
+   "description": "Initial estimates from the data. Command `fit.initial_estimates`. Estimates the starting values of a model's parameters from one subject's profile (log-linear regression, curve stripping, terminal phase). Reads only: nothing is stored. A zero-order input model needs its duration among `fixed`. Refused for pk2: give the initial values.",
    "inputSchema": {
     "$defs": {
      "Id": {
@@ -2681,14 +2681,20 @@
       "type": "integer"
      },
      "ModelId": {
-      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "description": "Route and input. pk1: v and cl or k. pk2 (two compartments): one set of cl,vc,q,vp or k10,k12,k21,vc or a,b,alpha,beta (a, b need the dose).",
       "enum": [
        "pk1.iv_bolus",
        "pk1.iv_infusion",
        "pk1.oral_1",
        "pk1.oral_1_lag",
        "pk1.oral_0",
-       "pk1.oral_0_lag"
+       "pk1.oral_0_lag",
+       "pk2.iv_bolus",
+       "pk2.iv_infusion",
+       "pk2.oral_1",
+       "pk2.oral_1_lag",
+       "pk2.oral_0",
+       "pk2.oral_0_lag"
       ],
       "type": "string"
      }
@@ -2836,6 +2842,7 @@
        },
        "derivatives": {
         "enum": [
+         "auto",
          "forward_difference",
          "analytic"
         ],
@@ -2909,6 +2916,13 @@
         "maximum": 1000000,
         "minimum": 0,
         "type": "integer"
+       },
+       "preset": {
+        "enum": [
+         "default",
+         "reference_conventions"
+        ],
+        "type": "string"
        }
       },
       "required": [],
@@ -2920,14 +2934,20 @@
       "type": "integer"
      },
      "ModelId": {
-      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "description": "Route and input. pk1: v and cl or k. pk2 (two compartments): one set of cl,vc,q,vp or k10,k12,k21,vc or a,b,alpha,beta (a, b need the dose).",
       "enum": [
        "pk1.iv_bolus",
        "pk1.iv_infusion",
        "pk1.oral_1",
        "pk1.oral_1_lag",
        "pk1.oral_0",
-       "pk1.oral_0_lag"
+       "pk1.oral_0_lag",
+       "pk2.iv_bolus",
+       "pk2.iv_infusion",
+       "pk2.oral_1",
+       "pk2.oral_1_lag",
+       "pk2.oral_0",
+       "pk2.oral_0_lag"
       ],
       "type": "string"
      },
@@ -2959,7 +2979,7 @@
       "additionalProperties": {
        "type": "number"
       },
-      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (see fit.initial_estimates).",
+      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (not for pk2: give every parameter).",
       "type": "object"
      },
      "model": {
@@ -3040,7 +3060,7 @@
     "readOnlyHint": false,
     "title": "Fit a model to a profile"
    },
-   "description": "Fit a model to a profile. Command `fit.run`. Weighted least-squares fit (Gauss-Newton with the Levenberg and Hartley modification) of a one-compartment model to the profile of one subject; stores the result in an analysis object. The result has the status (converged or why not), estimates with standard error, CV% and confidence intervals, diagnostics, observed and predicted values, the smooth curve, the trace, and quality flags. A fit that cannot start is an error and stores nothing.",
+   "description": "Fit a model to a profile. Command `fit.run`. Weighted least-squares fit (Gauss-Newton with the Levenberg and Hartley modification) of a one- or two-compartment model to the profile of one subject; stores the result in an analysis object. The result has the status (converged or why not), estimates with standard error, CV% and confidence intervals, diagnostics, observed and predicted values, the smooth curve, the trace, and quality flags. A fit that cannot start is an error and stores nothing.",
    "inputSchema": {
     "$defs": {
      "FitOptions": {
@@ -3096,6 +3116,7 @@
        },
        "derivatives": {
         "enum": [
+         "auto",
          "forward_difference",
          "analytic"
         ],
@@ -3169,6 +3190,13 @@
         "maximum": 1000000,
         "minimum": 0,
         "type": "integer"
+       },
+       "preset": {
+        "enum": [
+         "default",
+         "reference_conventions"
+        ],
+        "type": "string"
        }
       },
       "required": [],
@@ -3180,14 +3208,20 @@
       "type": "integer"
      },
      "ModelId": {
-      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "description": "Route and input. pk1: v and cl or k. pk2 (two compartments): one set of cl,vc,q,vp or k10,k12,k21,vc or a,b,alpha,beta (a, b need the dose).",
       "enum": [
        "pk1.iv_bolus",
        "pk1.iv_infusion",
        "pk1.oral_1",
        "pk1.oral_1_lag",
        "pk1.oral_0",
-       "pk1.oral_0_lag"
+       "pk1.oral_0_lag",
+       "pk2.iv_bolus",
+       "pk2.iv_infusion",
+       "pk2.oral_1",
+       "pk2.oral_1_lag",
+       "pk2.oral_0",
+       "pk2.oral_0_lag"
       ],
       "type": "string"
      },
@@ -3223,7 +3257,7 @@
       "additionalProperties": {
        "type": "number"
       },
-      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (see fit.initial_estimates).",
+      "description": "Initial estimates by parameter name; the fitted parameters are exactly those named. Empty: generated from the data (not for pk2: give every parameter).",
       "type": "object"
      },
      "model": {
@@ -3873,7 +3907,7 @@
     "readOnlyHint": true,
     "title": "Evaluate a model on a time grid"
    },
-   "description": "Evaluate a model on a time grid. Command `model.simulate`. Concentration and AUC of a one-compartment model at the given times (a list, or a regular grid), and its secondary parameters (half-life, clearance, AUC to infinity, MRT, predicted Cmax and Tmax...). Nothing is stored unless `store` is true (with `analysis`, that simulation is updated instead of a new one being created), so it can be called at every change of a parameter for a live curve.",
+   "description": "Evaluate a model on a time grid. Command `model.simulate`. Concentration and AUC of a one- or two-compartment model at the given times (a list, or a regular grid), and its secondary parameters (half-life, clearance, AUC to infinity, MRT, predicted Cmax and Tmax...). Nothing is stored unless `store` is true (with `analysis`, that simulation is updated instead of a new one being created), so it can be called at every change of a parameter for a live curve.",
    "inputSchema": {
     "$defs": {
      "Id": {
@@ -3882,14 +3916,20 @@
       "type": "integer"
      },
      "ModelId": {
-      "description": "One-compartment model: route and input (see `describe` of the model catalogue).",
+      "description": "Route and input. pk1: v and cl or k. pk2 (two compartments): one set of cl,vc,q,vp or k10,k12,k21,vc or a,b,alpha,beta (a, b need the dose).",
       "enum": [
        "pk1.iv_bolus",
        "pk1.iv_infusion",
        "pk1.oral_1",
        "pk1.oral_1_lag",
        "pk1.oral_0",
-       "pk1.oral_0_lag"
+       "pk1.oral_0_lag",
+       "pk2.iv_bolus",
+       "pk2.iv_infusion",
+       "pk2.oral_1",
+       "pk2.oral_1_lag",
+       "pk2.oral_0",
+       "pk2.oral_0_lag"
       ],
       "type": "string"
      }
@@ -3937,7 +3977,7 @@
       "additionalProperties": {
        "type": "number"
       },
-      "description": "Parameters by name: `v`; exactly one of `cl` and `k`; `ka`, `dur`, `tlag` as the model needs.",
+      "description": "Parameters by name: pk1 `v` and one of `cl`, `k`; pk2 one set (see model); `ka`, `dur`, `tlag` as needed.",
       "type": "object"
      },
      "store": {
@@ -4744,6 +4784,41 @@
     "type": "object"
    },
    "title": "Export a result table"
+  },
+  {
+   "annotations": {
+    "openWorldHint": false,
+    "readOnlyHint": true,
+    "title": "Compare analyses"
+   },
+   "description": "Compare analyses. Command `analysis.compare`. Differences and ratios of shared parameters.",
+   "inputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+     "a": {
+      "type": "integer"
+     },
+     "b": {
+      "type": "integer"
+     },
+     "parameters": {
+      "type": "array"
+     }
+    },
+    "required": [
+     "a",
+     "b"
+    ],
+    "title": "analysis.compare",
+    "type": "object"
+   },
+   "name": "analysis_compare",
+   "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "analysis.compare",
+    "type": "object"
+   },
+   "title": "Compare analyses"
   },
   {
    "annotations": {

@@ -31,7 +31,7 @@ MCP_BIN = os.environ.get("APOTHICAIRE_MCP", os.path.join(
     "caladrius-mcp.exe" if os.name == "nt" else "caladrius-mcp"))
 
 # Tools exposed to the model (the 12k-token context cannot hold the 18 schemas).
-EXPOSED = ["data_import", "nca_run", "analysis_get", "export_table"]
+EXPOSED = ["data_import", "nca_run", "analysis_get", "export_table", "analysis_compare"]
 # nca_run options kept in the schema shown to the model (the full schema is ~1k tokens; the
 # server still accepts every option, they are only hidden from the prompt).
 NCA_OPTIONS_KEPT = ["auc_method", "start", "lambda_z", "quality"]
@@ -39,7 +39,7 @@ NCA_OPTIONS_KEPT = ["auc_method", "start", "lambda_z", "quality"]
 SYSTEM_ADDITION = """
 
 You are Apothicaire, a DMPK assistant. Never compute pharmacokinetic numbers yourself: import the data and call Caladrius tools, then explain the results in the user's language, with units, and mention quality flags.
-Caladrius workflow: data_import (CSV text in `csv`; give the units the user states in `columns`, e.g. {"name":"time","unit":"h"}) returns a worksheet id; nca_run(worksheet, dose, route, options) returns an analysis id and the parameters by PKNCA name; to redo an analysis with other options call nca_run again. Worksheets and analyses persist during the chat: reuse their ids, do not import the same data twice. NCA parameters come with their unit (aucpext.* are percentages); when the dose unit is unknown to Caladrius, CL and V are in dose unit/(...). Quote tool values verbatim and never convert units (no mg to ug, no h to min, no L/h from dose unit/...); if a unit is missing, say so. You may round a value, saying so. Never state a value that no tool returned."""
+Caladrius workflow: data_import (CSV text in `csv`; give the units the user states in `columns`, e.g. {"name":"time","unit":"h"}) returns a worksheet id; nca_run(worksheet, dose, route, options) returns an analysis id and the parameters by PKNCA name; to redo an analysis with other options call nca_run again. Worksheets and analyses persist during the chat: reuse their ids, do not import the same data twice. NCA parameters come with their unit (aucpext.* are percentages); when the dose unit is unknown to Caladrius, CL and V are in dose unit/(...). Quote tool values verbatim and never convert units (no mg to ug, no h to min, no L/h from dose unit/...); if a unit is missing, say so. You may round a value, saying so. Never state a value that no tool returned. Differences, percentages and ratios between two results come from analysis_compare (b minus a, per parameter, with units), never from you."""
 
 # ---------------------------------------------------------------- MCP stdio client
 class MCPError(Exception): pass
@@ -109,6 +109,13 @@ def to_openai(tool):
         params["properties"]["infusion_duration"] = {"type": "number", "description": "Only with route iv_infusion: duration of the infusion in the time unit of the data (2 h -> 2)."}
         params["properties"]["dose"] = {"type": "number", "description": "Dose amount in the unit the user gives (10 mg -> 10)."}
         params["properties"]["subject"] = {"description": "One subject label; omit for all subjects."}
+    if tool["name"] == "analysis_compare":
+        desc = ("Differences, relative differences in percent and ratios (b minus a) of the parameters two analyses of one "
+                "subject share, computed by Caladrius with their units. Use it for any comparison of two results.")
+        params["properties"]["a"] = {"type": "integer", "description": "Analysis id of the reference result (from nca_run)."}
+        params["properties"]["b"] = {"type": "integer", "description": "Analysis id of the other result."}
+        params["properties"]["parameters"] = {"type": "array", "items": {"type": "string"},
+                                              "description": "PKNCA names to compare, e.g. [\"auclast\"]; omit for all shared."}
     if tool["name"] == "data_import":
         params["properties"].pop("decimal_comma", None); params["properties"].pop("delimiter", None)
     return {"type": "function", "function": {"name": tool["name"], "description": desc, "parameters": params}}
@@ -181,6 +188,41 @@ def digest_analysis(d, units=None):
         out["subjects"].append(o)
     return out
 
+def digest_compare(d, units=None):
+    """An `analysis_compare` answer (one row per shared parameter: a, b, unit_a, unit_b, difference, difference_unit,
+    relative_percent, ratio, not_comparable) as one line per parameter in the "value unit" style of the NCA digest, 6
+    significant digits, nothing computed or converted here. A row with neither value (both missing) carries only a reason:
+    those are grouped under their reason like the NCA digest does for not-calculated parameters.
+    Units: the engine's own when it reports them; when it reports none (an NCA run whose options carry no units, which is
+    what nca_run called through this client does) the unit is labelled from the worksheet like in the NCA digest, but only
+    when both analyses come from the same worksheet (`units[("analysis", id)]` -> worksheet id, filled by render_tool_result).
+    No value is converted."""
+    ids = [(d.get(k) or {}).get("analysis") for k in ("a", "b")]
+    wsids = [(units or {}).get(("analysis", i)) for i in ids]
+    wu = (units or {}).get(wsids[0]) if wsids[0] is not None and wsids[0] == wsids[1] else None
+    def label(name, unit):
+        if unit is not None or wu is None: return unit
+        u = param_unit(name, wu); return None if u == "?" else u
+    def val(x, unit=None):
+        if x is None: return None
+        return f"{_sig(x)} {unit}".strip() if unit else f"{_sig(x)}"
+    info = lambda s: {"analysis": s.get("analysis"), "label": s.get("label"), "status": s.get("status")}
+    out = {"a": info(d.get("a") or {}), "b": info(d.get("b") or {}), "subject": (d.get("a") or {}).get("subject"),
+           "parameters": {}, "not_comparable": {}}
+    for r in d.get("rows", []):
+        if r.get("a") is None and r.get("b") is None:
+            out["not_comparable"].setdefault(r.get("not_comparable") or "no value", []).append(r.get("parameter"))
+            continue
+        pn = r.get("parameter"); ua, ub = label(pn, r.get("unit_a")), label(pn, r.get("unit_b"))
+        parts = [f"a {val(r.get('a'), ua)}" if r.get("a") is not None else "a none",
+                 f"b {val(r.get('b'), ub)}" if r.get("b") is not None else "b none"]
+        if r.get("difference") is not None: parts.append(f"difference {val(r['difference'], r.get('difference_unit') or (ua if ua == ub else None))}")
+        if r.get("relative_percent") is not None: parts.append(f"percent {val(r['relative_percent'], '%')}")
+        if r.get("ratio") is not None: parts.append(f"ratio {val(r['ratio'])}")
+        if r.get("not_comparable"): parts.append(f"not comparable: {r['not_comparable']}")
+        out["parameters"][r.get("parameter")] = " | ".join(parts)
+    return out
+
 def render_tool_result(name, ok, text, units):
     """What the model is shown for an MCP answer. `units` (worksheet id -> units, updated in place)
     remembers the units a worksheet reported; an NCA analysis is digested with the units of its
@@ -194,8 +236,11 @@ def render_tool_result(name, ok, text, units):
             units[ws.get("id")] = {"time": roles.get("time"), "conc": roles.get("concentration"),
                                    "dose": roles.get("dose"), "derived": ws["derived_units"],
                                    "warnings": ws.get("unit_warnings", [])}
-        if isinstance(d, dict) and d.get("kind") == "nca" and "result" in d:
+        if name == "analysis_compare" and isinstance(d, dict) and isinstance(d.get("rows"), list):
+            d = digest_compare(d, units)
+        elif isinstance(d, dict) and d.get("kind") == "nca" and "result" in d:
             wid = (d.get("spec") or {}).get("worksheet")
+            units[("analysis", d.get("id"))] = wid                  # lets analysis_compare label units
             d = digest_analysis(d, units.get(wid))
         return json.dumps(d, ensure_ascii=False, separators=(",", ":"))
     except Exception:

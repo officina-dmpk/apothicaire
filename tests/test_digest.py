@@ -331,6 +331,114 @@ class TestGoldenDigest(unittest.TestCase):
         self.assertEqual(apothicaire.render_tool_result("nca_run", True, "not json", {}), "not json")
 
 
+def load_compare():
+    with open(os.path.join(GOLDEN_DIR, "compare", "theoph_s1_compare_linear_vs_lin_up_log_down.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+COMPARE = load_compare()
+
+def compare_units():
+    """The units the client remembers after the three calls that precede analysis_compare (as the agent does)."""
+    units = {}
+    apothicaire.render_tool_result("data_import", True, json.dumps(COMPARE["data_import_result"]), units)
+    for k in ("nca_run_linear", "nca_run_lin_up_log_down"):
+        apothicaire.render_tool_result("nca_run", True, json.dumps(COMPARE[k]), units)
+    return units
+
+def fmt6(x):
+    """A float at 6 significant digits the way the digest writes it (independent: Decimal, then Python's repr of the float)."""
+    return repr(float(round6(x)))
+
+class TestCompareDigest(unittest.TestCase):
+    """Golden test of the digest of analysis_compare on PUBLIC data: Theoph subject 1 (dose as an argument), the
+    same worksheet analysed with the linear and the lin-up/log-down AUC, then the compare tool through the MCP client."""
+    def test_golden_shape(self):
+        self.assertEqual([c["tool"] for c in COMPARE["calls"]], ["data_import", "nca_run", "nca_run", "analysis_compare", "analysis_compare"])
+        self.assertEqual([c["arguments"]["options"]["auc_method"] for c in COMPARE["calls"][1:3]], ["linear", "lin_up_log_down"])
+        self.assertEqual(COMPARE["calls"][3]["arguments"], {"a": COMPARE["nca_run_linear"]["id"], "b": COMPARE["nca_run_lin_up_log_down"]["id"]})
+        self.assertEqual(COMPARE["calls"][4]["arguments"]["parameters"], ["auclast"])
+
+    def test_one_parameter_line_per_value_unit_difference_percent_ratio(self):
+        row = COMPARE["compare_auclast_result"]["rows"][0]
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(COMPARE["compare_auclast_result"]), compare_units()))
+        unit = COMPARE["data_import_result"]["worksheet"]["derived_units"]["auc"]
+        want = (f"a {fmt6(row['a'])} {unit} | b {fmt6(row['b'])} {unit} | difference {fmt6(row['difference'])} {unit} | "
+                f"percent {fmt6(row['relative_percent'])} % | ratio {fmt6(row['ratio'])}")
+        self.assertEqual(shown["parameters"], {"auclast": want})
+        self.assertEqual(shown["not_comparable"], {})
+        self.assertEqual((shown["a"]["analysis"], shown["b"]["analysis"]), (COMPARE["nca_run_linear"]["id"], COMPARE["nca_run_lin_up_log_down"]["id"]))
+        self.assertEqual(shown["subject"], "1")
+        # the engine's own arithmetic, not the digest's: b - a, (b - a) / a * 100, b / a
+        self.assertAlmostEqual(row["difference"], row["b"] - row["a"], places=9)
+        self.assertAlmostEqual(row["relative_percent"], (row["b"] - row["a"]) / row["a"] * 100, places=9)
+        self.assertAlmostEqual(row["ratio"], row["b"] / row["a"], places=12)
+
+    def test_all_rows(self):
+        payload = COMPARE["compare_all_result"]; ws = COMPARE["data_import_result"]["worksheet"]
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(payload), compare_units()))
+        lines, grouped = {}, {}
+        for r in payload["rows"]:
+            if r["a"] is None and r["b"] is None: grouped.setdefault(r["not_comparable"], []).append(r["parameter"]); continue
+            u = expected_unit(r["parameter"], ws)
+            parts = [f"a {fmt6(r['a'])}" + (f" {u}" if u else ""), f"b {fmt6(r['b'])}" + (f" {u}" if u else "")]
+            if r["difference"] is not None: parts.append(f"difference {fmt6(r['difference'])}" + (f" {u}" if u else ""))
+            if r["relative_percent"] is not None: parts.append(f"percent {fmt6(r['relative_percent'])} %")
+            if r["ratio"] is not None: parts.append(f"ratio {fmt6(r['ratio'])}")
+            if r["not_comparable"]: parts.append(f"not comparable: {r['not_comparable']}")
+            lines[r["parameter"]] = " | ".join(parts)
+        self.assertEqual(shown["parameters"], lines)
+        self.assertEqual(shown["not_comparable"], grouped)
+        self.assertTrue(any("a is zero" in l for l in lines.values()))          # a row with a difference but no percentage
+        self.assertEqual(len(grouped), 1)                                       # the route-dependent parameters share one reason
+        self.assertEqual(len(shown["parameters"]) + sum(len(v) for v in grouped.values()), len(payload["rows"]))
+        self.assertLess(len(json.dumps(shown)), len(json.dumps(payload)) / 2)   # a digest, not a copy
+
+    def test_no_number_of_the_digest_is_absent_from_the_payload(self):
+        for key in ("compare_auclast_result", "compare_all_result"):
+            shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(COMPARE[key]), compare_units()))
+            with self.subTest(case=key):
+                self.assertEqual(foreign_numbers(shown, COMPARE[key]), [])
+        # the detector can fail: a recomputed difference and a converted ratio are foreign
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(COMPARE["compare_auclast_result"]), compare_units()))
+        shown["parameters"]["auclast"] = shown["parameters"]["auclast"].replace("difference -1.6883", "difference -1.69").replace("ratio 0.988663", "ratio 98.8663")
+        self.assertEqual(len(foreign_numbers(shown, COMPARE["compare_auclast_result"])), 2)
+
+    def test_units_come_from_the_engine_when_it_has_them_and_never_from_two_worksheets(self):
+        payload = copy.deepcopy(COMPARE["compare_auclast_result"]); row = payload["rows"][0]
+        row.update(unit_a="ng*h/mL", unit_b="ng*h/mL", difference_unit="ng*h/mL")
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(payload), compare_units()))
+        self.assertIn("a 148.923 ng*h/mL | b 147.235 ng*h/mL | difference -1.6883 ng*h/mL", shown["parameters"]["auclast"])
+        units = compare_units(); units[("analysis", COMPARE["nca_run_lin_up_log_down"]["id"])] = 99     # another worksheet: no label
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(COMPARE["compare_auclast_result"]), units))
+        self.assertEqual(shown["parameters"]["auclast"].count("h*mg/L"), 0)
+        self.assertTrue(shown["parameters"]["auclast"].startswith("a 148.923 | b 147.235 | difference -1.6883 | percent"))
+
+    def test_unit_mismatch_and_missing_values_are_reported_as_the_engine_says(self):
+        rows = [{"parameter": "auclast", "a": 10.0, "b": 12.0, "unit_a": "h*mg/L", "unit_b": "h*ng/mL", "difference": None,
+                 "difference_unit": None, "relative_percent": None, "ratio": None,
+                 "not_comparable": "unit mismatch: a is in `h*mg/L`, b is in `h*ng/mL`; no unit is converted"},
+                {"parameter": "tlag", "a": None, "b": 1.0, "unit_a": "h", "unit_b": "h", "difference": None, "difference_unit": None,
+                 "relative_percent": None, "ratio": None, "not_comparable": "analysis a: not calculated"}]
+        payload = {"a": {"analysis": 2, "label": "x", "status": "fresh", "subject": "1"}, "b": {"analysis": 3, "label": "y", "status": "fresh", "subject": "1"}, "rows": rows}
+        shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(payload), {}))
+        self.assertEqual(shown["parameters"]["auclast"], "a 10.0 h*mg/L | b 12.0 h*ng/mL | not comparable: unit mismatch: a is in `h*mg/L`, b is in `h*ng/mL`; no unit is converted")
+        self.assertEqual(shown["parameters"]["tlag"], "a none | b 1.0 h | not comparable: analysis a: not calculated")
+        self.assertNotIn("difference", shown["parameters"]["auclast"])
+
+    def test_errors_pass_through(self):
+        self.assertEqual(apothicaire.render_tool_result("analysis_compare", False, "ambiguous_subject: 6 subjects", {}), "ambiguous_subject: 6 subjects")
+
+    def test_tool_and_prompt(self):
+        tools = {t["name"]: t for t in load("tools_list.json")["tools"]}
+        f = apothicaire.to_openai(tools["analysis_compare"])["function"]
+        self.assertEqual(f["parameters"]["required"], ["a", "b"])
+        self.assertEqual({k: v["type"] for k, v in f["parameters"]["properties"].items()}, {"a": "integer", "b": "integer", "parameters": "array"})
+        self.assertEqual(f["parameters"]["properties"]["parameters"]["items"], {"type": "string"})
+        self.assertIn("analysis_compare", apothicaire.EXPOSED)
+        self.assertIn("Differences, percentages and ratios between two results come from analysis_compare", apothicaire.SYSTEM_ADDITION)
+        self.assertLess(len(json.dumps(f)), 1200)
+
+
 class TestSchemaFlattening(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

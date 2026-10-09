@@ -1,0 +1,2111 @@
+{
+ "case": "theoph_s1_compare_linear_vs_lin_up_log_down",
+ "source": "theoph.csv, subject 1 (dose argument): the same worksheet analysed with the linear and the lin-up/log-down AUC, then analysis_compare(a, b)",
+ "server": {
+  "name": "caladrius-mcp",
+  "title": "Caladrius",
+  "version": "0.1.0"
+ },
+ "engine_commit": "be3625e43254984dc47fafb878cb0c911c050309+uncommitted changes in crates/apps",
+ "calls": [
+  {
+   "tool": "data_import",
+   "arguments": {
+    "name": "theoph_s1",
+    "csv": "subject,time,conc\n1,0,0.74\n1,0.25,2.84\n1,0.57,6.57\n1,1.12,10.5\n1,2.02,9.66\n1,3.82,8.58\n1,5.1,8.36\n1,7.03,7.47\n1,9.05,6.89\n1,12.12,5.94\n1,24.37,3.28\n",
+    "columns": [
+     {
+      "name": "time",
+      "unit": "h"
+     },
+     {
+      "name": "conc",
+      "unit": "mg/L"
+     }
+    ]
+   }
+  },
+  {
+   "tool": "nca_run",
+   "arguments": {
+    "worksheet": 1,
+    "dose": 319.992,
+    "route": "extravascular",
+    "options": {
+     "auc_method": "linear"
+    }
+   }
+  },
+  {
+   "tool": "nca_run",
+   "arguments": {
+    "worksheet": 1,
+    "dose": 319.992,
+    "route": "extravascular",
+    "options": {
+     "auc_method": "lin_up_log_down"
+    }
+   }
+  },
+  {
+   "tool": "analysis_compare",
+   "arguments": {
+    "a": 2,
+    "b": 3
+   }
+  },
+  {
+   "tool": "analysis_compare",
+   "arguments": {
+    "a": 2,
+    "b": 3,
+    "parameters": [
+     "auclast"
+    ]
+   }
+  }
+ ],
+ "data_import_result": {
+  "delimiter": ",",
+  "notes": [],
+  "worksheet": {
+   "columns": [
+    {
+     "max": 1.0,
+     "min": 1.0,
+     "missing": 0,
+     "name": "subject",
+     "role": "subject",
+     "type": "number",
+     "unit": null
+    },
+    {
+     "max": 24.37,
+     "min": 0.0,
+     "missing": 0,
+     "name": "time",
+     "role": "time",
+     "type": "number",
+     "unit": "h"
+    },
+    {
+     "max": 10.5,
+     "min": 0.74,
+     "missing": 0,
+     "name": "conc",
+     "role": "concentration",
+     "type": "number",
+     "unit": "mg/L"
+    }
+   ],
+   "derived_units": {
+    "auc": "h*mg/L",
+    "aumc": "h^2*mg/L",
+    "half_life": "h",
+    "lambda_z": "1/h",
+    "mrt": "h"
+   },
+   "id": 1,
+   "name": "theoph_s1",
+   "revision": 0,
+   "rows": 11,
+   "subjects": [
+    "1"
+   ],
+   "unit_warnings": [
+    {
+     "code": "missing_unit",
+     "message": "the dose has no unit; derived units (AUC, clearance, volume) cannot be named"
+    }
+   ]
+  }
+ },
+ "nca_run_linear": {
+  "id": 2,
+  "kind": "nca",
+  "label": "NCA of theoph_s1, all subjects",
+  "name": null,
+  "result": {
+   "kind": "nca",
+   "subjects": [
+    {
+     "dose": 319.992,
+     "flag_messages": [
+      "the terminal phase spans 1.07 half-lives (< 2); λz and the extrapolated values are uncertain, sample longer if possible",
+      "aucpext.obs is 31.2 % (> 20 %); the AUC to infinity relies mostly on extrapolation",
+      "aucpext.pred is 31.2 % (> 20 %); the AUC to infinity relies mostly on extrapolation"
+     ],
+     "not_calculated_messages": {
+      "aucivall": "not defined for this route of administration",
+      "aucivinf.obs": "not defined for this route of administration",
+      "aucivinf.pred": "not defined for this route of administration",
+      "aucivlast": "not defined for this route of administration",
+      "aucivpbextall": "not defined for this route of administration",
+      "aucivpbextinf.obs": "not defined for this route of administration",
+      "aucivpbextinf.pred": "not defined for this route of administration",
+      "aucivpbextlast": "not defined for this route of administration",
+      "c0": "not defined for this route of administration",
+      "mrt.iv.last": "not defined for this route of administration",
+      "mrt.iv.obs": "not defined for this route of administration",
+      "mrt.iv.pred": "not defined for this route of administration",
+      "vss.iv.last": "not defined for this route of administration",
+      "vss.iv.obs": "not defined for this route of administration",
+      "vss.iv.pred": "not defined for this route of administration"
+     },
+     "outcome": {
+      "ok": {
+       "flags": [
+        {
+         "code": "short_span",
+         "threshold": 2.0,
+         "value": 1.0710008124334718
+        },
+        {
+         "code": "high_extrapolation",
+         "parameter": "aucpext.obs",
+         "threshold": 20.0,
+         "value": 31.24891694045343
+        },
+        {
+         "code": "high_extrapolation",
+         "parameter": "aucpext.pred",
+         "threshold": 20.0,
+         "value": 31.249876331311334
+        }
+       ],
+       "lambda_z_candidates": [
+        {
+         "adj_r_squared": 0.9999994593499586,
+         "intercept": 2.3687850942058546,
+         "lambda_z": 0.048456996965774914,
+         "n_points": 3,
+         "r_squared": 0.9999997296749793,
+         "replaced_points": 0,
+         "selected": true,
+         "time_first": 9.05,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9994163844905055,
+         "intercept": 2.3568342483700397,
+         "lambda_z": 0.04787556312610348,
+         "n_points": 4,
+         "r_squared": 0.9996109229936704,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 7.03,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9994228635797362,
+         "intercept": 2.3624292019215396,
+         "lambda_z": 0.04817355544598906,
+         "n_points": 5,
+         "r_squared": 0.9995671476848021,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 5.1,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9984130831895457,
+         "intercept": 2.3508451960552423,
+         "lambda_z": 0.04751439576832124,
+         "n_points": 6,
+         "r_squared": 0.9987304665516366,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 3.82,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9985615433207209,
+         "intercept": 2.3551870096396064,
+         "lambda_z": 0.04778624529547217,
+         "n_points": 7,
+         "r_squared": 0.9988012861006007,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 2.02,
+         "time_last": 24.37,
+         "valid": true
+        }
+       ],
+       "parameters": [
+        {
+         "name": "c0",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cmax",
+         "value": {
+          "value": 10.5
+         }
+        },
+        {
+         "name": "tmax",
+         "value": {
+          "value": 1.12
+         }
+        },
+        {
+         "name": "tfirst",
+         "value": {
+          "value": 0.0
+         }
+        },
+        {
+         "name": "tlag",
+         "value": {
+          "value": 0.0
+         }
+        },
+        {
+         "name": "tlast",
+         "value": {
+          "value": 24.37
+         }
+        },
+        {
+         "name": "clast.obs",
+         "value": {
+          "value": 3.28
+         }
+        },
+        {
+         "name": "auclast",
+         "value": {
+          "value": 148.92305
+         }
+        },
+        {
+         "name": "aucall",
+         "value": {
+          "value": 148.92305
+         }
+        },
+        {
+         "name": "aumclast",
+         "value": {
+          "value": 1459.0711035000002
+         }
+        },
+        {
+         "name": "aumcall",
+         "value": {
+          "value": 1459.0711035000002
+         }
+        },
+        {
+         "name": "lambda.z",
+         "value": {
+          "value": 0.048456996965774914
+         }
+        },
+        {
+         "name": "r.squared",
+         "value": {
+          "value": 0.9999997296749793
+         }
+        },
+        {
+         "name": "adj.r.squared",
+         "value": {
+          "value": 0.9999994593499586
+         }
+        },
+        {
+         "name": "lambda.z.time.first",
+         "value": {
+          "value": 9.05
+         }
+        },
+        {
+         "name": "lambda.z.time.last",
+         "value": {
+          "value": 24.37
+         }
+        },
+        {
+         "name": "lambda.z.n.points",
+         "value": {
+          "value": 3.0
+         }
+        },
+        {
+         "name": "clast.pred",
+         "value": {
+          "value": 3.280146474143118
+         }
+        },
+        {
+         "name": "half.life",
+         "value": {
+          "value": 14.304377571096984
+         }
+        },
+        {
+         "name": "span.ratio",
+         "value": {
+          "value": 1.0710008124334718
+         }
+        },
+        {
+         "name": "aucinf.obs",
+         "value": {
+          "value": 216.61193303822577
+         }
+        },
+        {
+         "name": "aucinf.pred",
+         "value": {
+          "value": 216.61495580381774
+         }
+        },
+        {
+         "name": "aumcinf.obs",
+         "value": {
+          "value": 4505.534819410651
+         }
+        },
+        {
+         "name": "aumcinf.pred",
+         "value": {
+          "value": 4505.670864582093
+         }
+        },
+        {
+         "name": "aucpext.obs",
+         "value": {
+          "value": 31.24891694045343
+         }
+        },
+        {
+         "name": "aucpext.pred",
+         "value": {
+          "value": 31.249876331311334
+         }
+        },
+        {
+         "name": "aumcpext.obs",
+         "value": {
+          "value": 67.61602868511723
+         }
+        },
+        {
+         "name": "aumcpext.pred",
+         "value": {
+          "value": 67.61700649354175
+         }
+        },
+        {
+         "name": "mrt.last",
+         "value": {
+          "value": 9.797483354658667
+         }
+        },
+        {
+         "name": "mrt.obs",
+         "value": {
+          "value": 20.800030525629232
+         }
+        },
+        {
+         "name": "mrt.pred",
+         "value": {
+          "value": 20.800368321117936
+         }
+        },
+        {
+         "name": "mrt.iv.last",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.iv.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.iv.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cl.obs",
+         "value": {
+          "value": 1.477259334293142
+         }
+        },
+        {
+         "name": "cl.pred",
+         "value": {
+          "value": 1.4772387197946206
+         }
+        },
+        {
+         "name": "vz.obs",
+         "value": {
+          "value": 30.48598606588286
+         }
+        },
+        {
+         "name": "vz.pred",
+         "value": {
+          "value": 30.485560647474536
+         }
+        },
+        {
+         "name": "vss.iv.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "vss.iv.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "vss.obs",
+         "value": {
+          "value": 30.727039247568072
+         }
+        },
+        {
+         "name": "vss.pred",
+         "value": {
+          "value": 30.727109469944843
+         }
+        },
+        {
+         "name": "vss.iv.last",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cmax.dn",
+         "value": {
+          "value": 0.03281332033300832
+         }
+        },
+        {
+         "name": "clast.obs.dn",
+         "value": {
+          "value": 0.01025025625640641
+         }
+        },
+        {
+         "name": "auclast.dn",
+         "value": {
+          "value": 0.4653961661541538
+         }
+        },
+        {
+         "name": "aucall.dn",
+         "value": {
+          "value": 0.4653961661541538
+         }
+        },
+        {
+         "name": "aucinf.obs.dn",
+         "value": {
+          "value": 0.6769292139748049
+         }
+        },
+        {
+         "name": "aucinf.pred.dn",
+         "value": {
+          "value": 0.6769386603534392
+         }
+        },
+        {
+         "name": "aumclast.dn",
+         "value": {
+          "value": 4.55971119121728
+         }
+        },
+        {
+         "name": "aumcall.dn",
+         "value": {
+          "value": 4.55971119121728
+         }
+        },
+        {
+         "name": "aumcinf.obs.dn",
+         "value": {
+          "value": 14.080148314366143
+         }
+        },
+        {
+         "name": "aumcinf.pred.dn",
+         "value": {
+          "value": 14.080573466155693
+         }
+        },
+        {
+         "name": "aucivlast",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivall",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivinf.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivinf.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextlast",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextall",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextinf.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextinf.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        }
+       ],
+       "profile": [
+        {
+         "conc": 0.74,
+         "index": 0,
+         "origin": "observed",
+         "time": 0.0
+        },
+        {
+         "conc": 2.84,
+         "index": 1,
+         "origin": "observed",
+         "time": 0.25
+        },
+        {
+         "conc": 6.57,
+         "index": 2,
+         "origin": "observed",
+         "time": 0.57
+        },
+        {
+         "conc": 10.5,
+         "index": 3,
+         "origin": "observed",
+         "time": 1.12
+        },
+        {
+         "conc": 9.66,
+         "index": 4,
+         "origin": "observed",
+         "time": 2.02
+        },
+        {
+         "conc": 8.58,
+         "index": 5,
+         "origin": "observed",
+         "time": 3.82
+        },
+        {
+         "conc": 8.36,
+         "index": 6,
+         "origin": "observed",
+         "time": 5.1
+        },
+        {
+         "conc": 7.47,
+         "index": 7,
+         "origin": "observed",
+         "time": 7.03
+        },
+        {
+         "conc": 6.89,
+         "index": 8,
+         "origin": "observed",
+         "time": 9.05
+        },
+        {
+         "conc": 5.94,
+         "index": 9,
+         "origin": "observed",
+         "time": 12.12
+        },
+        {
+         "conc": 3.28,
+         "index": 10,
+         "origin": "observed",
+         "time": 24.37
+        }
+       ],
+       "removed": [],
+       "units_missing": true
+      }
+     },
+     "route": "extravascular",
+     "subject": "1"
+    }
+   ]
+  },
+  "spec": {
+   "dose": 319.992,
+   "kind": "nca",
+   "options": {
+    "auc_method": "linear",
+    "blq": {
+     "position": {
+      "first": "keep",
+      "last": "keep",
+      "middle": "drop"
+     }
+    },
+    "lambda_z": {
+     "adj_r_squared_factor": 0.0001,
+     "allow_tmax": false,
+     "min_points": 3
+    },
+    "lambda_z_selection": {
+     "exclude": [],
+     "exclude_replaced": false,
+     "manual": null,
+     "positive_filter_first": false,
+     "tie_rule": "tolerance"
+    },
+    "missing": "drop",
+    "negative": "error",
+    "quality": {
+     "max_extrapolated_percent": 20.0,
+     "min_adj_r_squared": 0.9,
+     "min_points": 3,
+     "min_span_ratio": 2.0
+    },
+    "start": "c0",
+    "tmax_tie": "first",
+    "units": null
+   },
+   "route": "extravascular",
+   "subject": null,
+   "worksheet": 1
+  },
+  "status": {
+   "state": "fresh"
+  }
+ },
+ "nca_run_lin_up_log_down": {
+  "id": 3,
+  "kind": "nca",
+  "label": "NCA of theoph_s1, all subjects",
+  "name": null,
+  "result": {
+   "kind": "nca",
+   "subjects": [
+    {
+     "dose": 319.992,
+     "flag_messages": [
+      "the terminal phase spans 1.07 half-lives (< 2); λz and the extrapolated values are uncertain, sample longer if possible",
+      "aucpext.obs is 31.5 % (> 20 %); the AUC to infinity relies mostly on extrapolation",
+      "aucpext.pred is 31.5 % (> 20 %); the AUC to infinity relies mostly on extrapolation"
+     ],
+     "not_calculated_messages": {
+      "aucivall": "not defined for this route of administration",
+      "aucivinf.obs": "not defined for this route of administration",
+      "aucivinf.pred": "not defined for this route of administration",
+      "aucivlast": "not defined for this route of administration",
+      "aucivpbextall": "not defined for this route of administration",
+      "aucivpbextinf.obs": "not defined for this route of administration",
+      "aucivpbextinf.pred": "not defined for this route of administration",
+      "aucivpbextlast": "not defined for this route of administration",
+      "c0": "not defined for this route of administration",
+      "mrt.iv.last": "not defined for this route of administration",
+      "mrt.iv.obs": "not defined for this route of administration",
+      "mrt.iv.pred": "not defined for this route of administration",
+      "vss.iv.last": "not defined for this route of administration",
+      "vss.iv.obs": "not defined for this route of administration",
+      "vss.iv.pred": "not defined for this route of administration"
+     },
+     "outcome": {
+      "ok": {
+       "flags": [
+        {
+         "code": "short_span",
+         "threshold": 2.0,
+         "value": 1.0710008124334718
+        },
+        {
+         "code": "high_extrapolation",
+         "parameter": "aucpext.obs",
+         "threshold": 20.0,
+         "value": 31.494388282068787
+        },
+        {
+         "code": "high_extrapolation",
+         "parameter": "aucpext.pred",
+         "threshold": 20.0,
+         "value": 31.495351756825286
+        }
+       ],
+       "lambda_z_candidates": [
+        {
+         "adj_r_squared": 0.9999994593499586,
+         "intercept": 2.3687850942058546,
+         "lambda_z": 0.048456996965774914,
+         "n_points": 3,
+         "r_squared": 0.9999997296749793,
+         "replaced_points": 0,
+         "selected": true,
+         "time_first": 9.05,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9994163844905055,
+         "intercept": 2.3568342483700397,
+         "lambda_z": 0.04787556312610348,
+         "n_points": 4,
+         "r_squared": 0.9996109229936704,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 7.03,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9994228635797362,
+         "intercept": 2.3624292019215396,
+         "lambda_z": 0.04817355544598906,
+         "n_points": 5,
+         "r_squared": 0.9995671476848021,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 5.1,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9984130831895457,
+         "intercept": 2.3508451960552423,
+         "lambda_z": 0.04751439576832124,
+         "n_points": 6,
+         "r_squared": 0.9987304665516366,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 3.82,
+         "time_last": 24.37,
+         "valid": true
+        },
+        {
+         "adj_r_squared": 0.9985615433207209,
+         "intercept": 2.3551870096396064,
+         "lambda_z": 0.04778624529547217,
+         "n_points": 7,
+         "r_squared": 0.9988012861006007,
+         "replaced_points": 0,
+         "selected": false,
+         "time_first": 2.02,
+         "time_last": 24.37,
+         "valid": true
+        }
+       ],
+       "parameters": [
+        {
+         "name": "c0",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cmax",
+         "value": {
+          "value": 10.5
+         }
+        },
+        {
+         "name": "tmax",
+         "value": {
+          "value": 1.12
+         }
+        },
+        {
+         "name": "tfirst",
+         "value": {
+          "value": 0.0
+         }
+        },
+        {
+         "name": "tlag",
+         "value": {
+          "value": 0.0
+         }
+        },
+        {
+         "name": "tlast",
+         "value": {
+          "value": 24.37
+         }
+        },
+        {
+         "name": "clast.obs",
+         "value": {
+          "value": 3.28
+         }
+        },
+        {
+         "name": "auclast",
+         "value": {
+          "value": 147.23474853700378
+         }
+        },
+        {
+         "name": "aucall",
+         "value": {
+          "value": 147.23474853700378
+         }
+        },
+        {
+         "name": "aumclast",
+         "value": {
+          "value": 1499.1290851603042
+         }
+        },
+        {
+         "name": "aumcall",
+         "value": {
+          "value": 1499.1290851603042
+         }
+        },
+        {
+         "name": "lambda.z",
+         "value": {
+          "value": 0.048456996965774914
+         }
+        },
+        {
+         "name": "r.squared",
+         "value": {
+          "value": 0.9999997296749793
+         }
+        },
+        {
+         "name": "adj.r.squared",
+         "value": {
+          "value": 0.9999994593499586
+         }
+        },
+        {
+         "name": "lambda.z.time.first",
+         "value": {
+          "value": 9.05
+         }
+        },
+        {
+         "name": "lambda.z.time.last",
+         "value": {
+          "value": 24.37
+         }
+        },
+        {
+         "name": "lambda.z.n.points",
+         "value": {
+          "value": 3.0
+         }
+        },
+        {
+         "name": "clast.pred",
+         "value": {
+          "value": 3.280146474143118
+         }
+        },
+        {
+         "name": "half.life",
+         "value": {
+          "value": 14.304377571096984
+         }
+        },
+        {
+         "name": "span.ratio",
+         "value": {
+          "value": 1.0710008124334718
+         }
+        },
+        {
+         "name": "aucinf.obs",
+         "value": {
+          "value": 214.92363157522956
+         }
+        },
+        {
+         "name": "aucinf.pred",
+         "value": {
+          "value": 214.92665434082153
+         }
+        },
+        {
+         "name": "aumcinf.obs",
+         "value": {
+          "value": 4545.592801070955
+         }
+        },
+        {
+         "name": "aumcinf.pred",
+         "value": {
+          "value": 4545.728846242397
+         }
+        },
+        {
+         "name": "aucpext.obs",
+         "value": {
+          "value": 31.494388282068787
+         }
+        },
+        {
+         "name": "aucpext.pred",
+         "value": {
+          "value": 31.495351756825286
+         }
+        },
+        {
+         "name": "aumcpext.obs",
+         "value": {
+          "value": 67.02016324895831
+         }
+        },
+        {
+         "name": "aumcpext.pred",
+         "value": {
+          "value": 67.02115027385503
+         }
+        },
+        {
+         "name": "mrt.last",
+         "value": {
+          "value": 10.181897276671311
+         }
+        },
+        {
+         "name": "mrt.obs",
+         "value": {
+          "value": 21.149804550365904
+         }
+        },
+        {
+         "name": "mrt.pred",
+         "value": {
+          "value": 21.15014008003853
+         }
+        },
+        {
+         "name": "mrt.iv.last",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.iv.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "mrt.iv.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cl.obs",
+         "value": {
+          "value": 1.4888637310597157
+         }
+        },
+        {
+         "name": "cl.pred",
+         "value": {
+          "value": 1.4888427914230236
+         }
+        },
+        {
+         "name": "vz.obs",
+         "value": {
+          "value": 30.725464314499252
+         }
+        },
+        {
+         "name": "vz.pred",
+         "value": {
+          "value": 30.725032186261778
+         }
+        },
+        {
+         "name": "vss.iv.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "vss.iv.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "vss.obs",
+         "value": {
+          "value": 31.489176914041533
+         }
+        },
+        {
+         "name": "vss.pred",
+         "value": {
+          "value": 31.489233595752534
+         }
+        },
+        {
+         "name": "vss.iv.last",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "cmax.dn",
+         "value": {
+          "value": 0.03281332033300832
+         }
+        },
+        {
+         "name": "clast.obs.dn",
+         "value": {
+          "value": 0.01025025625640641
+         }
+        },
+        {
+         "name": "auclast.dn",
+         "value": {
+          "value": 0.4601200921804413
+         }
+        },
+        {
+         "name": "aucall.dn",
+         "value": {
+          "value": 0.4601200921804413
+         }
+        },
+        {
+         "name": "aucinf.obs.dn",
+         "value": {
+          "value": 0.6716531400010923
+         }
+        },
+        {
+         "name": "aucinf.pred.dn",
+         "value": {
+          "value": 0.6716625863797268
+         }
+        },
+        {
+         "name": "aumclast.dn",
+         "value": {
+          "value": 4.684895513513788
+         }
+        },
+        {
+         "name": "aumcall.dn",
+         "value": {
+          "value": 4.684895513513788
+         }
+        },
+        {
+         "name": "aumcinf.obs.dn",
+         "value": {
+          "value": 14.20533263666265
+         }
+        },
+        {
+         "name": "aumcinf.pred.dn",
+         "value": {
+          "value": 14.2057577884522
+         }
+        },
+        {
+         "name": "aucivlast",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivall",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivinf.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivinf.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextlast",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextall",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextinf.obs",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        },
+        {
+         "name": "aucivpbextinf.pred",
+         "value": {
+          "not_calculated": "not_applicable_to_route"
+         }
+        }
+       ],
+       "profile": [
+        {
+         "conc": 0.74,
+         "index": 0,
+         "origin": "observed",
+         "time": 0.0
+        },
+        {
+         "conc": 2.84,
+         "index": 1,
+         "origin": "observed",
+         "time": 0.25
+        },
+        {
+         "conc": 6.57,
+         "index": 2,
+         "origin": "observed",
+         "time": 0.57
+        },
+        {
+         "conc": 10.5,
+         "index": 3,
+         "origin": "observed",
+         "time": 1.12
+        },
+        {
+         "conc": 9.66,
+         "index": 4,
+         "origin": "observed",
+         "time": 2.02
+        },
+        {
+         "conc": 8.58,
+         "index": 5,
+         "origin": "observed",
+         "time": 3.82
+        },
+        {
+         "conc": 8.36,
+         "index": 6,
+         "origin": "observed",
+         "time": 5.1
+        },
+        {
+         "conc": 7.47,
+         "index": 7,
+         "origin": "observed",
+         "time": 7.03
+        },
+        {
+         "conc": 6.89,
+         "index": 8,
+         "origin": "observed",
+         "time": 9.05
+        },
+        {
+         "conc": 5.94,
+         "index": 9,
+         "origin": "observed",
+         "time": 12.12
+        },
+        {
+         "conc": 3.28,
+         "index": 10,
+         "origin": "observed",
+         "time": 24.37
+        }
+       ],
+       "removed": [],
+       "units_missing": true
+      }
+     },
+     "route": "extravascular",
+     "subject": "1"
+    }
+   ]
+  },
+  "spec": {
+   "dose": 319.992,
+   "kind": "nca",
+   "options": {
+    "auc_method": "lin_up_log_down",
+    "blq": {
+     "position": {
+      "first": "keep",
+      "last": "keep",
+      "middle": "drop"
+     }
+    },
+    "lambda_z": {
+     "adj_r_squared_factor": 0.0001,
+     "allow_tmax": false,
+     "min_points": 3
+    },
+    "lambda_z_selection": {
+     "exclude": [],
+     "exclude_replaced": false,
+     "manual": null,
+     "positive_filter_first": false,
+     "tie_rule": "tolerance"
+    },
+    "missing": "drop",
+    "negative": "error",
+    "quality": {
+     "max_extrapolated_percent": 20.0,
+     "min_adj_r_squared": 0.9,
+     "min_points": 3,
+     "min_span_ratio": 2.0
+    },
+    "start": "c0",
+    "tmax_tie": "first",
+    "units": null
+   },
+   "route": "extravascular",
+   "subject": null,
+   "worksheet": 1
+  },
+  "status": {
+   "state": "fresh"
+  }
+ },
+ "compare_all_result": {
+  "a": {
+   "analysis": 2,
+   "kind": "nca",
+   "label": "NCA of theoph_s1, all subjects",
+   "status": "fresh",
+   "subject": "1"
+  },
+  "b": {
+   "analysis": 3,
+   "kind": "nca",
+   "label": "NCA of theoph_s1, all subjects",
+   "status": "fresh",
+   "subject": "1"
+  },
+  "rows": [
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "c0",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 10.5,
+    "b": 10.5,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "cmax",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1.12,
+    "b": 1.12,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "tmax",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.0,
+    "b": 0.0,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": "a is zero: the relative difference and the ratio are undefined",
+    "parameter": "tfirst",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.0,
+    "b": 0.0,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": "a is zero: the relative difference and the ratio are undefined",
+    "parameter": "tlag",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 24.37,
+    "b": 24.37,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "tlast",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 3.28,
+    "b": 3.28,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "clast.obs",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 148.92305,
+    "b": 147.23474853700378,
+    "difference": -1.6883014629962076,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "auclast",
+    "ratio": 0.9886632629200368,
+    "relative_percent": -1.1336737079963162,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 148.92305,
+    "b": 147.23474853700378,
+    "difference": -1.6883014629962076,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucall",
+    "ratio": 0.9886632629200368,
+    "relative_percent": -1.1336737079963162,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1459.0711035000002,
+    "b": 1499.1290851603042,
+    "difference": 40.057981660303994,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumclast",
+    "ratio": 1.0274544410921533,
+    "relative_percent": 2.745444109215339,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1459.0711035000002,
+    "b": 1499.1290851603042,
+    "difference": 40.057981660303994,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcall",
+    "ratio": 1.0274544410921533,
+    "relative_percent": 2.745444109215339,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.048456996965774914,
+    "b": 0.048456996965774914,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "lambda.z",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.9999997296749793,
+    "b": 0.9999997296749793,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "r.squared",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.9999994593499586,
+    "b": 0.9999994593499586,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "adj.r.squared",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 9.05,
+    "b": 9.05,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "lambda.z.time.first",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 24.37,
+    "b": 24.37,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "lambda.z.time.last",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 3.0,
+    "b": 3.0,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "lambda.z.n.points",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 3.280146474143118,
+    "b": 3.280146474143118,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "clast.pred",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 14.304377571096984,
+    "b": 14.304377571096984,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "half.life",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1.0710008124334718,
+    "b": 1.0710008124334718,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "span.ratio",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 216.61193303822577,
+    "b": 214.92363157522956,
+    "difference": -1.6883014629962076,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucinf.obs",
+    "ratio": 0.9922058704739121,
+    "relative_percent": -0.7794129526087886,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 216.61495580381774,
+    "b": 214.92665434082153,
+    "difference": -1.6883014629962076,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucinf.pred",
+    "ratio": 0.9922059792375313,
+    "relative_percent": -0.7794020762468757,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 4505.534819410651,
+    "b": 4545.592801070955,
+    "difference": 40.057981660303994,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcinf.obs",
+    "ratio": 1.0088908383279442,
+    "relative_percent": 0.889083832794434,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 4505.670864582093,
+    "b": 4545.728846242397,
+    "difference": 40.057981660303994,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcinf.pred",
+    "ratio": 1.0088905698761064,
+    "relative_percent": 0.8890569876106437,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 31.24891694045343,
+    "b": 31.494388282068787,
+    "difference": 0.24547134161535666,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucpext.obs",
+    "ratio": 1.007855355181849,
+    "relative_percent": 0.7855355181848899,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 31.249876331311334,
+    "b": 31.495351756825286,
+    "difference": 0.24547542551395196,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucpext.pred",
+    "ratio": 1.0078552447027764,
+    "relative_percent": 0.7855244702776432,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 67.61602868511723,
+    "b": 67.02016324895831,
+    "difference": -0.5958654361589169,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcpext.obs",
+    "ratio": 0.9911875120774422,
+    "relative_percent": -0.8812487922557793,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 67.61700649354175,
+    "b": 67.02115027385503,
+    "difference": -0.5958562196867234,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcpext.pred",
+    "ratio": 0.9911877758187412,
+    "relative_percent": -0.8812224181258823,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 9.797483354658667,
+    "b": 10.181897276671311,
+    "difference": 0.38441392201264435,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "mrt.last",
+    "ratio": 1.0392359862321028,
+    "relative_percent": 3.9235986232102857,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 20.800030525629232,
+    "b": 21.149804550365904,
+    "difference": 0.3497740247366714,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "mrt.obs",
+    "ratio": 1.0168160342027235,
+    "relative_percent": 1.6816034202723373,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 20.800368321117936,
+    "b": 21.15014008003853,
+    "difference": 0.34977175892059265,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "mrt.pred",
+    "ratio": 1.016815652180807,
+    "relative_percent": 1.6815652180806855,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "mrt.iv.last",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "mrt.iv.obs",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "mrt.iv.pred",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1.477259334293142,
+    "b": 1.4888637310597157,
+    "difference": 0.011604396766573766,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "cl.obs",
+    "ratio": 1.0078553551818485,
+    "relative_percent": 0.7855355181848547,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 1.4772387197946206,
+    "b": 1.4888427914230236,
+    "difference": 0.011604071628402934,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "cl.pred",
+    "ratio": 1.0078552447027764,
+    "relative_percent": 0.7855244702776434,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 30.48598606588286,
+    "b": 30.725464314499252,
+    "difference": 0.23947824861639333,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "vz.obs",
+    "ratio": 1.0078553551818485,
+    "relative_percent": 0.7855355181848476,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 30.485560647474536,
+    "b": 30.725032186261778,
+    "difference": 0.23947153878724237,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "vz.pred",
+    "ratio": 1.0078552447027764,
+    "relative_percent": 0.7855244702776378,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "vss.iv.obs",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "vss.iv.pred",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 30.727039247568072,
+    "b": 31.489176914041533,
+    "difference": 0.7621376664734605,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "vss.obs",
+    "ratio": 1.0248034853059844,
+    "relative_percent": 2.4803485305984396,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 30.727109469944843,
+    "b": 31.489233595752534,
+    "difference": 0.7621241258076914,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "vss.pred",
+    "ratio": 1.0248029879463003,
+    "relative_percent": 2.4802987946300292,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "vss.iv.last",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.03281332033300832,
+    "b": 0.03281332033300832,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "cmax.dn",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.01025025625640641,
+    "b": 0.01025025625640641,
+    "difference": 0.0,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "clast.obs.dn",
+    "ratio": 1.0,
+    "relative_percent": 0.0,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.4653961661541538,
+    "b": 0.4601200921804413,
+    "difference": -0.005276073973712492,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "auclast.dn",
+    "ratio": 0.9886632629200368,
+    "relative_percent": -1.1336737079963162,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.4653961661541538,
+    "b": 0.4601200921804413,
+    "difference": -0.005276073973712492,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucall.dn",
+    "ratio": 0.9886632629200368,
+    "relative_percent": -1.1336737079963162,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.6769292139748049,
+    "b": 0.6716531400010923,
+    "difference": -0.005276073973712547,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucinf.obs.dn",
+    "ratio": 0.9922058704739121,
+    "relative_percent": -0.7794129526087968,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 0.6769386603534392,
+    "b": 0.6716625863797268,
+    "difference": -0.005276073973712436,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aucinf.pred.dn",
+    "ratio": 0.9922059792375313,
+    "relative_percent": -0.7794020762468676,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 4.55971119121728,
+    "b": 4.684895513513788,
+    "difference": 0.12518432229650767,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumclast.dn",
+    "ratio": 1.0274544410921536,
+    "relative_percent": 2.745444109215345,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 4.55971119121728,
+    "b": 4.684895513513788,
+    "difference": 0.12518432229650767,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcall.dn",
+    "ratio": 1.0274544410921536,
+    "relative_percent": 2.745444109215345,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 14.080148314366143,
+    "b": 14.20533263666265,
+    "difference": 0.12518432229650678,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcinf.obs.dn",
+    "ratio": 1.0088908383279442,
+    "relative_percent": 0.8890838327944297,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": 14.080573466155693,
+    "b": 14.2057577884522,
+    "difference": 0.12518432229650678,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "aumcinf.pred.dn",
+    "ratio": 1.0088905698761064,
+    "relative_percent": 0.8890569876106393,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivlast",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivall",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivinf.obs",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivinf.pred",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivpbextlast",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivpbextall",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivpbextinf.obs",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   },
+   {
+    "a": null,
+    "b": null,
+    "difference": null,
+    "difference_unit": null,
+    "not_comparable": "analysis a: not calculated, not defined for this route of administration; analysis b: not calculated, not defined for this route of administration",
+    "parameter": "aucivpbextinf.pred",
+    "ratio": null,
+    "relative_percent": null,
+    "unit_a": null,
+    "unit_b": null
+   }
+  ]
+ },
+ "compare_auclast_result": {
+  "a": {
+   "analysis": 2,
+   "kind": "nca",
+   "label": "NCA of theoph_s1, all subjects",
+   "status": "fresh",
+   "subject": "1"
+  },
+  "b": {
+   "analysis": 3,
+   "kind": "nca",
+   "label": "NCA of theoph_s1, all subjects",
+   "status": "fresh",
+   "subject": "1"
+  },
+  "rows": [
+   {
+    "a": 148.92305,
+    "b": 147.23474853700378,
+    "difference": -1.6883014629962076,
+    "difference_unit": null,
+    "not_comparable": null,
+    "parameter": "auclast",
+    "ratio": 0.9886632629200368,
+    "relative_percent": -1.1336737079963162,
+    "unit_a": null,
+    "unit_b": null
+   }
+  ]
+ }
+}

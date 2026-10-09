@@ -60,9 +60,38 @@ def engine_commit():
         return head + ("+uncommitted changes in crates/apps" if dirty else "")
     except Exception: return "unknown"
 
+COMPARE_CASE = ("theoph_s1_compare_linear_vs_lin_up_log_down",
+                "theoph.csv, subject 1 (dose argument): the same worksheet analysed with the linear and the lin-up/log-down AUC, then analysis_compare(a, b)")
+
+def make_compare(commit):
+    """tests/golden/compare/<case>.json: data_import, two nca_run, analysis_compare (all on one server session)."""
+    name, source = COMPARE_CASE
+    _, imp, nca = CASES["theoph_s1_oral_dose_arg"]
+    c = apothicaire.MCPClient([apothicaire.MCP_BIN])
+    try:
+        ok, text = c.call("data_import", imp); assert ok, text
+        ws = json.loads(text); wid = ws["worksheet"]["id"]
+        calls, results = [{"tool": "data_import", "arguments": imp}], {"data_import_result": ws}
+        ids = []
+        for method in ("linear", "lin_up_log_down"):
+            args = {"worksheet": wid, **nca, "options": {"auc_method": method}}
+            ok, text = c.call("nca_run", args); assert ok, text
+            r = json.loads(text); ids.append(r["id"])
+            calls.append({"tool": "nca_run", "arguments": args}); results[f"nca_run_{method}"] = r
+        for args, key in (({"a": ids[0], "b": ids[1]}, "compare_all"), ({"a": ids[0], "b": ids[1], "parameters": ["auclast"]}, "compare_auclast")):
+            ok, text = c.call("analysis_compare", args); assert ok, text
+            calls.append({"tool": "analysis_compare", "arguments": args}); results[key + "_result"] = json.loads(text)
+        golden = {"case": name, "source": source, "server": c.server_info, "engine_commit": commit, "calls": calls, **results}
+    finally: c.close()
+    os.makedirs(os.path.join(OUT, "compare"), exist_ok=True)
+    with open(os.path.join(OUT, "compare", name + ".json"), "w", encoding="utf-8") as f:
+        json.dump(golden, f, ensure_ascii=False, indent=1)
+    print("wrote compare/" + name)
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     commit = engine_commit()
+    make_compare(commit)
     for name, (source, imp, nca) in CASES.items():
         c = apothicaire.MCPClient([apothicaire.MCP_BIN])
         try:
