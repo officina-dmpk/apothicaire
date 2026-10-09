@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Runs the Apothicaire benchmark: every exercise through the agent (gate in the loop), then the report.
 
-  python bench/run_bench.py [--date YYYY-MM-DD] [--first N] [--ids ex01_iv_bolus,...] [--resume] [--report-only]
+  python bench/run_bench.py [--date YYYY-MM-DD] [--first N] [--ids ex01_iv_bolus,...] [--resume] [--report-only] [--rescore] [--tool-arg-audit]
 
 For each exercise of bench/exercises/ (sorted by id): a fresh memory folder bench/runs/<date>/<id>-data/
 (git-ignored), the 8-turn script of bench/scripts.py, one record per turn; the exercise's records are written
@@ -60,6 +60,15 @@ def tool_records(calls, meta, csv_text, known_tools):
         out.append(r)
     return out
 
+# ---------------------------------------------------------------- oracle
+def attach_oracle(rec, meta, script):
+    """Adds the oracle verdict to every turn (`oracle`, see score.oracle_exercise) and the tool-call argument audit to the
+    record (`tool_arg_audit`). Pure function of the stored answers and tool calls; the gate counts are not touched."""
+    for t, o in zip(rec["turns"], score.oracle_exercise(meta, script, rec["turns"], BADGE_MARK)):
+        if o is None: t.pop("oracle", None)
+        else: t["oracle"] = o
+    rec["tool_arg_audit"] = score.tool_arg_audit(meta, rec["turns"])
+
 # ---------------------------------------------------------------- one exercise
 def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
     """Runs the 8 turns of one exercise; returns the record (also written to <run_dir>/<id>.json)."""
@@ -116,6 +125,7 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
     record = {"id": meta["id"], "family": meta["family"], "model": meta["model"], "units": meta["units"],
               "dose": meta["dose"], "blq": bool(meta.get("blq")), "wall_s": round(time.time() - t_ex, 1),
               "taxonomy_chance_baseline": baseline, "turns": turns}
+    attach_oracle(record, meta, script)
     with open(os.path.join(run_dir, meta["id"] + ".json"), "w", encoding="utf-8") as f:
         json.dump(record, f, ensure_ascii=False, indent=1)
     return record
@@ -128,6 +138,10 @@ def cluster_interval(records, num, den, n_boot=2000, seed=0):
     """95 % percentile interval of sum(num)/sum(den) with the exercises resampled (a cluster bootstrap: the numbers
     of one conversation are not independent)."""
     per = [(sum(t.get(num, 0) or 0 for t in r["turns"]), sum(t.get(den, 0) or 0 for t in r["turns"])) for r in records]
+    return _cluster_ci(per, n_boot, seed)
+
+def _cluster_ci(per, n_boot=2000, seed=0):
+    """Percentile interval of sum(a)/sum(b) over resampled (a, b) pairs, one pair per exercise."""
     if len(per) < 2: return None
     rng, vals = random.Random(seed), []
     for _ in range(n_boot):
@@ -187,6 +201,8 @@ def build_report(records, meta=None):
     out["time"] = {"mean_wall_s_per_turn": sum(walls) / len(walls) if walls else None,
                    "mean_prompt_tokens_first_call": (sum(t["prompt_tokens"] for t in ok_turns) / len(ok_turns)) if ok_turns else None,
                    "total_wall_s": sum(r["wall_s"] for r in records)}
+    out["oracle"] = oracle_section(records)
+    out["tool_arg_audit"] = audit_section(records)
     out["per_exercise"] = []
     for r in records:
         ts = [t for t in r["turns"] if "error" not in t]
@@ -200,6 +216,102 @@ def build_report(records, meta=None):
             "calls_total": sum(len(t["tool_calls"]) for t in ts),
             "mean_wall_s": (sum(t["wall_s"] for t in ts) / len(ts)) if ts else None})
     return out
+
+# ---------------------------------------------------------------- oracle section of the report
+def oracle_section(records):
+    """Oracle correctness (bench/score.py: oracle_turn), separate from the gate counts and from the scorer's `correct`.
+    Denominators: the turns whose expectation contains numbers (not_available has none) and the expected numbers (items)."""
+    rows = [(r["id"], t) for r in records for t in r["turns"] if "error" not in t and t.get("oracle")]
+    zero = lambda: {c: 0 for c in score.ORACLE_CLASSES}
+    byk, classes, mism = {}, zero(), []
+    dis = {"items_oracle_wrong_scorer_found": [], "items_oracle_ok_scorer_missing": [],
+           "turns_oracle_wrong_scorer_correct": [], "turns_oracle_ok_scorer_incorrect": []}
+    for ex, t in rows:
+        o, b = t["oracle"], byk.setdefault(t["kind"], {"turns": 0, "correct": 0, "items": 0, "ok": 0, "classes": zero()})
+        b["turns"] += 1; b["correct"] += o["correct"]; b["items"] += o["n_items"]; b["ok"] += o["n_ok"]
+        for it in o["items"]:
+            if it["ok"]:
+                if it["label"] in t["score"]["missing"]: dis["items_oracle_ok_scorer_missing"].append(f"{ex} t{t['turn']} {it['label']}")
+                continue
+            classes[it["class"]] += 1; b["classes"][it["class"]] += 1
+            mism.append({"exercise": ex, "turn": t["turn"], "kind": t["kind"], "label": it["label"], "class": it["class"],
+                         "detail": it["detail"], "claimed": it["claimed"]})
+            if it["label"] in t["score"]["found"]: dis["items_oracle_wrong_scorer_found"].append(f"{ex} t{t['turn']} {it['label']} ({it['class']})")
+        if o["correct"] and not t["score"]["correct"]: dis["turns_oracle_ok_scorer_incorrect"].append(f"{ex} t{t['turn']} {t['kind']}")
+        if not o["correct"] and t["score"]["correct"]: dis["turns_oracle_wrong_scorer_correct"].append(f"{ex} t{t['turn']} {t['kind']}")
+    for b in byk.values(): b["correct_rate"] = _rate(b["correct"], b["turns"]); b["ok_rate"] = _rate(b["ok"], b["items"])
+    n_t, n_ok_t = len(rows), sum(t["oracle"]["correct"] for _, t in rows)
+    n_i, n_ok_i = sum(t["oracle"]["n_items"] for _, t in rows), sum(t["oracle"]["n_ok"] for _, t in rows)
+    per_t, per_i = {}, {}
+    for ex, t in rows:
+        a = per_t.setdefault(ex, [0, 0]); a[0] += not t["oracle"]["correct"]; a[1] += 1
+        a = per_i.setdefault(ex, [0, 0]); a[0] += t["oracle"]["n_items"] - t["oracle"]["n_ok"]; a[1] += t["oracle"]["n_items"]
+    ci = lambda per: _cluster_ci(list(per.values()))
+    wrong_t, wrong_i = n_t - n_ok_t, n_i - n_ok_i
+    inv = lambda c: None if c is None else [1 - c[1], 1 - c[0]]
+    return {"turns": n_t, "correct_turns": n_ok_t, "correct_turns_rate": _rate(n_ok_t, n_t),
+            "correct_turns_ci95_cluster_bootstrap": inv(ci(per_t)) if wrong_t else None,
+            "numbers": n_i, "numbers_ok": n_ok_i, "numbers_ok_rate": _rate(n_ok_i, n_i),
+            "numbers_ok_ci95_cluster_bootstrap": inv(ci(per_i)) if wrong_i else None,
+            "classes": classes, "by_question_type": {k: byk[k] for k in scripts.KINDS if k in byk},
+            "not_covered": [k for k in scripts.KINDS if k not in byk], "mismatches": mism, "disagreements_with_scorer": dis}
+
+def audit_section(records):
+    """Aggregate of the per-exercise `tool_arg_audit` (score.tool_arg_audit): tool calls whose arguments differ from the intent."""
+    per, by_field = {}, {}
+    for r in records:
+        a = r.get("tool_arg_audit")
+        if not a: continue
+        per[r["id"]] = a
+        for d in a["deviations"]:
+            k = f"{d['tool']}: {d['field']} = {json.dumps(d['got'], ensure_ascii=False)} (intended {json.dumps(d['intended'], ensure_ascii=False)})"
+            by_field[k] = by_field.get(k, 0) + 1
+    return {"calls": sum(a["calls"] for a in per.values()), "deviating_calls": sum(a["deviating_calls"] for a in per.values()),
+            "exercises_with_deviation": sorted(i for i, a in per.items() if a["deviations"]), "by_deviation": by_field, "per_exercise": per}
+
+def render_oracle_md(o):
+    c, L = o, []
+    if not o["turns"]: return ["## Oracle check: no stored oracle verdicts (run `run_bench.py --rescore`)", ""]
+    fmt = lambda ci: "" if not ci else f" (95 % CI, exercises resampled: {100 * ci[0]:.1f}-{100 * ci[1]:.1f} %)"
+    L += [f"## Oracle check: {c['correct_turns']} / {c['turns']} turns = {_pct(c['correct_turns_rate'])}{fmt(c['correct_turns_ci95_cluster_bootstrap'])}; "
+          f"{c['numbers_ok']} / {c['numbers']} expected numbers = {_pct(c['numbers_ok_rate'])}{fmt(c['numbers_ok_ci95_cluster_bootstrap'])}", "",
+          "Second judgement, independent of the gate (`bench/score.py`, `oracle_turn`): the number written after the label of the parameter "
+          "the question asks for must be Caladrius's value of THAT parameter, of the right AUC method, with the unit Caladrius reports. "
+          "The gate counts above are untouched; the denominators here are the turns that expect numbers and the numbers they expect "
+          f"(not covered: {', '.join(c['not_covered']) or 'none'}, no value to check).", "",
+          "| question type | turns | oracle-correct | expected numbers ok | " + " | ".join(score.ORACLE_CLASSES) + " |",
+          "|---|---|---|---|" + "---|" * len(score.ORACLE_CLASSES)]
+    for k, v in c["by_question_type"].items():
+        L.append(f"| {k} | {v['turns']} | {v['correct']} ({_pct(v['correct_rate'])}) | {v['ok']} / {v['items']} | " +
+                 " | ".join(str(v["classes"][x]) for x in score.ORACLE_CLASSES) + " |")
+    L.append("| **total** | %d | %d (%s) | %d / %d | %s |" % (c["turns"], c["correct_turns"], _pct(c["correct_turns_rate"]), c["numbers_ok"], c["numbers"],
+                                                          " | ".join(str(c["classes"][x]) for x in score.ORACLE_CLASSES)))
+    d = c["disagreements_with_scorer"]
+    L += ["", f"Against the scorer's expected-number check (the global search of the numbers, above): items the scorer found but the oracle rejects "
+          f"{len(d['items_oracle_wrong_scorer_found'])}" + (f" ({'; '.join(d['items_oracle_wrong_scorer_found'])})" if d["items_oracle_wrong_scorer_found"] else "") +
+          f"; items the scorer missed but the oracle accepts {len(d['items_oracle_ok_scorer_missing'])}" +
+          (f" ({'; '.join(d['items_oracle_ok_scorer_missing'])})" if d["items_oracle_ok_scorer_missing"] else "") +
+          f"; turns oracle-wrong but scorer-correct {len(d['turns_oracle_wrong_scorer_correct'])}" +
+          (f" ({'; '.join(d['turns_oracle_wrong_scorer_correct'])})" if d["turns_oracle_wrong_scorer_correct"] else "") +
+          f"; turns oracle-correct but scorer-incorrect {len(d['turns_oracle_ok_scorer_incorrect'])}" +
+          (f" ({'; '.join(d['turns_oracle_ok_scorer_incorrect'])})" if d["turns_oracle_ok_scorer_incorrect"] else "") + ".", ""]
+    if c["mismatches"]:
+        L += ["Every expected number the oracle rejects:", "", "| exercise | turn | expected | class | detail | numbers written after the label |", "|---|---|---|---|---|---|"]
+        for m in c["mismatches"]:
+            L.append(f"| {m['exercise']} | {m['turn']} {m['kind']} | {m['label']} | {m['class']} | {m['detail'] or ''} | {', '.join(m['claimed']) or '(none)'} |")
+        L.append("")
+    return L
+
+def render_audit_md(a):
+    if not a["calls"]: return []
+    L = [f"## Tool-call argument audit: {a['deviating_calls']} of {a['calls']} `nca_run` / `data_import` calls differ from the exercise's intent "
+         f"(dose, route, AUC method alone as options; the CSV and the column units)", ""]
+    if a["by_deviation"]:
+        L += ["| deviation | calls |", "|---|---|"] + [f"| {k} | {n} |" for k, n in sorted(a["by_deviation"].items(), key=lambda kv: (-kv[1], kv[0]))]
+        L += ["", "In exercises: " + ", ".join(a["exercises_with_deviation"]) + ". A deviation is listed here whatever its effect; the oracle check calls it `wrong_option` only when "
+              "the answer's value is wrong (`run_bench.py --tool-arg-audit` prints every call).", ""]
+    else: L += ["No deviation.", ""]
+    return L
 
 def _pct(x): return "n/a" if x is None else f"{100 * x:.1f} %"
 def _ci(c, u=None, n=None):
@@ -234,10 +346,12 @@ def render_md(rep):
     for k, v in rep["by_question_type"].items():
         L.append(f"| {k} | {v['turns']} | {v['correct']} ({_pct(v['correct_rate'])}) | {v['found']} / {v['must']} | "
                  f"{v['unverified_before']} / {v['total_before']} | {v['unverified_after']} / {v['total_after']} |")
-    L += ["", f"## Tool calls: {t['valid']} valid, {t['invalid']} invalid, {t['failed']} failed of {t['total']} (validity {_pct(t['validity_rate'])})", "",
+    L += [""] + render_oracle_md(rep.get("oracle") or oracle_section([]))
+    L += [f"## Tool calls: {t['valid']} valid, {t['invalid']} invalid, {t['failed']} failed of {t['total']} (validity {_pct(t['validity_rate'])})", "",
           f"`nca_run` calls: {t['nca_run_calls']}, with the right dose {t['nca_run_right_dose']}, with the right route {t['nca_run_right_route']}; "
           f"memory calls (zoom / read_message): {t['memory_calls']}; by tool: {t['by_tool']}. "
           "invalid = unknown tool, invalid_parameters, unknown_worksheet / unknown_analysis or any rejection; failed = accepted but the analysis errs for every subject.", "",
+          *render_audit_md(rep.get("tool_arg_audit") or audit_section([])),
           f"## Time: mean {tm['mean_wall_s_per_turn']:.1f} s per turn, mean {tm['mean_prompt_tokens_first_call']:.0f} prompt tokens (first call), total {tm['total_wall_s'] / 60:.0f} min" if tm["mean_wall_s_per_turn"] is not None else "## Time: n/a",
           "", "## Per exercise", "",
           "| exercise | dose | units | unverified / total before | unverified / total shown | correct turns | badge turns | calls valid / total | mean s per turn |",
@@ -249,8 +363,9 @@ def render_md(rep):
     return "\n".join(L) + "\n"
 
 def rescore(run_dir, ids):
-    """Recomputes the `score` of every stored turn from the stored answer and the current expectation rules (no model,
-    no engine). Used after a fix of a scoring rule; the gate counts and the taxonomy are not touched."""
+    """Recomputes the `score` and the `oracle` verdict of every stored turn from the stored answer, the stored tool calls and
+    the current expectation rules (no model, no engine). Used after a fix of a scoring rule; the gate counts and the
+    taxonomy are not touched."""
     changed = []
     for i in ids:
         p = os.path.join(run_dir, i + ".json")
@@ -264,8 +379,24 @@ def rescore(run_dir, ids):
             new = score.score_turn(ans, st["expect"], t["numbers_unverified_after"])
             if new != t["score"]: changed.append((i, t["turn"], t["kind"], t["score"]["correct"], new["correct"]))
             t["score"] = new
+        before = [(t.get("oracle") or {}).get("correct") for t in rec["turns"]]
+        attach_oracle(rec, meta, script)
+        for t, b in zip(rec["turns"], before):
+            if (t.get("oracle") or {}).get("correct") != b: changed.append((i, t["turn"], t["kind"], "oracle", b, (t.get("oracle") or {}).get("correct")))
         with open(p, "w", encoding="utf-8") as f: json.dump(rec, f, ensure_ascii=False, indent=1)
     return changed
+
+def print_tool_arg_audit(records, out=print):
+    """Per exercise, every `nca_run` / `data_import` call whose arguments differ from the script's intent, with counts."""
+    n_calls = n_dev = 0
+    for r in records:
+        a = r.get("tool_arg_audit") or {"calls": 0, "deviating_calls": 0, "deviations": []}
+        n_calls += a["calls"]; n_dev += a["deviating_calls"]
+        out(f"{r['id']}: {a['deviating_calls']} of {a['calls']} calls deviate")
+        for d in a["deviations"]:
+            out(f"    turn {d['turn']} {d['tool']} ({d['status']}): {d['field']} = {json.dumps(d['got'], ensure_ascii=False)}, "
+                f"intended {json.dumps(d['intended'], ensure_ascii=False)}")
+    out(f"total: {n_dev} of {n_calls} calls deviate, in {sum(1 for r in records if (r.get('tool_arg_audit') or {}).get('deviations'))} of {len(records)} exercises")
 
 def load_records(run_dir, ids):
     out = []
@@ -289,6 +420,7 @@ def main():
     ap.add_argument("--ids", default="", help="comma-separated exercise ids")
     ap.add_argument("--resume", action="store_true", help="skip the exercises whose <id>.json exists")
     ap.add_argument("--report-only", action="store_true")
+    ap.add_argument("--tool-arg-audit", action="store_true", help="list, per exercise, every tool call whose arguments differ from the script's intent (needs the stored records; run --rescore first on an older run)")
     ap.add_argument("--rescore", action="store_true", help="recompute the scores of the stored turns with the current rules, then the report")
     a = ap.parse_args(); optchat._utf8_stdout()
     run_dir = os.path.join(RUNS, a.date); os.makedirs(run_dir, exist_ok=True)
@@ -298,6 +430,8 @@ def main():
     ids = [os.path.basename(d) for d in dirs]
     if a.rescore:
         for ch in rescore(run_dir, ids): print("rescored", ch)
+    if a.tool_arg_audit:
+        print_tool_arg_audit(load_records(run_dir, ids)); return
     if not a.report_only and not a.rescore:
         for d in dirs:
             i = os.path.basename(d)

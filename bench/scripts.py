@@ -15,7 +15,8 @@ One script of 8 turns per exercise type (oral, iv_bolus, iv_infusion), built fro
 
 Expectation of a turn (JSON-serialisable): {"must": [{"label", "key", "value"}], "must_not": [{"label", "value"}],
 "words": [{"label", "pattern"}], "no_new_numbers": bool}; see score.score_turn for how it is applied. `must` values
-are Caladrius truth (the oracle), matched with the gate's rounding rule; `must_not` are the converted / computed
+are Caladrius truth (the oracle), matched with the gate's rounding rule, and carry the analysis (`method`) and the unit
+they come from for the oracle check of bench/score.py (`oracle_turn`); `must_not` are the converted / computed
 values a wrong answer would contain (a unit factor of the CL and V, the difference, the percentage and the ratio
 of the two AUC), without those that coincide with a legitimate number of the exercise.
 """
@@ -82,8 +83,14 @@ def forbidden(label, base, factors, pool):
 UNIT_FACTORS = [(1e3, "x 10^3"), (1e6, "x 10^6"), (1e-3, "x 10^-3"), (1e-6, "x 10^-6"), (60.0, "x 60"), (1 / 60, "/ 60"),
                 (10.0, "x 10"), (100.0, "x 100"), (0.1, "/ 10"), (0.01, "/ 100"), (1e4, "x 10^4"), (1e-4, "x 10^-4")]
 
+def truth_unit(meta, key, method="linear"):
+    return meta["ground_truth"]["nca"][method]["parameters"][key]["unit"]
+
 def must(meta, key, label, method="linear"):
-    return {"label": label, "key": key, "value": truth_value(meta, key, method)}
+    """An expected number: the truth value (the oracle) and, for the oracle check of bench/score.py, the analysis it comes
+    from (`method`) and the unit Caladrius reports for it."""
+    return {"label": label, "key": key, "value": truth_value(meta, key, method), "method": method,
+            "unit": truth_unit(meta, key, method)}
 
 def build_script(meta, csv_text):
     """The 8 turns for an exercise: [{"id", "kind", "question", "expect"}]."""
@@ -131,7 +138,8 @@ def build_script(meta, csv_text):
     route_words = {"oral": r"orale?|oral|extravasculaire|per os", "iv_bolus": r"bolus|intraveineu|IV|i\.v\.",
                    "iv_infusion": r"perfusion|infusion"}[kind]
     unit_words = r"µg|μg|\bug\b|microgramme" if meta["dose"]["unit"] == "ug" else r"\bmg\b|milligramme"
-    turns.append(("recall", q6, {"must": [{"label": "dose", "key": "dose", "value": float(meta["dose"]["amount"])}],
+    turns.append(("recall", q6, {"must": [{"label": "dose", "key": "dose", "value": float(meta["dose"]["amount"]),
+                                           "unit": meta["dose"]["unit"]}],
                                  "words": [{"label": "dose unit", "pattern": unit_words},
                                            {"label": "route", "pattern": route_words},
                                            {"label": "method", "pattern": r"lin[ée]aire|linear|trap[èe]ze"}]}))
@@ -146,8 +154,8 @@ def build_script(meta, csv_text):
            forbidden("AUC difference in % of the log-down AUC", diff / a_ll * 100, comp_factors, pool + [a_lin, a_ll]) +
            forbidden("AUC ratio", ratio, comp_factors, pool + [a_lin, a_ll]) +
            forbidden("AUC ratio in %", ratio * 100, comp_factors, pool + [a_lin, a_ll]))
-    turns.append(("compare", q7, {"must": [{"label": "AUC(0-tlast) linear", "key": "auclast", "value": a_lin},
-                                           {"label": "AUC(0-tlast) lin-up/log-down", "key": "auclast", "value": a_ll}],
+    turns.append(("compare", q7, {"must": [dict(must(meta, "auclast", "AUC(0-tlast) linear"), by_method=True),
+                                           dict(must(meta, "auclast", "AUC(0-tlast) lin-up/log-down", "lin_up_log_down"), by_method=True)],
                                   "must_not": mn7, "no_new_numbers": True}))
     # 8
     if oral:
