@@ -1,0 +1,268 @@
+{
+ "rows": {
+  "train": 1980,
+  "heldout": 720,
+  "bench": 900
+ },
+ "leakage": {
+  "heldout_rows": 720,
+  "distinct_requests_train": 83,
+  "distinct_requests_heldout": 83,
+  "heldout_request_seen_in_train": 1.0,
+  "heldout_dose_sentence_seen_in_train": 0.4625,
+  "heldout_(kind,request)_seen_in_train": 1.0,
+  "bench_request_seen_in_train": 1.0,
+  "heldout_requests_absent_from_train": []
+ },
+ "heldout_baselines": {
+  "analysis": {
+   "majority": 0.5833,
+   "rule": 0.9528
+  },
+  "auc_method": {
+   "majority": 0.8333,
+   "rule": 0.9722
+  },
+  "compare_pair": {
+   "majority": 0.9167,
+   "rule": 0.9722
+  },
+  "dose_has_unit": {
+   "majority": 0.8181,
+   "rule": 1.0
+  },
+  "is_not_available": {
+   "majority": 0.9167,
+   "rule": 0.9972
+  },
+  "route": {
+   "majority": 0.4361,
+   "rule": 1.0
+  },
+  "asked_*_mean_majority": 0.8867
+ },
+ "heldout_overall": {
+  "majority_20q": 0.8459,
+  "rule_plus_majority_asked": 0.9154
+ },
+ "my_gold_vs_project_conventions": {
+  "requests": 74,
+  "auc_method_disagreements": 16,
+  "auc_method_disagreement_ids": [
+   {
+    "id": "ood-002",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "abbreviation",
+     "typo",
+     "follow-up"
+    ]
+   },
+   {
+    "id": "ood-003",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "abbreviation",
+     "follow-up"
+    ]
+   },
+   {
+    "id": "ood-009",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "abbreviation",
+     "follow-up"
+    ]
+   },
+   {
+    "id": "ood-014",
+    "mine": "linear",
+    "project_convention": "lin_up_log_down",
+    "analysis": "compare",
+    "tags": [
+     "compare"
+    ]
+   },
+   {
+    "id": "ood-017",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "parameter-not-for-route",
+     "iv-explicit"
+    ]
+   },
+   {
+    "id": "ood-018",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "parameter-not-for-route"
+    ]
+   },
+   {
+    "id": "ood-025",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "follow-up",
+     "abbreviation"
+    ]
+   },
+   {
+    "id": "ood-029",
+    "mine": "lin_up_log_down",
+    "project_convention": "linear",
+    "analysis": "nca",
+    "tags": [
+     "two-requests-in-one-sentence",
+     "rerun"
+    ]
+   },
+   {
+    "id": "ood-034",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "parameter-not-in-schema",
+     "abbreviation"
+    ]
+   },
+   {
+    "id": "ood-038",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "parameter-not-for-route",
+     "infusion"
+    ]
+   },
+   {
+    "id": "ood-048",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "parameter-not-in-schema"
+    ]
+   },
+   {
+    "id": "ood-050",
+    "mine": "lin_up_log_down",
+    "project_convention": "linear",
+    "analysis": "nca",
+    "tags": [
+     "method-explicit",
+     "blq"
+    ]
+   },
+   {
+    "id": "ood-056",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "recall"
+    ]
+   },
+   {
+    "id": "ood-057",
+    "mine": "linear",
+    "project_convention": "lin_up_log_down",
+    "analysis": "compare",
+    "tags": [
+     "compare",
+     "non-auc-parameter"
+    ]
+   },
+   {
+    "id": "ood-060",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "invented",
+     "parameter-not-for-route"
+    ]
+   },
+   {
+    "id": "ood-061",
+    "mine": "linear",
+    "project_convention": "not_applicable",
+    "analysis": "none_needed",
+    "tags": [
+     "invented",
+     "parameter-not-for-route"
+    ]
+   }
+  ],
+  "is_not_available_true_but_outside_the_project_label_space": [
+   {
+    "id": "ood-019",
+    "tags": [
+     "out-of-scope",
+     "bioequivalence"
+    ]
+   },
+   {
+    "id": "ood-020",
+    "tags": [
+     "out-of-scope",
+     "population"
+    ]
+   },
+   {
+    "id": "ood-034",
+    "tags": [
+     "parameter-not-in-schema",
+     "abbreviation"
+    ]
+   },
+   {
+    "id": "ood-048",
+    "tags": [
+     "parameter-not-in-schema"
+    ]
+   },
+   {
+    "id": "ood-064",
+    "tags": [
+     "invented",
+     "out-of-scope",
+     "steady-state",
+     "multiple-dose"
+    ]
+   },
+   {
+    "id": "ood-065",
+    "tags": [
+     "invented",
+     "out-of-scope",
+     "urine"
+    ]
+   }
+  ],
+  "route_unknown_lines": [
+   "ood-053",
+   "ood-065"
+  ],
+  "dose_has_unit_false_lines": [
+   "ood-021",
+   "ood-022",
+   "ood-024",
+   "ood-065",
+   "ood-069"
+  ]
+ }
+}

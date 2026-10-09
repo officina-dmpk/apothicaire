@@ -1,0 +1,111 @@
+{
+ "id": "ex13_oral_1",
+ "family": "oral_1",
+ "model": "pk1.oral_1",
+ "units": {
+  "time": "h",
+  "conc": "ng/mL"
+ },
+ "dose": {
+  "amount": 50,
+  "unit": "mg"
+ },
+ "blq": true,
+ "wall_s": 0.093,
+ "decider": "qwen35-0.8b",
+ "taxonomy_chance_baseline": {
+  "3": {
+   "unit_conversion": 1,
+   "arithmetic": 0,
+   "unlabelled_misread": 6,
+   "recall_error": 0,
+   "other": 43
+  },
+  "4": {
+   "unit_conversion": 0,
+   "arithmetic": 1,
+   "unlabelled_misread": 6,
+   "recall_error": 0,
+   "other": 43
+  }
+ },
+ "turns": [
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 1,
+   "id": "t1",
+   "kind": "import_nca",
+   "question": "Voici les données d'un exercice (50 mg par voie orale ; temps en h, concentration en ng/mL) :\ntime (h),conc (ng/mL)\n0,0\n0.11,62.73\n0.2,120.4\n0.36,168.2\n0.64,246.8\n1.1,364.5\n2,446.6\n3.7,369\n6.6,206.4\n12,65.17\n21,0\nLes valeurs égales à 0 sont sous la limite de quantification (LLOQ = 13 ng/mL).\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL/F, Vz/F et MRT, avec les unités.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 2,
+   "id": "t2",
+   "kind": "cmax_tmax",
+   "question": "Quels sont la Cmax et le Tmax ? Donne-les avec leurs unités.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.002
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 3,
+   "id": "t3",
+   "kind": "clearance_volume",
+   "question": "Donne-moi CL/F et Vz/F avec leurs unités, exactement comme Caladrius les rapporte.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 4,
+   "id": "t4",
+   "kind": "half_life",
+   "question": "Quelle est la demi-vie terminale et quel pourcentage de l'AUC est extrapolé ? Est-ce acceptable ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 5,
+   "id": "t5",
+   "kind": "lambda_z_regression",
+   "question": "Combien de points ont servi à la régression de λz et quel est le R² ajusté ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 6,
+   "id": "t6",
+   "kind": "recall",
+   "question": "Rappelle-moi la dose, la voie d'administration et la méthode d'AUC que j'ai indiquées au premier message.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 7,
+   "id": "t7",
+   "kind": "compare",
+   "question": "Refais l'analyse avec la méthode linear-up/log-down. De combien l'AUC(0-tlast) diffère-t-elle de celle de la méthode linéaire, en valeur absolue et en pourcentage ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.002
+  },
+  {
+   "exercise": "ex13_oral_1",
+   "turn": 8,
+   "id": "t8",
+   "kind": "not_available",
+   "question": "Quelle est la concentration initiale extrapolée C0 ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  }
+ ],
+ "tool_arg_audit": {
+  "calls": 0,
+  "deviating_calls": 0,
+  "deviations": []
+ }
+}

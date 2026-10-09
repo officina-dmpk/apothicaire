@@ -1,0 +1,9 @@
+{
+ "model": null,
+ "load_s": 0.0,
+ "decide_calls": 0,
+ "model_seconds_total": 0.0,
+ "model_seconds_per_call": 0.0,
+ "torch_peak_allocated_mib": 8,
+ "nvidia_smi_used_mib_at_end": 1348
+}

@@ -1,0 +1,111 @@
+{
+ "id": "ex01_iv_bolus",
+ "family": "iv_bolus",
+ "model": "pk1.iv_bolus",
+ "units": {
+  "time": "h",
+  "conc": "mg/L"
+ },
+ "dose": {
+  "amount": 200,
+  "unit": "mg"
+ },
+ "blq": false,
+ "wall_s": 16.267,
+ "decider": "qwen35-0.8b",
+ "taxonomy_chance_baseline": {
+  "3": {
+   "unit_conversion": 1,
+   "arithmetic": 0,
+   "unlabelled_misread": 9,
+   "recall_error": 0,
+   "other": 40
+  },
+  "4": {
+   "unit_conversion": 3,
+   "arithmetic": 0,
+   "unlabelled_misread": 10,
+   "recall_error": 0,
+   "other": 37
+  }
+ },
+ "turns": [
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 1,
+   "id": "t1",
+   "kind": "import_nca",
+   "question": "Voici les données d'un exercice (200 mg en bolus intraveineux ; temps en h, concentration en mg/L) :\ntime (h),conc (mg/L)\n2.7,3.679\n3.9,3.404\n5.7,2.898\n8.2,2.942\n12,2.073\n17,1.26\n25,0.9319\n37,0.391\n54,0.1231\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL, Vz et MRT, avec les unités.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 16.179
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 2,
+   "id": "t2",
+   "kind": "cmax_tmax",
+   "question": "Quelles sont la concentration initiale C0 (extrapolée), la Cmax et le Tmax ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 3,
+   "id": "t3",
+   "kind": "clearance_volume",
+   "question": "Donne-moi CL et Vz avec leurs unités, exactement comme Caladrius les rapporte.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.001
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 4,
+   "id": "t4",
+   "kind": "half_life",
+   "question": "Quelle est la demi-vie terminale et quel pourcentage de l'AUC est extrapolé ? Est-ce acceptable ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 5,
+   "id": "t5",
+   "kind": "lambda_z_regression",
+   "question": "Combien de points ont servi à la régression de λz et quel est le R² ajusté ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 6,
+   "id": "t6",
+   "kind": "recall",
+   "question": "Rappelle-moi la dose, la voie d'administration et la méthode d'AUC que j'ai indiquées au premier message.",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.001
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 7,
+   "id": "t7",
+   "kind": "compare",
+   "question": "Refais l'analyse avec la méthode linear-up/log-down. De combien l'AUC(0-tlast) diffère-t-elle de celle de la méthode linéaire, en valeur absolue et en pourcentage ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  },
+  {
+   "exercise": "ex01_iv_bolus",
+   "turn": 8,
+   "id": "t8",
+   "kind": "not_available",
+   "question": "Quel est le temps de latence Tlag ?",
+   "error": "PermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\abdou\\\\apothicaire\\\\agent\\\\decision\\\\models\\\\qwen35-0.8b-d01\\\\merged\\\\unsloth_decision_config.json'",
+   "wall_s": 0.0
+  }
+ ],
+ "tool_arg_audit": {
+  "calls": 0,
+  "deviating_calls": 0,
+  "deviations": []
+ }
+}

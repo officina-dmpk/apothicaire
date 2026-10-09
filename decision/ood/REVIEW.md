@@ -102,3 +102,160 @@ ood-031 (`t1/2` mapped to `half_life`), ood-058 (compare with no prior analysis:
   `ground_truth.data_import_columns` and an explicit `oracle_note`. The truth it does carry (route, dose, units, model)
   is exact and deterministic (no noise).
 - All files are UTF-8 with LF endings, like the committed exercise files.
+
+### Part 2 (after the Part 1 commit)
+
+8. `decision/README.md` (whole, including Steps 2-5).
+9. `decision/make_dataset.py`, `bench/scripts.py`, `decision/decider_unsloth.py`.
+10. `bench/score.py`, `bench/run_bench.py`.
+11. `decision/predict_unsloth.py`, `decision/zero_shot_d1.py`.
+12. `bench/make_exercises.py`, `decision/make_exercises.py`.
+13. `decision/models/qwen35-0.8b-d01/merged/{unsloth_decision_config.json,config.json,joint_schema_model.py}` (via the
+    `read` tool only; see the sandbox finding below) and `.venv-unsloth/Lib/site-packages/unsloth_zoo/hf_cache.py`.
+14. `decision/data/{train,heldout,bench}.jsonl`, `decision/runs/2026-10-09-harness-qwen35-0.8b/*.json` and the
+    `decision/exercises/` folders (programmatically, through the project's own loaders; no file opened by hand).
+
+## Part 2: what I reproduced, with the command used
+
+| claim (decision/README.md) | reported | I obtained | command |
+|---|---|---|---|
+| dataset regeneration is byte-identical | 1980 / 720 / 900 rows | identical SHA-256 for `train.jsonl`, `heldout.jsonl`, `bench.jsonl` **and** `decision/README.md` before/after | `python decision/make_dataset.py` |
+| harness with gold decisions, `asked_<key>` (step 4b) | 175/175 turns, 558/558 numbers, 0/250 invalid calls, 0/691 gate, 1 ms/turn | **175/175, 558/558, 0/250, 0/691**, 0.001 s/turn; scorer 200/200 turns fully correct; 0 scorer/oracle disagreements; 0/75 deviating tool calls | `python decision/run_harness.py --decider gold --date 2026-10-09-dsh` (see the note) |
+| trained model: 44 of 4500 answers differ from gold | 19 `is_not_available`, 25 compare first asks | **exactly 225 decide calls / 4500 answers, 19 `is_not_available` = false (all confidence < 0.86), 25 compare first asks = `not_applicable`, 0 outside options** | re-analysis of the stored `decision/runs/2026-10-09-harness-qwen35-0.8b/*.json` (no model) |
+| trained harness and held-out 99.9 % | 175/175; 99.9 % | **not reproduced** (see below) | `.venv-unsloth/Scripts/python decision/run_harness.py --decider decider_unsloth:decide` |
+
+- **The brief's command does not run:** `--decider gold-asked` raises `ModuleNotFoundError: No module named 'gold-asked'`
+  (`run_harness.load_decider` accepts only `gold`); the accepted name is `gold`, and the run folder is still called
+  `...-gold-asked` because the function carries `decide.name = "gold-asked"`. Trivial, but a reader copying the brief loses time.
+- **The trained-model run cannot be reproduced in this session**, for two independent reasons, both recorded in
+  `runs/2026-10-09-model-run-attempt-FAILED/` (25 records, 200/200 turns failed) and `runs/model_run.err`:
+  1. `import unsloth` never returns while `unsloth_zoo.hf_cache` probes `~/.cache/huggingface` for writability outside
+     the file sandbox (>10 min, CPU-bound, no GPU allocation; `-X importtime` stops at `numpy`). Pointing `HF_HOME`,
+     `HF_HUB_CACHE` and `HF_XET_CACHE` at a writable folder inside the workspace fixes it (import in 36 s).
+  2. The workspace-write sandbox denies **shell-spawned processes** read access to `decision/models/qwen35-0.8b-d01/merged/`
+     and `.../adapters/` (`PermissionError: [Errno 13]`), while the harness's own `read` tool can read them and
+     `.../qwen35-0.8b-d01/train_summary.json` (one level up) is readable. The one-shot escalation the sandbox offers
+     (`danger-full-access`) is refused: *"requires approval, but no approval channel is available"*. The 99.9 % held-out
+     and the 175/175 trained figures therefore remain **unverified by me**; `decision/ood/eval_ood_model.py` is ready to
+     produce the missing out-of-distribution score in an unconfined environment.
+  3. Side finding: `run_harness.py` line 171 crashes with `TypeError: unsupported format string passed to NoneType` when
+     every turn failed (`mean_wall_s_per_turn` is None); the report files were written, the CLI exits 1.
+
+## Part 2: what I attack
+
+### The held-out split leaks the wordings (this is the big one)
+
+The split is by exercise, and I confirm no exercise is shared (the project tests it). But the request sentences come from
+one global `WORDINGS` pool in `make_dataset.py`, so:
+
+- **720 / 720 held-out rows (100 %) use a `request` string that appears verbatim in `train.jsonl`**, and 720/720 the same
+  `(kind, request)` pair; `bench.jsonl` is also 100 %. There are only **83 distinct requests** in each split
+  (`runs/analyze_dataset.json`). The dose sentence differs more (46 % overlap).
+- The state adds the exercise's `data.header/first_rows`, but the questions that are not `asked_*` are decided by the
+  sentence and the exercise route, not by the concentration values. So "held-out" means *new data tables, same 83
+  sentences*: 99.9 % measures that the generator's sentences are memorised, which is exactly the limit the project states.
+  It is not evidence about a user who writes differently. My requests.jsonl is that missing test (unrun, reason above).
+
+### "Always answer the majority" is the wrong baseline
+
+`runs/analyze_dataset.json` (held-out, same rows):
+
+| question | always-majority | my deterministic rule |
+|---|---|---|
+| route | 0.436 | **1.000** |
+| analysis | 0.583 | 0.953 |
+| auc_method | 0.833 | 0.972 |
+| dose_has_unit | 0.818 | **1.000** |
+| compare_pair | 0.917 | 0.972 |
+| is_not_available | 0.917 | **0.997** |
+| overall (20 questions) | 0.846 | **0.915** |
+
+The rule is ~40 lines built from the generator's own regexes (`UNIT_RE`, `ROUTE_RE`) and the fact that `auc_method`,
+`compare_pair` and `analysis` are near-deterministic functions of the turn kind (`AUC_METHOD_OF`, `ANALYSIS_OF`,
+`compare_pair = ids[0]+ids[1]`). The model's margin over a rule that never sees a GPU is therefore ~8 points, not ~15;
+on **`is_not_available`, the one question the project flags as weak, the model (98.1 % held-out) is *below* the rule
+(99.7 %)**. The headline "majority 84.6 %" is also inflated by the 14 sparse `asked_*` booleans (mostly false); the five
+real choices have majority 44-92 %. A better statement of the result would be "0.8B model ≈ hand rules on the same
+template distribution". Whether the trained model beats the rules on free wording is exactly the unrun test.
+
+### The scorer measures the answer, not the decision; 175/175 is a template test
+
+On the decision path no generated number can exist, so the gate's 0/691 and the oracle's 558/558 are properties of
+`harness.py`, not evidence about a model. The gold-decider run is a ceiling test of the templates, and it is now exact.
+The scorer cannot see the two failure modes the project lists (`not_available` turns answered by the reading path score
+`not_covered`; the first compare ask is unused). I verified the 19 + 25 = 44 differences are invisible to it.
+
+### Construction bugs and refusals found by running my 74 requests through the gold path
+
+`python decision/ood/run_ood_goldpath.py` (my gold decisions, real engine, `runs/goldpath.json`): **64/74 lines take the
+branch my gold asks for**; the 10 that do not are not my gold's fault:
+
+1. **Infusion duration parsing fails in 8/8 infusion requests** (`ood-008, 010, 011, 037, 043, 055, 062, 070` →
+   `T_ASK_DURATION` although the text states the duration). `_DURATION_RE` cannot cross a digit: `parse_duration`
+   returns `(None, None)` for `"Perfusion de 150 mg sur 2 h"` but `(2, "h")` for the benchmark's
+   `"150 mg en perfusion intraveineuse de 2 h"` (the dose sits before the word "perfusion" there). Natural French puts
+   the dose first, so the harness asks for a duration the user already gave. `"90 minutes"` fails too (`\b` after
+   `min` rejects the plural); only `"90 min"` parses.
+2. **`compare_pair` only offers ascending pairs:** `questions_for` builds `{f"{a}+{b}"}` with `a < b`, so "compare
+   l'analyse 2 à l'analyse 1" is outside the options, is nulled by `normalize_answers`, and the harness answers
+   `T_WHICH_PAIR` (`ood-015`, `ood-072`). A user cannot choose the direction of `b - a`.
+3. **The refusal path names the wrong parameter.** `Harness._refuse` takes `next(iter(self.asked(a)))`, i.e. the first
+   `asked_*` in `make_dataset.PARAMETERS` order, not the unavailable one. Demonstrated with the engine:
+   *"Donne-moi la Cmax et la C0"* answers **"Cmax n'est pas calculé par Caladrius pour cette voie"** — Cmax *is*
+   computed, C0 is not. `is_not_available` is one boolean for all parameters, so a mixed request cannot be honest.
+4. **A request with no dose says the wrong thing.** `_nca` checks `dose_has_unit` before `parse_dose`, so a request with
+   no dose at all gets `T_ASK_DOSE_UNIT` ("la dose n'a pas d'unité", ood-021) and `T_ASK_DOSE` ("je ne trouve pas la
+   dose") is unreachable with correct decisions.
+5. **Out-of-scope asks get a false claim.** Bioequivalence, population modelling, steady state and urine recovery
+   (ood-019, 020, 064, 065) are answered *"Ce paramètre n'est pas calculé par Caladrius pour cette voie
+   d'administration"* — there is no "not supported" label in the schema, so the schema forces a wrong explanation.
+6. **The dose unit never reaches Caladrius, silently.** `ood-023` ("bolus IV de 2 mg" on the 2000 µg exercise) runs
+   `nca_run(dose=2)`; the header says *"dose 2"* with no unit and CL/Vz are 1000× the meta truth in those labels. The
+   decision is `dose_has_unit=true` and nothing downstream can see the unit change. Related: `render_header` prints the
+   dose value without its unit at all, and the not-calculated reasons are quoted in English inside French answers.
+7. **The compare turn with one analysis asks twice** (open item (b)): `ood-013/030/071` re-run the second analysis and
+   re-ask; a stateless decider returns the same first answer and the harness gives `T_WHICH_PAIR`. The dataset describes
+   the compare turn only after the re-run, so a model trained there may pass; my gold describes the first ask, and I say
+   so.
+
+### Calibration statement is vacuous on this task
+
+ECE 0.001 is claimed as a result. The labels are one-hot, the task is near-deterministic and the model is at 99.9 %: no
+bin can be miscalibrated. It says nothing about the ambiguous requests the dataset itself excludes, and nothing about
+free wording. Reporting ECE here is not wrong but it is not evidence of trustworthiness.
+
+## Verdict
+
+**Reproduced (1 figure group, exact):** `make_dataset.py` byte-identical; the gold-decision harness ceiling
+(175/175 turns, 558/558 numbers, 0/250 invalid calls, 0/691 gate, 0.001 s/turn, 0 scorer/oracle disagreements). I also
+re-derived the reported 44/4500 trained-run decision differences from the stored run files.
+
+**Not reproduced:** the trained Qwen3.5-0.8B runs (held-out 99.9 %, bench 175/175 trained). Two blockers: the Unsloth
+import hangs on out-of-workspace HF cache probing (worked around with `HF_HOME` inside the workspace), and the sandbox
+denies shell processes read access to `decision/models/.../merged/` and `/adapters/` with no approval channel available.
+The model itself is therefore the one part of the claim I cannot check; the missing measurement is the OOD score, not
+another benchmark run.
+
+**Refuted / weakened:**
+1. The held-out figure is a wording-memorisation figure: 100 % of held-out requests are verbatim train requests.
+2. The baseline is a straw man: 40 lines of rules reach 91.5 % overall and beat the model on `is_not_available`.
+3. The 175/175 (gold and trained) is a template/decision consistency test, not evidence about free wording, and the
+   scorer is blind to the two failure modes the project already lists.
+4. The harness is not robust to natural French: infusion duration (8/8 of my requests), compare direction, mixed
+   available/unavailable parameters, out-of-scope asks, and the silently dropped dose unit.
+5. ECE 0.001 is uninformative on a deterministic one-hot task.
+
+**What I would do next, ranked:**
+1. Run `decision/ood/requests.jsonl` through the trained decider in an unconfined environment
+   (`decision/ood/eval_ood_model.py`, which reports both my gold and the project-convention gold). This is the single
+   measurement the project says it lacks; until it exists, 99.9 % should be read as in-distribution only.
+2. Hold out *wordings*, not only exercises (or freeze the wordings before the model sees any): split the 83 requests,
+   keep the exercises.
+3. Fix the harness first: `_DURATION_RE` (parse the duration anywhere; accept "minutes"), a directed compare pair,
+   pick the unavailable parameter in `_refuse`, distinguish "no dose" from "no dose unit", and add a `not_supported`
+   label/path for out-of-scope requests. The number-safety by construction survives all of these.
+4. Replace the always-majority baseline with the deterministic rules in `decision/ood/analyze_dataset.py` in the
+   Step 3/5 tables; report the margin over them.
+5. Send the dose unit to Caladrius (a `dose_unit` argument) so CL/Vz do not depend on the user's unit token, and print
+   the dose unit in `render_header`.
+6. Re-run the 25 exercises with a wording-shuffled script to separate template learning from decision learning.
