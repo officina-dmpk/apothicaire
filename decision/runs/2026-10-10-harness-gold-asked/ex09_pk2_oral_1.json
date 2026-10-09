@@ -11,7 +11,7 @@
   "unit": "mg"
  },
  "blq": false,
- "wall_s": 0.928,
+ "wall_s": 0.945,
  "decider": "gold-asked",
  "taxonomy_chance_baseline": {
   "3": {
@@ -103,7 +103,8 @@
      "MRT"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -111,7 +112,7 @@
     "new_numbers": 0,
     "n_must": 9,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -159,7 +160,8 @@
        }
       ]
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\n  \"delimiter\": \",\",\n  \"notes\": [\n    \"unit `h` read from the header of column `time`\",\n    \"unit `ng/mL` read from the header of column `conc`\"\n  ],\n  \"worksheet\": {\n    \"columns\": [\n      {\n        \"max\": 29.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"time\",\n        \"role\": \"time\",\n        \"type\": \"number\",\n        \"unit\": \"h\"\n      },\n      {\n        \"max\": 5269.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"conc\",\n        \"role\": \"concentration\",\n        \"type\": \"number\",\n        \"unit\": \"ng/mL\"\n      }\n    ],\n    \"derived_units\": {\n      \"auc\": \"h*ng/mL\",\n      \"aumc\": \"h^2*ng/mL\",\n      \"half_life\": \"h\",\n      \"lambda_z\": \"1/h\",\n      \"mrt\": \"h\"\n    },\n    \"id\": 1,\n    \"name\": \"donnees\",\n    \"revision\": 0,\n    \"rows\": 8,\n    \"subjects\": [\n      \"1\"\n    ],\n    \"unit_warnings\": [\n      {\n        \"code\": \"missing_unit\",\n        \"message\": \"the dose has no unit; derived units (AUC, clearance, volume) cannot be named\"\n      }\n    ]\n  }\n}"
     },
     {
      "name": "nca_run",
@@ -176,7 +178,8 @@
        }
       }
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\"1\":{\"cmax\":\"5269 ng/mL\",\"tmax\":\"0.84 h\",\"tfirst\":\"0.14 h\",\"tlag\":\"0 h\",\"tlast\":\"29 h\",\"clast.obs\":\"173.7 ng/mL\",\"auclast\":\"46601.3 h·ng/mL\",\"aucall\":\"46601.3 h·ng/mL\",\"aumclast\":\"322541 h²·ng/mL\",\"aumcall\":\"322541 h²·ng/mL\",\"lambda.z\":\"0.117552 1/h\",\"r.squared\":\"0.999994\",\"adj.r.squared\":\"0.999989\",\"lambda.z.time.first\":\"4.9 h\",\"lambda.z.time.last\":\"29 h\",\"lambda.z.n.points\":\"3\",\"clast.pred\":\"173.502 ng/mL\",\"half.life\":\"5.8965 h\",\"span.ratio\":\"4.08717\",\"aucinf.obs\":\"48079 h·ng/mL\",\"aucinf.pred\":\"48077.3 h·ng/mL\",\"aumcinf.obs\":\"377962 h²·ng/mL\",\"aumcinf.pred\":\"377899 h²·ng/mL\",\"aucpext.obs\":\"3.07336 %\",\"aucpext.pred\":\"3.06996 %\",\"aumcpext.obs\":\"14.6633 %\",\"aumcpext.pred\":\"14.649 %\",\"mrt.last\":\"6.92127 h\",\"mrt.obs\":\"7.86128 h\",\"mrt.pred\":\"7.86024 h\",\"cl.obs\":\"6.23973 L/h\",\"cl.pred\":\"6.23995 L/h\",\"vz.obs\":\"53.0805 L\",\"vz.pred\":\"53.0824 L\",\"vss.obs\":\"49.0523 L\",\"vss.pred\":\"49.0475 L\",\"cmax.dn\":\"17.5633 (ng/mL)/mg\",\"clast.obs.dn\":\"0.579 (ng/mL)/mg\",\"auclast.dn\":\"155.338 (h·ng/mL)/mg\",\"aucall.dn\":\"155.338 (h·ng/mL)/mg\",\"aucinf.obs.dn\":\"160.263 (h·ng/mL)/mg\",\"aucinf.pred.dn\":\"160.258 (h·ng/mL)/mg\",\"aumclast.dn\":\"1075.14 (h²·ng/mL)/mg\",\"aumcall.dn\":\"1075.14 (h²·ng/mL)/mg\",\"aumcinf.obs.dn\":\"1259.87 (h²·ng/mL)/mg\",\"aumcinf.pred.dn\":\"1259.66 (h²·ng/mL)/mg\"}}"
     }
    ],
    "oracle": {
@@ -304,7 +307,7 @@
    "kind": "cmax_tmax",
    "question": "Quels sont la Cmax et le Tmax ? Donne-les avec leurs unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, voie orale (extravasculaire)) :\n- Cmax : 5269 ng/mL\n- Tmax : 0.84 h\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -336,6 +339,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -444,7 +448,8 @@
      "Vz/F"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -452,7 +457,7 @@
     "new_numbers": 0,
     "n_must": 2,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -559,6 +564,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -668,6 +674,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -776,6 +783,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 1,
@@ -841,7 +849,7 @@
    "kind": "compare",
    "question": "Refais l'analyse avec la méthode linear-up/log-down. De combien l'AUC(0-tlast) diffère-t-elle de celle de la méthode linéaire, en valeur absolue et en pourcentage ?",
    "answer": "Comparaison calculée par Caladrius entre l'analyse 2 et l'analyse 3 (b - a ; a = analyse 2, la référence ; b = analyse 3, comparée à la référence) :\n- AUC(0-tlast), méthode linéaire (analyse 2) : 46601.3 h*ng/mL\n- AUC(0-tlast), méthode linear-up/log-down (analyse 3) : 42659.4 h*ng/mL\n- Différence (b - a) : -3941.99 h*ng/mL\n- Différence relative : -8.45896 %\n- Rapport b/a : 0.91541",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 2,
    "numbers_total_before": 5,
@@ -895,6 +903,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 4,
@@ -1040,7 +1049,7 @@
    "kind": "not_available",
    "question": "Quelle est la concentration initiale extrapolée C0 ?",
    "answer": "C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius pour cette voie d'administration : voie orale (extravasculaire). Raison donnée par Caladrius : « not defined for this route of administration ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 0,
@@ -1069,6 +1078,7 @@
     "found": [],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 0,

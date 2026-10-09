@@ -28,13 +28,13 @@ Classes are heuristics (`bench/score.py`); the unverified counts above never dep
 | recall_error | 0.0 % | 0.0 % |
 | other | 77.2 % | 65.0 % |
 
-## Correctness: 178 / 200 turns fully correct; expected numbers found 558 / 558; forbidden (converted or computed) values present in 44 answers
+## Correctness: 200 / 200 turns fully correct; expected numbers found 558 / 558; forbidden (converted or computed) values present in 0 answers
 
 | question type | turns | correct | found / expected numbers | unverified / total before | unverified / total shown |
 |---|---|---|---|---|---|
-| import_nca | 25 | 14 (56.0 %) | 225 / 225 | 0 / 290 | 0 / 290 |
+| import_nca | 25 | 25 (100.0 %) | 225 / 225 | 0 / 290 | 0 / 290 |
 | cmax_tmax | 25 | 25 (100.0 %) | 58 / 58 | 0 / 87 | 0 / 87 |
-| clearance_volume | 25 | 14 (56.0 %) | 50 / 50 | 0 / 115 | 0 / 115 |
+| clearance_volume | 25 | 25 (100.0 %) | 50 / 50 | 0 / 115 | 0 / 115 |
 | half_life | 25 | 25 (100.0 %) | 50 / 50 | 0 / 79 | 0 / 79 |
 | lambda_z_regression | 25 | 25 (100.0 %) | 50 / 50 | 0 / 54 | 0 / 54 |
 | recall | 25 | 25 (100.0 %) | 25 / 25 | 0 / 28 | 0 / 28 |
@@ -59,7 +59,7 @@ Second judgement, independent of the gate (`bench/score.py`, `oracle_turn`): the
 | compare | 25 | 25 (100.0 %) | 100 / 100 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **total** | 175 | 175 (100.0 %) | 558 / 558 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Against the scorer's expected-number check (the global search of the numbers, above): items the scorer found but the oracle rejects 0; items the scorer missed but the oracle accepts 0; turns oracle-wrong but scorer-correct 0; turns oracle-correct but scorer-incorrect 22 (ex02_oral_1 t1 import_nca; ex02_oral_1 t3 clearance_volume; ex04_oral_1_lag t1 import_nca; ex04_oral_1_lag t3 clearance_volume; ex06_oral_0 t1 import_nca; ex06_oral_0 t3 clearance_volume; ex09_pk2_oral_1 t1 import_nca; ex09_pk2_oral_1 t3 clearance_volume; ex13_oral_1 t1 import_nca; ex13_oral_1 t3 clearance_volume; ex14_iv_bolus t1 import_nca; ex14_iv_bolus t3 clearance_volume; ex18_pk2_iv_bolus t1 import_nca; ex18_pk2_iv_bolus t3 clearance_volume; ex20_iv_infusion t1 import_nca; ex20_iv_infusion t3 clearance_volume; ex23_iv_bolus t1 import_nca; ex23_iv_bolus t3 clearance_volume; ex24_pk2_iv_bolus t1 import_nca; ex24_pk2_iv_bolus t3 clearance_volume; ex25_oral_1 t1 import_nca; ex25_oral_1 t3 clearance_volume).
+Against the scorer's expected-number check (the global search of the numbers, above): items the scorer found but the oracle rejects 0; items the scorer missed but the oracle accepts 0; turns oracle-wrong but scorer-correct 0; turns oracle-correct but scorer-incorrect 0.
 
 ## Tool calls: 250 valid, 0 invalid, 0 failed of 250 (validity 100.0 %)
 
@@ -76,30 +76,30 @@ No deviation.
 | exercise | dose | units | unverified / total before | unverified / total shown | correct turns | badge turns | calls valid / total | mean s per turn |
 |---|---|---|---|---|---|---|---|---|
 | ex01_iv_bolus | 200 mg | h, mg/L | 0 / 28 | 0 / 28 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex02_oral_1 | 400 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex02_oral_1 | 400 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex03_pk2_iv_bolus | 300 mg | h, mg/L | 0 / 28 | 0 / 28 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex04_oral_1_lag | 300 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex04_oral_1_lag | 300 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex05_iv_infusion | 150 mg | h, mg/L | 0 / 33 | 0 / 33 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex06_oral_0 | 100 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex06_oral_0 | 100 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex07_iv_bolus | 2000 ug | h, ng/mL | 0 / 32 | 0 / 32 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex08_oral_1 | 800 ug | min, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex09_pk2_oral_1 | 300 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex09_pk2_oral_1 | 300 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex10_oral_1_lag | 100 mg | h, mg/L | 0 / 27 | 0 / 27 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex11_pk2_iv_bolus | 1000 ug | h, ng/mL | 0 / 32 | 0 / 32 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex12_iv_infusion | 500 ug | min, ng/mL | 0 / 37 | 0 / 37 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex13_oral_1 | 50 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
-| ex14_iv_bolus | 150 mg | h, ng/mL | 0 / 37 | 0 / 37 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex13_oral_1 | 50 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
+| ex14_iv_bolus | 150 mg | h, ng/mL | 0 / 37 | 0 / 37 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex15_oral_0 | 400 mg | h, mg/L | 0 / 27 | 0 / 27 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex16_pk2_oral_1 | 2000 ug | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex17_oral_1 | 500 mg | h, mg/L | 0 / 27 | 0 / 27 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex18_pk2_iv_bolus | 200 mg | min, ng/mL | 0 / 32 | 0 / 32 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex18_pk2_iv_bolus | 200 mg | min, ng/mL | 0 / 32 | 0 / 32 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex19_oral_1_lag | 2000 ug | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex20_iv_infusion | 150 mg | h, ng/mL | 0 / 37 | 0 / 37 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex20_iv_infusion | 150 mg | h, ng/mL | 0 / 37 | 0 / 37 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex21_oral_0 | 5000 ug | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 | ex22_pk2_oral_1 | 500 mg | h, mg/L | 0 / 27 | 0 / 27 | 8 / 8 | 0 | 10 / 10 | 0.0 |
-| ex23_iv_bolus | 300 mg | min, ng/mL | 0 / 32 | 0 / 32 | 6 / 8 | 0 | 10 / 10 | 0.0 |
-| ex24_pk2_iv_bolus | 150 mg | h, ng/mL | 0 / 32 | 0 / 32 | 6 / 8 | 0 | 10 / 10 | 0.0 |
-| ex25_oral_1 | 100 mg | h, ng/mL | 0 / 31 | 0 / 31 | 6 / 8 | 0 | 10 / 10 | 0.0 |
+| ex23_iv_bolus | 300 mg | min, ng/mL | 0 / 32 | 0 / 32 | 8 / 8 | 0 | 10 / 10 | 0.0 |
+| ex24_pk2_iv_bolus | 150 mg | h, ng/mL | 0 / 32 | 0 / 32 | 8 / 8 | 0 | 10 / 10 | 0.0 |
+| ex25_oral_1 | 100 mg | h, ng/mL | 0 / 31 | 0 / 31 | 8 / 8 | 0 | 10 / 10 | 0.0 |
 
 ## Decision harness
 

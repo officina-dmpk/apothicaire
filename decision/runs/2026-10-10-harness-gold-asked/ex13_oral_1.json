@@ -11,7 +11,7 @@
   "unit": "mg"
  },
  "blq": true,
- "wall_s": 0.988,
+ "wall_s": 1.033,
  "decider": "gold-asked",
  "taxonomy_chance_baseline": {
   "3": {
@@ -37,7 +37,7 @@
    "kind": "import_nca",
    "question": "Voici les données d'un exercice (50 mg par voie orale ; temps en h, concentration en ng/mL) :\ntime (h),conc (ng/mL)\n0,0\n0.11,62.73\n0.2,120.4\n0.36,168.2\n0.64,246.8\n1.1,364.5\n2,446.6\n3.7,369\n6.6,206.4\n12,65.17\n21,0\nLes valeurs égales à 0 sont sous la limite de quantification (LLOQ = 13 ng/mL).\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL/F, Vz/F et MRT, avec les unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 50 mg, voie orale (extravasculaire)) :\n- Cmax : 446.6 ng/mL\n- Tmax : 2 h\n- AUC(0-tlast) : 2859.3 h*ng/mL\n- λz (constante d'élimination terminale) : 0.209474 1/h\n- t½ (demi-vie terminale) : 3.30899 h\n- AUC(0-inf) : 3170.42 h*ng/mL\n- MRT (temps moyen de résidence) : 5.56168 h\n- CL/F (clairance) : 0.0157708 dose unit/(h*ng/mL), soit 15.7708 L/h (conversion faite par Caladrius avec la dose en mg)\n- Vz/F (volume de distribution) : 0.0752878 dose unit/(ng/mL), soit 75.2878 L (conversion faite par Caladrius avec la dose en mg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.02,
+   "wall_s": 0.016,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 12,
@@ -103,7 +103,8 @@
      "MRT"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -111,7 +112,7 @@
     "new_numbers": 0,
     "n_must": 9,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -159,7 +160,8 @@
        }
       ]
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\n  \"delimiter\": \",\",\n  \"notes\": [\n    \"unit `h` read from the header of column `time`\",\n    \"unit `ng/mL` read from the header of column `conc`\"\n  ],\n  \"worksheet\": {\n    \"columns\": [\n      {\n        \"max\": 21.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"time\",\n        \"role\": \"time\",\n        \"type\": \"number\",\n        \"unit\": \"h\"\n      },\n      {\n        \"max\": 446.6,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"conc\",\n        \"role\": \"concentration\",\n        \"type\": \"number\",\n        \"unit\": \"ng/mL\"\n      }\n    ],\n    \"derived_units\": {\n      \"auc\": \"h*ng/mL\",\n      \"aumc\": \"h^2*ng/mL\",\n      \"half_life\": \"h\",\n      \"lambda_z\": \"1/h\",\n      \"mrt\": \"h\"\n    },\n    \"id\": 1,\n    \"name\": \"donnees\",\n    \"revision\": 0,\n    \"rows\": 11,\n    \"subjects\": [\n      \"1\"\n    ],\n    \"unit_warnings\": [\n      {\n        \"code\": \"missing_unit\",\n        \"message\": \"the dose has no unit; derived units (AUC, clearance, volume) cannot be named\"\n      }\n    ]\n  }\n}"
     },
     {
      "name": "nca_run",
@@ -176,7 +178,8 @@
        }
       }
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\"1\":{\"cmax\":\"446.6 ng/mL\",\"tmax\":\"2 h\",\"tfirst\":\"0.11 h\",\"tlag\":\"0 h\",\"tlast\":\"12 h\",\"clast.obs\":\"65.17 ng/mL\",\"auclast\":\"2859.3 h·ng/mL\",\"aucall\":\"3152.57 h·ng/mL\",\"aumclast\":\"12414.3 h²·ng/mL\",\"aumcall\":\"15933.4 h²·ng/mL\",\"lambda.z\":\"0.209474 1/h\",\"r.squared\":\"0.999744\",\"adj.r.squared\":\"0.999489\",\"lambda.z.time.first\":\"3.7 h\",\"lambda.z.time.last\":\"12 h\",\"lambda.z.n.points\":\"3\",\"clast.pred\":\"65.5365 ng/mL\",\"half.life\":\"3.30899 h\",\"span.ratio\":\"2.50832\",\"aucinf.obs\":\"3170.42 h·ng/mL\",\"aucinf.pred\":\"3172.16 h·ng/mL\",\"aumcinf.obs\":\"17632.8 h²·ng/mL\",\"aumcinf.pred\":\"17662.2 h²·ng/mL\",\"aucpext.obs\":\"9.81301 %\",\"aucpext.pred\":\"9.86275 %\",\"aumcpext.obs\":\"29.5957 %\",\"aumcpext.pred\":\"29.7127 %\",\"mrt.last\":\"4.34171 h\",\"mrt.obs\":\"5.56168 h\",\"mrt.pred\":\"5.56786 h\",\"cl.obs\":\"15.7708 L/h\",\"cl.pred\":\"15.7621 L/h\",\"vz.obs\":\"75.2878 L\",\"vz.pred\":\"75.2462 L\",\"vss.obs\":\"87.7122 L\",\"vss.pred\":\"87.7613 L\",\"cmax.dn\":\"8.932 (ng/mL)/mg\",\"clast.obs.dn\":\"1.3034 (ng/mL)/mg\",\"auclast.dn\":\"57.186 (h·ng/mL)/mg\",\"aucall.dn\":\"63.0513 (h·ng/mL)/mg\",\"aucinf.obs.dn\":\"63.4083 (h·ng/mL)/mg\",\"aucinf.pred.dn\":\"63.4433 (h·ng/mL)/mg\",\"aumclast.dn\":\"248.285 (h²·ng/mL)/mg\",\"aumcall.dn\":\"318.669 (h²·ng/mL)/mg\",\"aumcinf.obs.dn\":\"352.657 (h²·ng/mL)/mg\",\"aumcinf.pred.dn\":\"353.244 (h²·ng/mL)/mg\"}}"
     }
    ],
    "oracle": {
@@ -304,7 +307,7 @@
    "kind": "cmax_tmax",
    "question": "Quels sont la Cmax et le Tmax ? Donne-les avec leurs unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 50 mg, voie orale (extravasculaire)) :\n- Cmax : 446.6 ng/mL\n- Tmax : 2 h\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -336,6 +339,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -413,7 +417,7 @@
    "kind": "clearance_volume",
    "question": "Donne-moi CL/F et Vz/F avec leurs unités, exactement comme Caladrius les rapporte.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 50 mg, voie orale (extravasculaire)) :\n- CL/F (clairance) : 0.0157708 dose unit/(h*ng/mL), soit 15.7708 L/h (conversion faite par Caladrius avec la dose en mg)\n- Vz/F (volume de distribution) : 0.0752878 dose unit/(ng/mL), soit 75.2878 L (conversion faite par Caladrius avec la dose en mg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 5,
@@ -444,7 +448,8 @@
      "Vz/F"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -452,7 +457,7 @@
     "new_numbers": 0,
     "n_must": 2,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -527,7 +532,7 @@
    "kind": "half_life",
    "question": "Quelle est la demi-vie terminale et quel pourcentage de l'AUC est extrapolé ? Est-ce acceptable ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 50 mg, voie orale (extravasculaire)) :\n- t½ (demi-vie terminale) : 3.30899 h\n- AUC extrapolée (%) : 9.81301 %\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -559,6 +564,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -636,7 +642,7 @@
    "kind": "lambda_z_regression",
    "question": "Combien de points ont servi à la régression de λz et quel est le R² ajusté ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 50 mg, voie orale (extravasculaire)) :\n- R² ajusté de la régression terminale : 0.999489\n- Nombre de points de la régression terminale : 3\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 2,
@@ -668,6 +674,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -745,7 +752,7 @@
    "kind": "recall",
    "question": "Rappelle-moi la dose, la voie d'administration et la méthode d'AUC que j'ai indiquées au premier message.",
    "answer": "Réglages de l'analyse 2 tels que Caladrius les a enregistrés :\n- Dose : 50 mg (unité de votre premier message ; l'analyse 2 a reçu la dose sans unité, Caladrius l'a reçue avec son unité pour convertir la clairance et le volume)\n- Voie d'administration : voie orale (extravasculaire)\n- Méthode d'AUC : trapèzes linéaires (linear)",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 1,
@@ -776,6 +783,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 1,
@@ -895,6 +903,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 4,
@@ -1069,6 +1078,7 @@
     "found": [],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 0,

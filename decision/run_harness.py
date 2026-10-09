@@ -13,7 +13,9 @@ expected numbers), the compare turn resolved from the analysis_compare call (run
 tool-call argument audit (run_bench.attach_oracle). The gate (gate.py) is run on every answer for completeness: the harness writes
 only engine values, so it should find 0 unverified numbers; its allowed numbers are those of both Caladrius sessions (the calls of the
 units session, which converts CL and V when the dose unit is not the concentrations' mass unit, are recorded per turn as `unit_calls`
-and kept out of the tool-call counts and audit, which describe the conversation's own session). Writes decision/runs/<date>-harness-<decider>/<id>.json, report.json
+with their results and kept out of the tool-call counts and audit, which describe the conversation's own session). The results of
+the turn's calls and of the units session so far (a cache the harness reuses on later turns) are passed to score.score_turn, which
+does not count a `must_not` value copied verbatim from them. Writes decision/runs/<date>-harness-<decider>/<id>.json, report.json
 and report.md (the report of run_bench.py, plus a section on the decisions).
 """
 import argparse, datetime, importlib, json, os, sys, time
@@ -85,7 +87,9 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
                     "nearest": f.get("nearest_allowed"), "class": score.classify(f, allowed, t["kind"], ans)} for f in g["findings"]]
             tool_recs = run_bench.tool_records(h.tool_log[n_log:], meta, csv_text, set(h.mcp.tools))
             st_resolved, usage = run_bench.resolve_turn(meta, t, turns, tool_recs)
-            sc = score.score_turn(ans, st_resolved["expect"], g["numbers_unverified"])
+            # the tool results of the turn: its calls, and the units session's results, which the harness caches and reuses on later
+            # turns (the clearance turn shows the conversion made on the first turn)
+            sc = score.score_turn(ans, st_resolved["expect"], g["numbers_unverified"], [c["shown"] for c in h.tool_log[n_log:] + h.unit_log])
             rec.update(answer=ans + ("\n\n" + gate.badge(g["findings"]) if g["findings"] else ""),
                        wall_s=round(wall, 3), prompt_tokens=0, rounds=len(info["decisions"]),
                        numbers_total_before=g["numbers_total"], numbers_unverified_before=g["numbers_unverified"],
@@ -96,7 +100,8 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
                                    "analyses_in_state": [x["id"] for x in d["state"]["analyses"]],
                                    **({"model_info": d["model_info"]} if d.get("model_info") else {})} for d in info["decisions"]],
                        harness_notes=info["notes"],
-                       unit_calls=[{"name": c["name"], "args": run_bench.elide(c["args"], csv_text), "ok": c["ok"]} for c in h.unit_log[n_units:]])
+                       unit_calls=[{"name": c["name"], "args": run_bench.elide(c["args"], csv_text), "ok": c["ok"], "shown": c["shown"][:6000]}
+                                   for c in h.unit_log[n_units:]])
             if usage is not None: rec["compare_tool"] = usage
             turns.append(rec)
         allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log + h.unit_log], h.user_texts)

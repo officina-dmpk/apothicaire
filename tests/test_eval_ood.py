@@ -174,6 +174,16 @@ class TestRejection(unittest.TestCase):
                         gold=gold(analysis="compare", compare_pair="1+5"))
         self.assertIn("not in prior_analyses", r)
 
+    def test_directed_pair_keeps_the_users_order(self):
+        """ood-015 / ood-072: "compare analysis 2 with analysis 1" is the pair 2+1, renumbered 3+2, not sorted into 2+3."""
+        prior = [{"id": 1, "auc_method": "linear"}, {"id": 2, "auc_method": "lin_up_log_down"}]
+        for pair, want in (("2+1", "3+2"), ("1+2", "2+3")):
+            it = convert(dict(LINE_COMPARE, turn=2, prior_analyses=prior, request="Compare l'analyse 2 et l'analyse 1.",
+                              gold=gold(analysis="compare", compare_pair=pair, asked=["auclast"])))[0]
+            self.assertEqual(json.loads(it["row"]["gold"])["compare_pair"]["label"], want)
+        self.assertEqual(E.translate_pair("2+1", {1: 2, 2: 3}, {"not_applicable": "", "2+3": "", "3+2": ""}), "3+2")
+        self.assertEqual(E.translate_pair("3+2", {2: 2, 3: 3}, {"not_applicable": "", "2+3": "", "3+2": ""}), "3+2")
+
     def test_pair_that_is_not_a_key(self):
         r = self.reason(turn=2, prior_analyses=[{"id": 1, "auc_method": "linear"}], gold=gold(analysis="compare", compare_pair="none_available_x"))
         self.assertIn("neither a key", r)
@@ -317,6 +327,8 @@ class TestAnswerKinds(unittest.TestCase):
         self.assertEqual(E.answer_kind(T.T_ASK_ROUTE), "refusal:ask"); self.assertEqual(E.answer_kind(T.T_ASK_DOSE_UNIT), "refusal:ask")
         self.assertEqual(E.answer_kind(T.T_NO_DATA), "refusal:no-data"); self.assertEqual(E.answer_kind(T.T_NO_ANALYSIS), "refusal:no-analysis")
         self.assertEqual(E.answer_kind(T.T_NOT_WIRED.format(what="x")), "refusal:not-wired")
+        self.assertEqual(E.answer_kind(T.T_NOT_SUPPORTED), "refusal:not-supported")      # 2026-10-10: was filed under not-wired
+        self.assertEqual(E.answer_kind(T.T_NOT_WIRED.format(what="ajustement d'un modèle à un compartiment")), "refusal:not-wired")
         self.assertEqual(E.answer_kind(T.T_NO_PARAMETER), "refusal:no-parameter")
         self.assertEqual(E.answer_kind(T.T_UNDECIDED.format(qs="x")), "refusal:undecided")
         self.assertEqual(E.answer_kind(T.T_WHICH_PAIR.format(analyses="a")), "refusal:which-pair")
@@ -331,6 +343,7 @@ class TestAnswerKinds(unittest.TestCase):
         self.assertTrue(E.expects_refusal(dict(base, analysis="nca", route="unknown")))
         self.assertTrue(E.expects_refusal(dict(base, analysis="nca", dose_has_unit="false")))
         self.assertTrue(E.expects_refusal(dict(base, analysis="fit_pk1")))
+        self.assertTrue(E.expects_refusal(dict(base, analysis="not_supported")))
 
     def test_what_a_human_reads(self):
         rec = lambda i, kind, **kw: {"id": i, "exercise": EX, "turn": 1, "tags": ["t1"], "request": "r", "answer": "a", "answer_kind": kind,

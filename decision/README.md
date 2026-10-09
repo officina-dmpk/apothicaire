@@ -41,46 +41,134 @@ what the harness knows at one turn:
 
 | question | type | answers | gold comes from |
 |---|---|---|---|
-| `analysis` | choice | nca, fit_pk1, fit_pk2, simulate, compare, none_needed, not_supported | turn kind: `import_nca` -> nca; `compare` -> compare; fit/simulate kinds; every question about a result already computed (and the recall, and the not-available question) -> none_needed; `not_supported` (out-of-scope asks, added 2026-10-10) has no generated row |
-| `route` | choice | iv_bolus, iv_infusion, oral, unknown | `meta.json` route; `unknown` when the sentence omits it |
-| `auc_method` | choice | linear, lin_up_log_down, not_applicable | the method the request specifies or requires: linear (turn 1), lin_up_log_down (compare turn), else not_applicable |
-| `asked_<key>` (14 questions: `asked_cmax`, `asked_tmax`, `asked_c0`, `asked_auclast`, `asked_aucinf`, `asked_lambda_z`, `asked_half_life`, `asked_cl`, `asked_vz`, `asked_mrt`, `asked_aucpext`, `asked_lambda_z_points`, `asked_adj_r2`, `asked_tlag`) | noul | false, true | true when the wording of the turn names that parameter ("The last request asks for ..."). One boolean per parameter, so a request for two or nine parameters has two or nine true answers. All false on a recall, a fit and a simulation (the fit parameters are model parameters, not NCA ones). The turn that asks for a parameter Caladrius does not compute for the route (`not_available`) has that one parameter true (C0 or Tlag). The first request of the benchmark (`import_nca`) has the nine it names true: Cmax, Tmax, AUC(0-tlast), AUC(0-inf), lambda_z, t1/2, CL, Vz, MRT |
-| `dose_has_unit` | noul | false, true | whether the dose sentence carries mg / ug |
-| `is_not_available` | noul | false, true | true exactly for the `not_available` kind: the parameter asked (C0 after an oral dose, Tlag or C0 after an IV dose) is in `ground_truth.nca.linear.not_calculated` of `meta.json` |
-| `compare_pair` | choice | `not_applicable` and one key `a+b` per ordered pair of analysis ids present (`2+3` and `3+2`: a is the reference, b - a; directed since 2026-10-10); `none_available` when fewer than two analyses exist | true only on the compare turn (always `2+3`: the linear analysis is the reference) |
+| `analysis` | choice | nca, fit_pk1, fit_pk2, simulate, compare, none_needed, not_supported | turn kind: `import_nca`, `nca_oneline` -> nca; `compare`, `compare_directed` -> compare; fit / simulate kinds; `not_supported` (out-of-scope asks: bioequivalence, population PK, steady state, urine, an explanation, a plot, a parameter outside the 14) -> not_supported; every question about a result already computed (and the recall, and the not-available question) -> none_needed |
+| `route` | choice | iv_bolus, iv_infusion, oral, unknown | `meta.json` route when the user's text gives one (a route phrase of the introduction, a `{route}` slot, or a route the one-line wording implies and declares: "comprimé", "perfusé sur 1 h", "injecté en bolus"); `unknown` when the text is silent (introduction drawn without its route phrase, or a one-line wording declared `route: none`) |
+| `auc_method` | choice | linear, lin_up_log_down, not_applicable | the NCA kinds take the method their wording declares (linear when it names none: the method the analysis needs to run; scripted: linear); the compare turn re-runs with lin_up_log_down; every other kind, the directed compare of two existing analyses included, runs no NCA: not_applicable |
+| `asked_<key>` (14 questions: `asked_cmax`, `asked_tmax`, `asked_c0`, `asked_auclast`, `asked_aucinf`, `asked_lambda_z`, `asked_half_life`, `asked_cl`, `asked_vz`, `asked_mrt`, `asked_aucpext`, `asked_lambda_z_points`, `asked_adj_r2`, `asked_tlag`) | noul | false, true | true for the parameters the wording declares in `asked` (`wordings.json`; the scripted wording: the benchmark's). A negated parameter ("pas l'AUC, seulement la demi-vie") or a corrected one ("la Cmax… non, le Tmax") is not asked. All false on a recall, a fit, a simulation and an out-of-scope request. The not-available turn asks at least one parameter Caladrius does not compute for the route (C0 after an oral dose or an infusion, Tlag after an IV dose), possibly with a computed one; no other turn asks one |
+| `dose_has_unit` | noul | false, true | the generator's draw of how the dose is written: with the exercise's unit or in another unit ("0,4 g" for 400 mg, "2 mg" for 2000 µg) -> true; the number alone, or no dose at all (a one-line wording declared `dose: none`) -> false |
+| `is_not_available` | noul | false, true | true exactly for the `not_available` kind: a parameter asked is in `ground_truth.nca.linear.not_calculated` of `meta.json` |
+| `compare_pair` | choice | `not_applicable` and one key `a+b` per ordered pair of analysis ids present (`2+3` and `3+2`: a is the reference, b - a); `none_available` when fewer than two analyses exist | the re-run compare turn: `2+3` (the linear analysis is the reference); the directed compare: `ref+other`, the reference the wording names (named first, or named as the reference against a negated or corrected other one), drawn 2 or 3 per row |
 
-Turn kinds: the 8 scripted ones of `bench/scripts.py` (import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall,
-compare, not_available) and 4 extra kinds written for this dataset so that every option of `analysis` has examples and every parameter is asked by some turn:
-`nca_other` (AUC(0-inf), MRT, AUC(0-tlast), lambda_z read from the NCA already run), `fit_pk1`, `fit_pk2`, `simulate`.
+No label is computed from a pattern over the text: they come from `meta.json`, the turn kind, the declared intent of the wording and the
+generator's draws (tested: the rows where a pattern would fail, an implied route or a dose in g, are labelled from the intent).
 
-Per (exercise, kind): the scripted wording (scripted kinds only, verbatim from `bench/scripts.py`) and 2 hand-written French paraphrases
-(3 for the extra kinds), picked among 4 to 5 wordings per kind (`WORDINGS` in `make_dataset.py`), some of which ask one parameter only.
-Paraphrased rows also use 5 hand-written introductions of the data, 3 phrasings of each route, and in 20 % of them drop the unit of the
-dose, in 20 % the route (not on `not_available` rows, where the route decides the answer). Conventions of the state: the compare turn is
-described after the harness ran the requested re-run (analyses 2 and 3 present); in 40 % of the rows of the result-reading kinds both
-analyses are present too (the question comes later in the conversation); a `simulate` state holds a fit as analysis 3.
+Turn kinds (15): the 8 scripted ones of `bench/scripts.py` (import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall,
+compare, not_available) and 7 extra kinds: `nca_other` (AUC, MRT, lambda_z read from the NCA already run), `fit_pk1`, `fit_pk2`, `simulate`,
+`nca_oneline` (a first message on one line: the request carries the dose, in its unit, in another unit, without a unit, said wrongly then
+corrected, or absent, and the route, named, implied or absent), `compare_directed` (two existing analyses compared, the reference named),
+`not_supported` (out-of-scope).
 
-## Exercises and split
+## Wordings (`decision/wordings.json`)
+
+Every French sentence the generator writes is in `decision/wordings.json` (data only, read by `make_dataset.py`): 15 request pools
+(one per turn kind, 12 to 19 wordings each) and 5 slot pools (introductions of the data, route phrases per route, BLQ notes). Each wording
+has an id (`<kind>.<nn>`), one family tag and its declared intent (`asked`; `auc_method` for the NCA kinds; `oneline`, `dose`, `route` for a
+one-line first message). Families: formal, colloquial, abbreviated (t1/2, AUC0-t, AUC0-inf, Cl/F, Vd, λz), implicit-route, unit-in-text,
+multi-parameter, negation, correction-in-sentence, out-of-scope, directed-compare, follow-up, no-dose, no-route, method-stated. The scripted
+wording of the benchmark (`bench/scripts.py`) is not in the file and is always on the train side.
+
+The reviewer's 74 requests (`ood/requests.jsonl`) were not copied nor paraphrased: they stay a frozen test set. A test checks that no wording
+and no sentence of any generated row equals one of them after normalisation (lower case, no accents, numbers as 0) or shares more than
+60 % of its word trigrams (Jaccard); the highest similarity is 0.24.
+
+Per (exercise, kind): the scripted wording (scripted kinds) and 2 paraphrases (3 for the extra kinds, 4 for `nca_oneline`), distinct,
+drawn among the wordings of the pool that fit the exercise (a wording that implies a route only on exercises of that route; C0 or Tlag
+only where Caladrius computes them, except on the not-available turn). A turn that is not a one-line first message has an introduction
+line; the dose is written with its unit (60 %), in another unit (20 %) or without a unit (20 %); 20 % of the introductions drop the route
+phrase (not on `not_available` rows, where the route decides the answer). 30 % of the not-available (one parameter), out-of-scope and fit
+rows are the first message (no analysis yet). Conventions of the state: the compare turns are described with analyses 2 (linear) and 3
+(lin-up/log-down) present, the re-run one after its re-run; in 40 % of the rows of the reading kinds, the fits and the out-of-scope asks
+both analyses are present (the question comes later in the conversation); a `simulate` state holds a fit as analysis 3.
+
+<!-- wordings:begin -->
+
+Wording split: seed 20261011, attempt 5.
+
+| pool | wordings | train side | held out |
+|---|---|---|---|
+| import_nca | 16 | 12 | 4 |
+| cmax_tmax | 14 | 10 | 4 |
+| clearance_volume | 13 | 10 | 3 |
+| half_life | 13 | 10 | 3 |
+| lambda_z_regression | 12 | 9 | 3 |
+| recall | 13 | 10 | 3 |
+| compare | 13 | 10 | 3 |
+| not_available | 15 | 11 | 4 |
+| nca_other | 13 | 10 | 3 |
+| fit_pk1 | 13 | 10 | 3 |
+| fit_pk2 | 13 | 10 | 3 |
+| simulate | 12 | 9 | 3 |
+| nca_oneline | 19 | 14 | 5 |
+| compare_directed | 14 | 10 | 4 |
+| not_supported | 17 | 13 | 4 |
+| intro | 13 | 10 | 3 |
+| route_oral | 6 | 4 | 2 |
+| route_iv_bolus | 6 | 4 | 2 |
+| route_iv_infusion | 6 | 4 | 2 |
+| blq_note | 5 | 4 | 1 |
+| all | 246 | 184 | 62 |
+
+| family | wordings | train side | held out | pools |
+|---|---|---|---|---|
+| formal | 48 | 32 | 16 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, nca_oneline, compare_directed, intro, route_oral, route_iv_bolus, route_iv_infusion, blq_note |
+| colloquial | 36 | 29 | 7 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, nca_oneline, compare_directed, not_supported, intro, route_oral, route_iv_bolus, route_iv_infusion, blq_note |
+| abbreviated | 41 | 33 | 8 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, nca_oneline, compare_directed, not_supported, intro, route_oral, route_iv_bolus, route_iv_infusion, blq_note |
+| implicit-route | 11 | 7 | 4 | fit_pk1, fit_pk2, nca_oneline, route_oral, route_iv_bolus, route_iv_infusion |
+| unit-in-text | 5 | 4 | 1 | fit_pk1, fit_pk2, nca_oneline, intro |
+| multi-parameter | 16 | 10 | 6 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, compare, not_available, nca_other, nca_oneline |
+| negation | 21 | 18 | 3 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, nca_oneline, compare_directed, not_supported |
+| correction-in-sentence | 18 | 16 | 2 | import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, nca_oneline, compare_directed, not_supported |
+| out-of-scope | 11 | 8 | 3 | not_supported |
+| directed-compare | 7 | 3 | 4 | compare_directed |
+| follow-up | 20 | 15 | 5 | cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall, compare, not_available, nca_other, fit_pk1, fit_pk2, simulate, not_supported |
+| no-dose | 5 | 4 | 1 | fit_pk1, fit_pk2, nca_oneline, not_supported |
+| no-route | 2 | 1 | 1 | nca_oneline |
+| method-stated | 5 | 4 | 1 | import_nca, compare, nca_oneline |
+
+Held-out wording ids: blq_note.04, clearance_volume.06, clearance_volume.10, clearance_volume.13, cmax_tmax.03, cmax_tmax.07, cmax_tmax.08, cmax_tmax.10, compare.04, compare.12, compare.13, compare_directed.01, compare_directed.04, compare_directed.10, compare_directed.12, fit_pk1.02, fit_pk1.07, fit_pk1.10, fit_pk2.08, fit_pk2.09, fit_pk2.12, half_life.02, half_life.03, half_life.08, import_nca.01, import_nca.07, import_nca.12, import_nca.14, intro.03, intro.11, intro.13, lambda_z_regression.01, lambda_z_regression.02, lambda_z_regression.09, nca_oneline.02, nca_oneline.07, nca_oneline.08, nca_oneline.12, nca_oneline.15, nca_other.08, nca_other.10, nca_other.13, not_available.04, not_available.08, not_available.09, not_available.10, not_supported.04, not_supported.06, not_supported.09, not_supported.14, recall.04, recall.09, recall.11, route_iv_bolus.01, route_iv_bolus.04, route_iv_infusion.03, route_iv_infusion.04, route_oral.04, route_oral.05, simulate.06, simulate.09, simulate.12.
+
+<!-- wordings:end -->
+
+## Exercises and splits
 
 - `bench/exercises/`: the 25 benchmark exercises (read only here). All of them go to `bench.jsonl` (`split` = `bench`, ids `be_...`,
-  `factors.bench = true`). That file is never used for training or calibration: it is the comparison set against the 27B pipeline (step 5).
+  `factors.bench = true`, train-side wordings). That file is never used for training or calibration: it is the comparison set against the
+  27B pipeline (step 5).
 - `decision/exercises/`: 75 more, 3 seeds (31415926, 27182818, 16180339) of the same plan, generated by `decision/make_exercises.py`
   with `bench/make_exercises.py` (the benchmark seed is 20261009; a draw the oracle rejects is redrawn, see `meta.json` `attempt`).
-- Split by exercise, never by row: 20 whole exercises drawn with seed 20261010 among the 75 new ones are `heldout.jsonl` (`split` = `test`);
-  the other 55 are `train.jsonl`. The harness rules are written against the benchmark and never see the held-out ones.
-- Train, held-out and bench share no exercise (tested). The held-out set is for the model's accuracy and calibration, the bench set for the
-  same-benchmark comparison of step 5.
+- **By exercise**: 20 whole exercises drawn with seed 20261010 among the 75 new ones are held out; the other 55 are train exercises.
+- **By wording** (v2): in every pool of `wordings.json`, round(25 %) of the wordings (at least one) drawn with seed 20261011 are held out
+  and never appear in a row of `train.jsonl`, `heldout_exercises.jsonl` or `bench.jsonl`; the draw is redrawn until every family has
+  wordings on both sides, every parameter is asked by a wording on both sides, and every kind keeps, for every route, enough train-side
+  wordings and at least one held-out one (attempt number in the block above). The held-out-wording rows take their introduction, route
+  phrase and BLQ note from the held-out side too.
+- Files (`split` = `test` and ids `te_...` unique over the three held-out files; `factors.file` names the file):
+
+  | file | exercises | wordings | rows per exercise |
+  |---|---|---|---|
+  | `train.jsonl` | 55 train | train side + scripted | 46 (8 scripted + 38 paraphrases) |
+  | `heldout_exercises.jsonl` | 20 held out | train side + scripted | 46 |
+  | `heldout_wordings.jsonl` | 55 train | held out | 15 (one per kind) |
+  | `heldout_both.jsonl` | 20 held out | held out | up to 30 (two per kind when two held-out wordings fit) |
+  | `bench.jsonl` | the 25 of the benchmark | train side + scripted | 46 |
+
+  `heldout_exercises` measures new exercises in known wordings (the v1 measure, 99.9 % in v1), `heldout_wordings` known exercises in
+  unseen wordings, `heldout_both` both unseen. Tested: no held-out wording id (request, introduction, route phrase, BLQ note) in a
+  train-side row and no held-out request sentence in train; no exercise shared between train / held-out / bench; every `analysis` option
+  (with `not_supported`), every `route`, `auc_method`, both pair directions and every `asked_*` true in train and in each held-out file.
+- The previous `heldout.jsonl` (v1) is no longer written; a copy left in `decision/data/` is stale (the Bonsai baseline of 2026-10-10
+  reads it).
 
 ## Regenerate
 
 ```
 python decision/make_exercises.py     # only to rebuild decision/exercises/ (needs caladrius-mcp, see apothicaire.MCP_BIN); byte-identical for the same engine
-python decision/make_dataset.py       # recreates decision/data/train.jsonl, heldout.jsonl and bench.jsonl and the counts block below; about 10 s, no engine needed
-python -m unittest discover -s tests -t .     # whole suite (about 45 s); only this file: python -m unittest tests.test_decision_dataset
+python decision/make_dataset.py       # recreates the five files of decision/data/ and the two generated blocks of this README; about 3 s, no engine needed
+python -m unittest discover -s tests -t .     # whole suite; only this file: python -m unittest tests.test_decision_dataset
 ```
 
-The tests are `unittest`-based like the others (pytest is not installed here, but collects them). `decision/data/` is git-ignored (22 MB,
-deterministic: regeneration is byte-identical); the exercises are versioned.
+The tests are `unittest`-based like the others (pytest is not installed here, but collects them). `decision/data/` is git-ignored
+(deterministic: regeneration is byte-identical); the exercises and `wordings.json` are versioned.
 
 ## Step 2: zero-shot baseline
 
@@ -114,176 +202,188 @@ Per question (held-out rows every 6th, 600M / 3B): `analysis` 68.3 / 90.0 %, `pa
 
 ## Counts (class balance)
 
+v1 (2026-10-09), for the record: three files, split by exercise only, 83 distinct request sentences (4 to 5 hand-written paraphrases per
+kind plus the scripted ones), every held-out request also a train request: `train.jsonl` 1980 rows / 55 exercises, `heldout.jsonl` 720 / 20,
+`bench.jsonl` 900 / 25; `analysis` in train: none_needed 1155, nca, compare, fit_pk1, fit_pk2, simulate 165 each, no `not_supported` and no
+`3+2` row. The trained 0.8B scored 99.9 % on that held-out file and 4 / 74 whole requests right on the reviewer's set (Step 6).
+
+v2 (2026-10-10), generated:
+
 <!-- counts:begin -->
 
-| file | rows | exercises |
-|---|---|---|
-| train.jsonl | 1980 | 55 |
-| heldout.jsonl | 720 | 20 |
-| bench.jsonl | 900 | 25 |
+| file | rows | exercises | request wordings (scripted ones counted once per kind) |
+|---|---|---|---|
+| train.jsonl | 2530 | 55 | 166 |
+| heldout_exercises.jsonl | 920 | 20 | 164 |
+| heldout_wordings.jsonl | 825 | 55 | 52 |
+| heldout_both.jsonl | 593 | 20 | 52 |
+| bench.jsonl | 1150 | 25 | 165 |
 
 `analysis`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| compare | 165 | 60 | 75 |
-| fit_pk1 | 165 | 60 | 75 |
-| fit_pk2 | 165 | 60 | 75 |
-| nca | 165 | 60 | 75 |
-| none_needed | 1155 | 420 | 525 |
-| simulate | 165 | 60 | 75 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| compare | 330 | 120 | 110 | 80 | 150 |
+| fit_pk1 | 165 | 60 | 55 | 40 | 75 |
+| fit_pk2 | 165 | 60 | 55 | 40 | 75 |
+| nca | 385 | 140 | 110 | 80 | 175 |
+| none_needed | 1155 | 420 | 385 | 273 | 525 |
+| not_supported | 165 | 60 | 55 | 40 | 75 |
+| simulate | 165 | 60 | 55 | 40 | 75 |
 
 `route`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| iv_bolus | 520 | 231 | 241 |
-| iv_infusion | 180 | 89 | 95 |
-| oral | 968 | 314 | 448 |
-| unknown | 312 | 86 | 116 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| iv_bolus | 670 | 285 | 214 | 157 | 313 |
+| iv_infusion | 234 | 118 | 76 | 71 | 117 |
+| oral | 1261 | 408 | 406 | 246 | 547 |
+| unknown | 365 | 109 | 129 | 119 | 173 |
 
 `auc_method`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| lin_up_log_down | 165 | 60 | 75 |
-| linear | 165 | 60 | 75 |
-| not_applicable | 1650 | 600 | 750 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| lin_up_log_down | 204 | 75 | 55 | 40 | 94 |
+| linear | 346 | 125 | 110 | 80 | 156 |
+| not_applicable | 1980 | 720 | 660 | 473 | 900 |
 
 `asked_cmax`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1672 | 605 | 757 |
-| true | 308 | 115 | 143 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2210 | 799 | 696 | 508 | 996 |
+| true | 320 | 121 | 129 | 85 | 154 |
 
 `asked_tmax`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1679 | 608 | 760 |
-| true | 301 | 112 | 140 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2201 | 806 | 752 | 546 | 1012 |
+| true | 329 | 114 | 73 | 47 | 138 |
 
 `asked_c0`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1844 | 674 | 836 |
-| true | 136 | 46 | 64 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2398 | 876 | 789 | 566 | 1092 |
+| true | 132 | 44 | 36 | 27 | 58 |
 
 `asked_auclast`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1621 | 587 | 736 |
-| true | 359 | 133 | 164 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2076 | 756 | 698 | 514 | 945 |
+| true | 454 | 164 | 127 | 79 | 205 |
 
 `asked_aucinf`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1743 | 637 | 788 |
-| true | 237 | 83 | 112 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2273 | 840 | 730 | 536 | 1035 |
+| true | 257 | 80 | 95 | 57 | 115 |
 
 `asked_lambda_z`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1782 | 648 | 812 |
-| true | 198 | 72 | 88 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2314 | 847 | 785 | 559 | 1064 |
+| true | 216 | 73 | 40 | 34 | 86 |
 
 `asked_half_life`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1669 | 609 | 759 |
-| true | 311 | 111 | 141 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2200 | 805 | 682 | 487 | 1002 |
+| true | 330 | 115 | 143 | 106 | 148 |
 
 `asked_cl`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1671 | 608 | 760 |
-| true | 309 | 112 | 140 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2245 | 831 | 766 | 552 | 1021 |
+| true | 285 | 89 | 59 | 41 | 129 |
 
 `asked_vz`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1673 | 613 | 763 |
-| true | 307 | 107 | 137 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2250 | 819 | 751 | 548 | 1030 |
+| true | 280 | 101 | 74 | 45 | 120 |
 
 `asked_mrt`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1751 | 636 | 798 |
-| true | 229 | 84 | 102 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2336 | 850 | 734 | 532 | 1058 |
+| true | 194 | 70 | 91 | 61 | 92 |
 
 `asked_aucpext`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1861 | 676 | 848 |
-| true | 119 | 44 | 52 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2385 | 866 | 794 | 571 | 1085 |
+| true | 145 | 54 | 31 | 22 | 65 |
 
 `asked_lambda_z_points`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1839 | 669 | 837 |
-| true | 141 | 51 | 63 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2409 | 878 | 784 | 557 | 1099 |
+| true | 121 | 42 | 41 | 36 | 51 |
 
 `asked_adj_r2`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1862 | 676 | 844 |
-| true | 118 | 44 | 56 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2392 | 863 | 775 | 557 | 1086 |
+| true | 138 | 57 | 50 | 36 | 64 |
 
 `asked_tlag`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1913 | 692 | 872 |
-| true | 67 | 28 | 28 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2455 | 886 | 805 | 584 | 1115 |
+| true | 75 | 34 | 20 | 9 | 35 |
 
 `dose_has_unit`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 323 | 131 | 144 |
-| true | 1657 | 589 | 756 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 461 | 171 | 172 | 128 | 207 |
+| true | 2069 | 749 | 653 | 465 | 943 |
 
 `is_not_available`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| false | 1815 | 660 | 825 |
-| true | 165 | 60 | 75 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| false | 2365 | 860 | 770 | 560 | 1075 |
+| true | 165 | 60 | 55 | 33 | 75 |
 
 `compare_pair`
 
-| answer | train | heldout | bench |
-|---|---|---|---|
-| 2+3 | 165 | 60 | 75 |
-| not_applicable | 1815 | 660 | 825 |
+| answer | train | heldout_exercises | heldout_wordings | heldout_both | bench |
+|---|---|---|---|---|---|
+| 2+3 | 238 | 89 | 79 | 55 | 113 |
+| 3+2 | 92 | 31 | 31 | 25 | 37 |
+| not_applicable | 2200 | 800 | 715 | 513 | 1000 |
 
 <!-- counts:end -->
 
 ## Limits
 
-- The turns are the scripted ones of the benchmark plus 4 extra kinds: the questions are templates, the dataset teaches the model the
-  intent behind a fixed set of sentences, not free French. The paraphrases (4 to 5 per kind, 5 introductions) are written by hand, no
-  model; they vary the wording, not the register or the typos of real students.
-- `none_needed` is 58 % of the `analysis` answers (1155 of 1980 train rows): not rebalanced here. If the model over-predicts it, step 3
-  can weight or subsample these rows.
-- Class balance is poor by construction: `is_not_available` is true on 1 row out of 12, `compare_pair` is `not_applicable` on 11 out of 12.
-  Each `asked_<key>` is false on most rows (true on 3 % of the train rows for `asked_tlag`, 6 to 7 % for `asked_adj_r2`, `asked_aucpext`, `asked_c0` and `asked_lambda_z_points`, 10 to 18 % for the others).
-  Rows by number of true `asked_*` (train / held-out / bench): 0 true 660 / 240 / 300, 1 true 687 / 251 / 309, 2 true 436 / 156 / 202,
-  3 true 32 / 13 / 14, 9 true 165 / 60 / 75 (the first request).
+- The requests are still templates written by one author: 210 request wordings and 36 slot wordings, filled with the exercise's values.
+  The held-out wordings are new sentences, not new authors; the reviewer's 74 requests remain the test of another writer.
+- `none_needed` is 46 % of the `analysis` answers of train (1155 of 2530): not rebalanced. `nca` is 15 % (385, 220 of them one-line
+  first messages).
+- Class balance is poor by construction: `is_not_available` is true on 1 row out of 15 (165 of 2530), `compare_pair` is `not_applicable`
+  on 87 % of the train rows and `3+2` on 92. Each `asked_<key>` is false on most rows (true on 3 % of the train rows for `asked_tlag`, 5 to
+  6 % for `asked_c0`, `asked_lambda_z_points`, `asked_adj_r2`, `asked_aucpext`, 8 to 18 % for the others). Rows by number of true
+  `asked_*` in train: 0 true 863, 1 true 927, 2 true 485, 3 true 126, 4 true 32, 9 true 97.
 - Labels are decided by the generator, not by annotators: one-hot gold, so calibration on this set measures the model against a
-  certain truth, not against annotator disagreement; ambiguous requests (a user who gives no AUC method, no unit and no route) are not covered.
+  certain truth, not against annotator disagreement. Conventions a reader may dispute: an NCA request that names no method is labelled
+  `linear`; a directed compare of two existing analyses has `auc_method` = not_applicable (the reviewer's gold says lin_up_log_down on
+  ood-015 and ood-072); "Cl/F" or "Vd/F" written after an IV dose is labelled `cl` / `vz`.
 - `route` = `unknown` and `dose_has_unit` = false come from synthetic omissions in the sentence, not from the exercise data.
 - Exercises are single-subject, one dose, simulated one- and two-compartment models with proportional noise; no multi-subject files,
   no wrong-unit CSV headers, no data error.
@@ -783,19 +883,25 @@ class `TestReviewDefects`).
 **Dataset.** `analysis` gains `not_supported` and `compare_pair` the reversed pairs. The generator writes no out-of-scope request and no
 reversed compare, so no row is relabelled: regeneration gives the same 1980 / 720 / 900 rows with the same ids, states, factors and labels,
 only `questions` and the zero probabilities of the new options in `gold` differ, and the counts block is unchanged. The test that every
-declared option has train rows lists these two as the known gaps.
+declared option has train rows lists these two as the known gaps. **Closed by dataset v2** (same day, Step 1 above): out-of-scope,
+directed-compare, one-line, implied-route and dose-without-unit wordings, and a wording-level split.
 
 **Retraining.** The trained 0.8B must be retrained before any trained figure is quoted on this schema: its prompt now lists 7 `analysis`
 options and both pair orders (the option numbering shifts), and it never saw a positive `not_supported` or `3+2`. Retraining on the current
 generator would only teach it never to choose them: the generator needs out-of-scope and reversed-compare wordings first (Step 6 shows the
-wording problem is wider anyway). Not re-measured here (no GPU used).
+wording problem is wider anyway). Not re-measured here (no GPU used). Dataset v2 has them; the retraining is on `train.jsonl` v2.
 
 **Ceiling** (`python decision/run_harness.py --decider gold`, [`runs/2026-10-10-harness-gold-asked/`](runs/2026-10-10-harness-gold-asked/report.md)):
 **175 / 175 oracle turns, 558 / 558 numbers**, 0 / 250 invalid or failed calls, 0 / 75 deviating calls, gate 0 / 778 unverified, 0.002 s
-per turn. The units session made 36 calls in the 18 exercises whose dose is mg or µg against ng/mL. `score_turn` counts 178 / 200 turns
-correct: the 22 others are the import and clearance turns of the 11 mg-against-ng/mL exercises, where its `must_not` rule ("CL x 10^3",
-"Vz x 10^3", written against a model that converts by itself) fires on Caladrius's L/h and L values. The gate verifies those values against
-the units session. These are the only 22 scorer/oracle disagreements.
+per turn. The units session made 36 calls in the 18 exercises whose dose is mg or µg against ng/mL. `score_turn` first counted 178 / 200
+turns correct: the 22 others were the import and clearance turns of the 11 mg-against-ng/mL exercises, where its `must_not` rule ("CL x 10^3",
+"Vz x 10^3", written against a model that converts by itself) fired on Caladrius's L/h and L values, the only 22 scorer/oracle
+disagreements. **Fixed (2026-10-10):** `score_turn` takes the tool results of the turn and does not count a `must_not` value when every
+number of the answer that hits it is written verbatim in one of them (`forbidden_from_tools` lists it); `run_harness.py` passes the turn's
+calls and the units session's results (a cache: the clearance turn reuses the conversion of turn 1) and now stores the units session's
+results in `unit_calls`, which `run_bench.py --rescore` reads. The stored run had no units-session results, so it was rerun with the gold
+decider (no model, same folder): **200 / 200 scorer turns, 175 / 175 oracle turns, 558 / 558 numbers, 0 disagreements**, 22 turns with
+`forbidden_from_tools`; `run_bench.rescore` on the stored records changes nothing. The 27B runs were not rescored.
 
 **The reviewer's 74 requests, gold decisions.** `eval_ood.py --decider gold` (outputs redirected to
 [`runs/2026-10-10-ood-gold/`](runs/2026-10-10-ood-gold/report.md); `ood/` untouched): `--no-run` 1480 / 1480 decisions, 74 / 74 rows; the
@@ -810,5 +916,8 @@ rerun from a copy outside the repository that writes nothing under `ood/` and al
 - All **10** it did not count now behave as intended. The 6 infusions with a duration in the data's unit run. ood-010 and 062 ask for the
   duration in minutes; the reviewer's expected branch was an answer, so by its letter the count is 72 / 74. ood-015 and 072 compare 3
   against 2 in the user's order.
-- `eval_ood.py` sorts a gold pair (`translate_pair`), so its rows lose the direction of ood-015 and 072, and it files `T_NOT_SUPPORTED`
-  under `refusal:not-wired` because both templates start "Cette demande (". Both need a fix in `eval_ood.py`.
+- `eval_ood.py` sorted a gold pair (`translate_pair`), so its rows lost the direction of ood-015 and 072, and it filed `T_NOT_SUPPORTED`
+  under `refusal:not-wired` because both templates start "Cette demande (". **Fixed (2026-10-10)**, with tests: the pair keeps the user's
+  order ("2+1" renumbered "3+2"), `T_NOT_SUPPORTED` is `refusal:not-supported` and a gold `not_supported` expects a refusal.
+  `ood/rows.jsonl` was not regenerated (the Bonsai run of the same day reads it): `python decision/eval_ood.py --convert-only` updates
+  the 74 rows to the current question set (7 `analysis` options, both pair orders) and the direction of ood-015 and 072.

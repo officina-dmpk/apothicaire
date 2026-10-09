@@ -32,6 +32,23 @@ class TestMatching(unittest.TestCase):
         self.assertEqual(score.score_turn("CL/F = 27 L/h", e)["forbidden"], [])      # 2 digits: could be chance
         self.assertEqual(score.score_turn("CL/F = 0,00271828", e)["forbidden"], [])
 
+    def test_forbidden_value_copied_from_a_tool_result_is_not_counted(self):
+        """2026-10-10: the decision harness prints Caladrius's own conversion ("soit 5.02147 L/h") next to the "dose unit" value; the
+        "CL x 10^3" rule must not fire on a number the engine returned in that turn, and still fires on one the answer computed."""
+        e = {"must": [{"label": "CL/F", "value": 0.00502147}], "must_not": [{"label": "CL/F x 10^3", "value": 5.02147}]}
+        ans = "CL/F : 0.00502147 dose unit/(h*ng/mL), soit 5.02147 L/h (conversion faite par Caladrius avec la dose en mg)"
+        units_session = json.dumps({"parameters": {"cl.obs": "5.02147 L/h"}})
+        s = score.score_turn(ans, e, 0, [tool_result(**{"cl.obs": "0.00502147 dose unit/(h*ng/mL)"}), units_session])
+        self.assertTrue(s["correct"]); self.assertEqual(s["forbidden"], []); self.assertEqual(s["forbidden_from_tools"], ["CL/F x 10^3"])
+        s = score.score_turn(ans, e, 0)                                                        # no tool result given: counted, as before
+        self.assertFalse(s["correct"]); self.assertEqual(s["forbidden"], ["CL/F x 10^3"]); self.assertEqual(s["forbidden_from_tools"], [])
+        s = score.score_turn(ans.replace("5.02147", "5.021"), e, 0, [units_session])           # rounded by the answer: not verbatim
+        self.assertEqual(s["forbidden"], ["CL/F x 10^3"])
+        s = score.score_turn(ans + " ; donc 5021,47 mL/h", {"must_not": [{"label": "x", "value": 5021.47}]}, 0, [units_session])
+        self.assertEqual(s["forbidden"], ["x"])                                                # converted by the answer itself
+        s = score.score_turn(ans + " ou 5,021 L/h", e, 0, [units_session])                    # one copied hit, one computed hit
+        self.assertEqual(s["forbidden"], ["CL/F x 10^3"])
+
     def test_score_turn_must_words_and_new_numbers(self):
         e = {"must": [{"label": "Cmax", "value": 8150.0}, {"label": "Tmax", "value": 2.0}],
              "words": [{"label": "unit", "pattern": r"ng/mL"}]}
@@ -109,6 +126,41 @@ class TestTaxonomy(unittest.TestCase):
         t0 = time.time(); out = score.classify_all(f, allowed)
         self.assertEqual(len(out), 2); self.assertTrue(set(out) <= set(score.CLASSES))
         self.assertLess(time.time() - t0, 15)
+
+
+class TestRescoreWithToolResults(unittest.TestCase):
+    """bench/run_bench.rescore passes each stored turn's tool results to score_turn: the turn's `tool_calls` and, for a decision-harness
+    run, the units session's results (`unit_calls`) of that turn and the earlier ones (the harness caches the conversion of turn 1 and
+    shows it again on the clearance turn)."""
+    def test_rescore_skips_a_must_not_value_returned_by_the_units_session(self):
+        import tempfile
+        from bench import make_exercises as mk, run_bench as rb, scripts
+        meta, csv = mk.load(os.path.join(mk.OUT, "ex02_oral_1"))                       # 400 mg against ng/mL
+        script = scripts.build_script(meta, csv)
+        cl, vz = scripts.truth_value(meta, "cl.obs"), scripts.truth_value(meta, "vz.obs")
+        conv = lambda x: f"{x * 1000:.6g}"                                             # what Caladrius returns with the units (L/h, L)
+        line = lambda st: chr(10).join(f"- {m['label']} : {m['value']:.6g}" for m in st["expect"].get("must", []))
+        answers = {"import_nca": line(script[0]) + f"{chr(10)}CL/F soit {conv(cl)} L/h ; Vz/F soit {conv(vz)} L",
+                   "clearance_volume": line(script[2]) + f"{chr(10)}soit {conv(cl)} L/h et {conv(vz)} L"}
+        units_result = json.dumps({"parameters": {"cl.obs": f"{conv(cl)} L/h", "vz.obs": f"{conv(vz)} L"}})
+        def record(with_shown):
+            turns = []
+            for k, st in enumerate(script):
+                t = {"exercise": meta["id"], "turn": k + 1, "kind": st["kind"], "answer": answers.get(st["kind"], "pas calculé"),
+                     "tool_calls": [], "numbers_unverified_after": 0, "score": {"correct": None}}
+                if k == 0: t["unit_calls"] = [{"name": "nca_run", "ok": True, **({"shown": units_result} if with_shown else {})}]
+                turns.append(t)
+            return {"id": meta["id"], "turns": turns}
+        with tempfile.TemporaryDirectory() as tmp:
+            for with_shown in (True, False):
+                with open(os.path.join(tmp, meta["id"] + ".json"), "w", encoding="utf-8") as f: json.dump(record(with_shown), f)
+                rb.rescore(tmp, [meta["id"]])
+                with open(os.path.join(tmp, meta["id"] + ".json"), encoding="utf-8") as f: turns = json.load(f)["turns"]
+                for k in (0, 2):
+                    sc = turns[k]["score"]
+                    self.assertEqual(sc["missing"], [], turns[k]["kind"])
+                    if with_shown: self.assertEqual((sc["forbidden"], sorted(sc["forbidden_from_tools"])), ([], ["CL/F x 10^3", "Vz/F x 10^3"]))
+                    else: self.assertEqual(sorted(sc["forbidden"]), ["CL/F x 10^3", "Vz/F x 10^3"])
 
 if __name__ == "__main__":
     unittest.main()

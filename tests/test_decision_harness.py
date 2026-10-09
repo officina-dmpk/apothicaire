@@ -520,13 +520,19 @@ class TestRealEngine(unittest.TestCase):
         self.assertEqual([t.get("error") for t in turns], [None] * 8)
         self.assertTrue(all(t["oracle"]["correct"] for t in turns if t.get("oracle")), [t["answer"] for t in turns])
         # 200 mg against ng/mL: CL and Vz also carry Caladrius's conversion (L/min, L), which the scorer's must_not rule (CL x 10^3,
-        # written against a model converting by itself) reads as a conversion; nothing else may be wrong, and the converted values are
+        # written against a model converting by itself) would read as a conversion; since 2026-10-10 the scorer gets the turn's tool
+        # results and the units session's (cached from turn 1 and reused on the clearance turn) and does not count a value copied
+        # verbatim from them, so every turn is correct; the converted values are
         # engine values (gate: 0 unverified, the units session is a source)
         for t in turns:
             sc = t["score"]
-            self.assertEqual((sc["missing"], sc["words_missing"], sc["new_numbers"]), ([], [], 0), t["kind"])
-            self.assertLessEqual(set(sc["forbidden"]), {"CL x 10^3", "Vz x 10^3"}, t["kind"])
+            self.assertEqual((sc["missing"], sc["forbidden"], sc["words_missing"], sc["new_numbers"]), ([], [], [], 0), t["kind"])
+            self.assertTrue(sc["correct"], t["kind"])
+            self.assertLessEqual(set(sc["forbidden_from_tools"]), {"CL x 10^3", "Vz x 10^3"}, t["kind"])
+        self.assertEqual(set(turns[0]["score"]["forbidden_from_tools"]), {"CL x 10^3", "Vz x 10^3"})
+        self.assertEqual(set(turns[2]["score"]["forbidden_from_tools"]), {"CL x 10^3", "Vz x 10^3"})            # clearance turn, cache
         self.assertEqual([c["name"] for c in turns[0]["unit_calls"]], ["data_import", "nca_run"])
+        self.assertIn("0.115015 L/min", turns[0]["unit_calls"][1]["shown"])                     # the units session's result is recorded
         self.assertEqual(turns[0]["unit_calls"][1]["args"]["options"]["units"], {"time": "min", "concentration": "ng/mL", "dose": "mg"})
         self.assertIn("soit 0.115015 L/min (conversion faite par Caladrius avec la dose en mg)", turns[0]["answer"])
         self.assertEqual(sum(t["numbers_unverified_after"] for t in turns), 0)

@@ -124,7 +124,7 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
             mem_calls = sum(1 for m in msgs if m["role"] == "tool_call" for c in optchat._calls_of(m) if c["name"] in ("zoom", "read_message"))
             tool_recs = tool_records(ag.tool_log[n_log:], meta, csv_text, set(ag.mcp.tools))
             st_resolved, usage = resolve_turn(meta, t, turns, tool_recs)
-            sc = score.score_turn(answer, st_resolved["expect"], after.get("numbers_unverified", 0))
+            sc = score.score_turn(answer, st_resolved["expect"], after.get("numbers_unverified", 0), [c["shown"] for c in ag.tool_log[n_log:]])
             rec.update(
                 answer=ans, wall_s=round(wall, 1), prompt_tokens=st["prompt_tokens"], rounds=st["rounds"],
                 numbers_total_before=before.get("numbers_total", 0), numbers_unverified_before=before.get("numbers_unverified", 0),
@@ -417,7 +417,9 @@ def rescore(run_dir, ids):
             ans = t["answer"].split(BADGE_MARK)[0]
             st, usage = resolve_turn(meta, st, rec["turns"][:k], t.get("tool_calls", []))
             if usage is not None: t["compare_tool"] = usage
-            new = score.score_turn(ans, st["expect"], t["numbers_unverified_after"])
+            # the turn's tool results; decision harness runs also have the units session's results (`unit_calls`), a cache reused later
+            shown = [c.get("shown", "") for c in t.get("tool_calls", [])] + [c.get("shown", "") for u in rec["turns"][:k + 1] for c in u.get("unit_calls", [])]
+            new = score.score_turn(ans, st["expect"], t["numbers_unverified_after"], shown)
             if new != t["score"]: changed.append((i, t["turn"], t["kind"], t["score"]["correct"], new["correct"]))
             t["score"] = new
         before = [(t.get("oracle") or {}).get("correct") for t in rec["turns"]]

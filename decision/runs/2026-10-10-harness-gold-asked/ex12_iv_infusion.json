@@ -11,7 +11,7 @@
   "unit": "ug"
  },
  "blq": false,
- "wall_s": 0.915,
+ "wall_s": 0.939,
  "decider": "gold-asked",
  "taxonomy_chance_baseline": {
   "3": {
@@ -37,7 +37,7 @@
    "kind": "import_nca",
    "question": "Voici les données d'un exercice (500 µg en perfusion intraveineuse de 90 min ; temps en min, concentration en ng/mL) :\ntime (min),conc (ng/mL)\n0,0\n30,1.561\n90,4.479\n130,4.256\n280,2.98\n590,2.157\n1200,1.004\n2600,0.1363\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL, Vz et MRT, avec les unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 500 µg, perfusion intraveineuse de 90 min) :\n- Cmax : 4.479 ng/mL\n- Tmax : 90 min\n- AUC(0-tlast) : 3480.57 min*ng/mL\n- λz (constante d'élimination terminale) : 0.00138303 1/min\n- t½ (demi-vie terminale) : 501.178 min\n- AUC(0-inf) : 3579.12 min*ng/mL\n- MRT (temps moyen de résidence) : 692.201 min\n- CL (clairance) : 0.139699 dose unit/(min*ng/mL), soit 0.139699 L/min (conversion faite par Caladrius avec la dose en µg)\n- Vz (volume de distribution) : 101.009 dose unit/(ng/mL), soit 101.009 L (conversion faite par Caladrius avec la dose en µg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.014,
+   "wall_s": 0.016,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 13,
@@ -108,6 +108,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 9,
@@ -160,7 +161,8 @@
        }
       ]
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\n  \"delimiter\": \",\",\n  \"notes\": [\n    \"unit `min` read from the header of column `time`\",\n    \"unit `ng/mL` read from the header of column `conc`\"\n  ],\n  \"worksheet\": {\n    \"columns\": [\n      {\n        \"max\": 2600.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"time\",\n        \"role\": \"time\",\n        \"type\": \"number\",\n        \"unit\": \"min\"\n      },\n      {\n        \"max\": 4.479,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"conc\",\n        \"role\": \"concentration\",\n        \"type\": \"number\",\n        \"unit\": \"ng/mL\"\n      }\n    ],\n    \"derived_units\": {\n      \"auc\": \"min*ng/mL\",\n      \"aumc\": \"min^2*ng/mL\",\n      \"half_life\": \"min\",\n      \"lambda_z\": \"1/min\",\n      \"mrt\": \"min\"\n    },\n    \"id\": 1,\n    \"name\": \"donnees\",\n    \"revision\": 0,\n    \"rows\": 8,\n    \"subjects\": [\n      \"1\"\n    ],\n    \"unit_warnings\": [\n      {\n        \"code\": \"missing_unit\",\n        \"message\": \"the dose has no unit; derived units (AUC, clearance, volume) cannot be named\"\n      }\n    ]\n  }\n}"
     },
     {
      "name": "nca_run",
@@ -181,7 +183,8 @@
        }
       }
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\"1\":{\"cmax\":\"4.479 ng/mL\",\"tmax\":\"90 min\",\"tfirst\":\"30 min\",\"tlast\":\"2600 min\",\"clast.obs\":\"0.1363 ng/mL\",\"auclast\":\"3480.57 min·ng/mL\",\"aucall\":\"3480.57 min·ng/mL\",\"aumclast\":\"2311040 min²·ng/mL\",\"aumcall\":\"2311040 min²·ng/mL\",\"lambda.z\":\"0.00138303 1/min\",\"r.squared\":\"0.999161\",\"adj.r.squared\":\"0.998321\",\"lambda.z.time.first\":\"590 min\",\"lambda.z.time.last\":\"2600 min\",\"lambda.z.n.points\":\"3\",\"clast.pred\":\"0.138238 ng/mL\",\"half.life\":\"501.178 min\",\"span.ratio\":\"4.01055\",\"aucinf.obs\":\"3579.12 min·ng/mL\",\"aucinf.pred\":\"3580.52 min·ng/mL\",\"aumcinf.obs\":\"2638530 min²·ng/mL\",\"aumcinf.pred\":\"2643180 min²·ng/mL\",\"aucpext.obs\":\"2.75351 %\",\"aucpext.pred\":\"2.79157 %\",\"aumcpext.obs\":\"12.4119 %\",\"aumcpext.pred\":\"12.5662 %\",\"mrt.iv.last\":\"618.983 min\",\"mrt.iv.obs\":\"692.201 min\",\"mrt.iv.pred\":\"693.213 min\",\"cl.obs\":\"0.139699 L/min\",\"cl.pred\":\"0.139645 L/min\",\"vz.obs\":\"101.009 L\",\"vz.pred\":\"100.97 L\",\"vss.iv.obs\":\"96.6999 L\",\"vss.iv.pred\":\"96.8034 L\",\"vss.obs\":\"102.986 L\",\"vss.pred\":\"103.087 L\",\"vss.iv.last\":\"88.9199 L\",\"cmax.dn\":\"0.008958 (ng/mL)/ug\",\"clast.obs.dn\":\"0.0002726 (ng/mL)/ug\",\"auclast.dn\":\"6.96113 (min·ng/mL)/ug\",\"aucall.dn\":\"6.96113 (min·ng/mL)/ug\",\"aucinf.obs.dn\":\"7.15823 (min·ng/mL)/ug\",\"aucinf.pred.dn\":\"7.16104 (min·ng/mL)/ug\",\"aumclast.dn\":\"4622.07 (min²·ng/mL)/ug\",\"aumcall.dn\":\"4622.07 (min²·ng/mL)/ug\",\"aumcinf.obs.dn\":\"5277.05 (min²·ng/mL)/ug\",\"aumcinf.pred.dn\":\"5286.37 (min²·ng/mL)/ug\"}}"
     }
    ],
    "oracle": {
@@ -309,7 +312,7 @@
    "kind": "cmax_tmax",
    "question": "Quels sont la Cmax et le Tmax ? Donne-les avec leurs unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 500 µg, perfusion intraveineuse de 90 min) :\n- Cmax : 4.479 ng/mL\n- Tmax : 90 min\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 4,
@@ -341,6 +344,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -418,7 +422,7 @@
    "kind": "clearance_volume",
    "question": "Donne-moi CL et Vz avec leurs unités, exactement comme Caladrius les rapporte.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 500 µg, perfusion intraveineuse de 90 min) :\n- CL (clairance) : 0.139699 dose unit/(min*ng/mL), soit 0.139699 L/min (conversion faite par Caladrius avec la dose en µg)\n- Vz (volume de distribution) : 101.009 dose unit/(ng/mL), soit 101.009 L (conversion faite par Caladrius avec la dose en µg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 6,
@@ -450,6 +454,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -561,6 +566,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -670,6 +676,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -778,6 +785,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 1,
@@ -901,6 +909,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 4,
@@ -1046,7 +1055,7 @@
    "kind": "not_available",
    "question": "Quel est le temps de latence Tlag ?",
    "answer": "Tlag (temps de latence) n'est pas calculé par Caladrius pour cette voie d'administration : perfusion intraveineuse. Raison donnée par Caladrius : « not defined for this route of administration ».",
-   "wall_s": 0.002,
+   "wall_s": 0.001,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 0,
@@ -1075,6 +1084,7 @@
     "found": [],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 0,

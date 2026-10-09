@@ -11,7 +11,7 @@
   "unit": "mg"
  },
  "blq": false,
- "wall_s": 1.141,
+ "wall_s": 1.151,
  "decider": "gold-asked",
  "taxonomy_chance_baseline": {
   "3": {
@@ -37,7 +37,7 @@
    "kind": "import_nca",
    "question": "Voici les données d'un exercice (300 mg en bolus intraveineux ; temps en min, concentration en ng/mL) :\ntime (min),conc (ng/mL)\n130,2328\n190,2424\n270,2089\n390,1993\n570,1381\n830,906.2\n1200,550\n1800,265.5\n2600,92.19\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL, Vz et MRT, avec les unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, bolus intraveineux) :\n- Cmax : 2424 ng/mL\n- Tmax : 190 min\n- AUC(0-tlast) : 2128760 min*ng/mL\n- λz (constante d'élimination terminale) : 0.00128362 1/min\n- t½ (demi-vie terminale) : 539.995 min\n- AUC(0-inf) : 2200580 min*ng/mL\n- MRT (temps moyen de résidence) : 744.022 min\n- CL (clairance) : 0.000136328 dose unit/(min*ng/mL), soit 0.136328 L/min (conversion faite par Caladrius avec la dose en mg)\n- Vz (volume de distribution) : 0.106206 dose unit/(ng/mL), soit 106.206 L (conversion faite par Caladrius avec la dose en mg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.016,
+   "wall_s": 0.014,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 12,
@@ -103,7 +103,8 @@
      "MRT"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL x 10^3",
      "Vz x 10^3"
     ],
@@ -111,7 +112,7 @@
     "new_numbers": 0,
     "n_must": 9,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -159,7 +160,8 @@
        }
       ]
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\n  \"delimiter\": \",\",\n  \"notes\": [\n    \"unit `min` read from the header of column `time`\",\n    \"unit `ng/mL` read from the header of column `conc`\"\n  ],\n  \"worksheet\": {\n    \"columns\": [\n      {\n        \"max\": 2600.0,\n        \"min\": 130.0,\n        \"missing\": 0,\n        \"name\": \"time\",\n        \"role\": \"time\",\n        \"type\": \"number\",\n        \"unit\": \"min\"\n      },\n      {\n        \"max\": 2424.0,\n        \"min\": 92.19,\n        \"missing\": 0,\n        \"name\": \"conc\",\n        \"role\": \"concentration\",\n        \"type\": \"number\",\n        \"unit\": \"ng/mL\"\n      }\n    ],\n    \"derived_units\": {\n      \"auc\": \"min*ng/mL\",\n      \"aumc\": \"min^2*ng/mL\",\n      \"half_life\": \"min\",\n      \"lambda_z\": \"1/min\",\n      \"mrt\": \"min\"\n    },\n    \"id\": 1,\n    \"name\": \"donnees\",\n    \"revision\": 0,\n    \"rows\": 9,\n    \"subjects\": [\n      \"1\"\n    ],\n    \"unit_warnings\": [\n      {\n        \"code\": \"missing_unit\",\n        \"message\": \"the dose has no unit; derived units (AUC, clearance, volume) cannot be named\"\n      }\n    ]\n  }\n}"
     },
     {
      "name": "nca_run",
@@ -176,7 +178,8 @@
        }
       }
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\"1\":{\"c0\":\"2328 ng/mL\",\"cmax\":\"2424 ng/mL\",\"tmax\":\"190 min\",\"tfirst\":\"130 min\",\"tlast\":\"2600 min\",\"clast.obs\":\"92.19 ng/mL\",\"auclast\":\"2128760 min·ng/mL\",\"aucall\":\"2128760 min·ng/mL\",\"aumclast\":\"1394590000 min²·ng/mL\",\"aumcall\":\"1394590000 min²·ng/mL\",\"lambda.z\":\"0.00128362 1/min\",\"r.squared\":\"0.999669\",\"adj.r.squared\":\"0.999504\",\"lambda.z.time.first\":\"830 min\",\"lambda.z.time.last\":\"2600 min\",\"lambda.z.n.points\":\"4\",\"clast.pred\":\"92.9602 ng/mL\",\"half.life\":\"539.995 min\",\"span.ratio\":\"3.27781\",\"aucinf.obs\":\"2200580 min·ng/mL\",\"aucinf.pred\":\"2201180 min·ng/mL\",\"aumcinf.obs\":\"1637280000 min²·ng/mL\",\"aumcinf.pred\":\"1639310000 min²·ng/mL\",\"aucpext.obs\":\"3.26371 %\",\"aucpext.pred\":\"3.29008 %\",\"aumcpext.obs\":\"14.8225 %\",\"aumcpext.pred\":\"14.9278 %\",\"mrt.iv.last\":\"655.121 min\",\"mrt.iv.obs\":\"744.022 min\",\"mrt.iv.pred\":\"744.74 min\",\"cl.obs\":\"0.136328 L/min\",\"cl.pred\":\"0.136291 L/min\",\"vz.obs\":\"106.206 L\",\"vz.pred\":\"106.177 L\",\"vss.iv.obs\":\"101.431 L\",\"vss.iv.pred\":\"101.501 L\",\"vss.obs\":\"101.431 L\",\"vss.pred\":\"101.501 L\",\"vss.iv.last\":\"92.3243 L\",\"cmax.dn\":\"8.08 (ng/mL)/mg\",\"clast.obs.dn\":\"0.3073 (ng/mL)/mg\",\"auclast.dn\":\"7095.86 (min·ng/mL)/mg\",\"aucall.dn\":\"7095.86 (min·ng/mL)/mg\",\"aucinf.obs.dn\":\"7335.26 (min·ng/mL)/mg\",\"aucinf.pred.dn\":\"7337.27 (min·ng/mL)/mg\",\"aumclast.dn\":\"4648650 (min²·ng/mL)/mg\",\"aumcall.dn\":\"4648650 (min²·ng/mL)/mg\",\"aumcinf.obs.dn\":\"5457600 (min²·ng/mL)/mg\",\"aumcinf.pred.dn\":\"5464360 (min²·ng/mL)/mg\"}}"
     }
    ],
    "oracle": {
@@ -304,7 +307,7 @@
    "kind": "cmax_tmax",
    "question": "Quelles sont la concentration initiale C0 (extrapolée), la Cmax et le Tmax ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, bolus intraveineux) :\n- C0 (concentration initiale extrapolée) : 2328 ng/mL\n- Cmax : 2424 ng/mL\n- Tmax : 190 min\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 4,
@@ -337,6 +340,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 3,
@@ -426,7 +430,7 @@
    "kind": "clearance_volume",
    "question": "Donne-moi CL et Vz avec leurs unités, exactement comme Caladrius les rapporte.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, bolus intraveineux) :\n- CL (clairance) : 0.000136328 dose unit/(min*ng/mL), soit 0.136328 L/min (conversion faite par Caladrius avec la dose en mg)\n- Vz (volume de distribution) : 0.106206 dose unit/(ng/mL), soit 106.206 L (conversion faite par Caladrius avec la dose en mg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 5,
@@ -457,7 +461,8 @@
      "Vz"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL x 10^3",
      "Vz x 10^3"
     ],
@@ -465,7 +470,7 @@
     "new_numbers": 0,
     "n_must": 2,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -540,7 +545,7 @@
    "kind": "half_life",
    "question": "Quelle est la demi-vie terminale et quel pourcentage de l'AUC est extrapolé ? Est-ce acceptable ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, bolus intraveineux) :\n- t½ (demi-vie terminale) : 539.995 min\n- AUC extrapolée (%) : 3.26371 %\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -572,6 +577,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -649,7 +655,7 @@
    "kind": "lambda_z_regression",
    "question": "Combien de points ont servi à la régression de λz et quel est le R² ajusté ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 300 mg, bolus intraveineux) :\n- R² ajusté de la régression terminale : 0.999504\n- Nombre de points de la régression terminale : 4\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.001,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 2,
@@ -681,6 +687,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -789,6 +796,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 1,
@@ -908,6 +916,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 4,
@@ -1082,6 +1091,7 @@
     "found": [],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 0,

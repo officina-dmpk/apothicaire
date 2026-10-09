@@ -11,7 +11,7 @@
   "unit": "mg"
  },
  "blq": false,
- "wall_s": 1.101,
+ "wall_s": 1.132,
  "decider": "gold-asked",
  "taxonomy_chance_baseline": {
   "3": {
@@ -37,7 +37,7 @@
    "kind": "import_nca",
    "question": "Voici les données d'un exercice (400 mg par voie orale ; temps en h, concentration en ng/mL) :\ntime (h),conc (ng/mL)\n0,0\n0.13,1300\n0.22,1814\n0.37,2965\n0.61,3887\n1,6173\n1.7,7990\n2.8,8150\n4.6,6851\n7.6,5129\n13,1876\n21,473.9\nFais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, CL/F, Vz/F et MRT, avec les unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400 mg, voie orale (extravasculaire)) :\n- Cmax : 8150 ng/mL\n- Tmax : 2.8 h\n- AUC(0-tlast) : 76985 h*ng/mL\n- λz (constante d'élimination terminale) : 0.177298 1/h\n- t½ (demi-vie terminale) : 3.9095 h\n- AUC(0-inf) : 79657.9 h*ng/mL\n- MRT (temps moyen de résidence) : 7.07364 h\n- CL/F (clairance) : 0.00502147 dose unit/(h*ng/mL), soit 5.02147 L/h (conversion faite par Caladrius avec la dose en mg)\n- Vz/F (volume de distribution) : 0.0283222 dose unit/(ng/mL), soit 28.3222 L (conversion faite par Caladrius avec la dose en mg)\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.014,
+   "wall_s": 0.016,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 12,
@@ -103,7 +103,8 @@
      "MRT"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -111,7 +112,7 @@
     "new_numbers": 0,
     "n_must": 9,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -159,7 +160,8 @@
        }
       ]
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\n  \"delimiter\": \",\",\n  \"notes\": [\n    \"unit `h` read from the header of column `time`\",\n    \"unit `ng/mL` read from the header of column `conc`\"\n  ],\n  \"worksheet\": {\n    \"columns\": [\n      {\n        \"max\": 21.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"time\",\n        \"role\": \"time\",\n        \"type\": \"number\",\n        \"unit\": \"h\"\n      },\n      {\n        \"max\": 8150.0,\n        \"min\": 0.0,\n        \"missing\": 0,\n        \"name\": \"conc\",\n        \"role\": \"concentration\",\n        \"type\": \"number\",\n        \"unit\": \"ng/mL\"\n      }\n    ],\n    \"derived_units\": {\n      \"auc\": \"h*ng/mL\",\n      \"aumc\": \"h^2*ng/mL\",\n      \"half_life\": \"h\",\n      \"lambda_z\": \"1/h\",\n      \"mrt\": \"h\"\n    },\n    \"id\": 1,\n    \"name\": \"donnees\",\n    \"revision\": 0,\n    \"rows\": 12,\n    \"subjects\": [\n      \"1\"\n    ],\n    \"unit_warnings\": [\n      {\n        \"code\": \"missing_unit\",\n        \"message\": \"the dose has no unit; derived units (AUC, clearance, volume) cannot be named\"\n      }\n    ]\n  }\n}"
     },
     {
      "name": "nca_run",
@@ -176,7 +178,8 @@
        }
       }
      },
-     "ok": true
+     "ok": true,
+     "shown": "{\"1\":{\"cmax\":\"8150 ng/mL\",\"tmax\":\"2.8 h\",\"tfirst\":\"0.13 h\",\"tlag\":\"0 h\",\"tlast\":\"21 h\",\"clast.obs\":\"473.9 ng/mL\",\"auclast\":\"76985 h·ng/mL\",\"aucall\":\"76985 h·ng/mL\",\"aumclast\":\"492265 h²·ng/mL\",\"aumcall\":\"492265 h²·ng/mL\",\"lambda.z\":\"0.177298 1/h\",\"r.squared\":\"0.999513\",\"adj.r.squared\":\"0.999026\",\"lambda.z.time.first\":\"7.6 h\",\"lambda.z.time.last\":\"21 h\",\"lambda.z.n.points\":\"3\",\"clast.pred\":\"468.152 ng/mL\",\"half.life\":\"3.9095 h\",\"span.ratio\":\"3.42755\",\"aucinf.obs\":\"79657.9 h·ng/mL\",\"aucinf.pred\":\"79625.5 h·ng/mL\",\"aumcinf.obs\":\"563472 h²·ng/mL\",\"aumcinf.pred\":\"562608 h²·ng/mL\",\"aucpext.obs\":\"3.35547 %\",\"aucpext.pred\":\"3.31612 %\",\"aumcpext.obs\":\"12.6371 %\",\"aumcpext.pred\":\"12.503 %\",\"mrt.last\":\"6.3943 h\",\"mrt.obs\":\"7.07364 h\",\"mrt.pred\":\"7.06568 h\",\"cl.obs\":\"5.02147 L/h\",\"cl.pred\":\"5.02351 L/h\",\"vz.obs\":\"28.3222 L\",\"vz.pred\":\"28.3337 L\",\"vss.obs\":\"35.5201 L\",\"vss.pred\":\"35.4945 L\",\"cmax.dn\":\"20.375 (ng/mL)/mg\",\"clast.obs.dn\":\"1.18475 (ng/mL)/mg\",\"auclast.dn\":\"192.463 (h·ng/mL)/mg\",\"aucall.dn\":\"192.463 (h·ng/mL)/mg\",\"aucinf.obs.dn\":\"199.145 (h·ng/mL)/mg\",\"aucinf.pred.dn\":\"199.064 (h·ng/mL)/mg\",\"aumclast.dn\":\"1230.66 (h²·ng/mL)/mg\",\"aumcall.dn\":\"1230.66 (h²·ng/mL)/mg\",\"aumcinf.obs.dn\":\"1408.68 (h²·ng/mL)/mg\",\"aumcinf.pred.dn\":\"1406.52 (h²·ng/mL)/mg\"}}"
     }
    ],
    "oracle": {
@@ -304,7 +307,7 @@
    "kind": "cmax_tmax",
    "question": "Quels sont la Cmax et le Tmax ? Donne-les avec leurs unités.",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400 mg, voie orale (extravasculaire)) :\n- Cmax : 8150 ng/mL\n- Tmax : 2.8 h\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.0,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -336,6 +339,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -444,7 +448,8 @@
      "Vz/F"
     ],
     "missing": [],
-    "forbidden": [
+    "forbidden": [],
+    "forbidden_from_tools": [
      "CL/F x 10^3",
      "Vz/F x 10^3"
     ],
@@ -452,7 +457,7 @@
     "new_numbers": 0,
     "n_must": 2,
     "fraction": 1.0,
-    "correct": false
+    "correct": true
    },
    "decisions": [
     {
@@ -527,7 +532,7 @@
    "kind": "half_life",
    "question": "Quelle est la demi-vie terminale et quel pourcentage de l'AUC est extrapolé ? Est-ce acceptable ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400 mg, voie orale (extravasculaire)) :\n- t½ (demi-vie terminale) : 3.9095 h\n- AUC extrapolée (%) : 3.35547 %\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.001,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 3,
@@ -559,6 +564,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -636,7 +642,7 @@
    "kind": "lambda_z_regression",
    "question": "Combien de points ont servi à la régression de λz et quel est le R² ajusté ?",
    "answer": "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400 mg, voie orale (extravasculaire)) :\n- R² ajusté de la régression terminale : 0.999026\n- Nombre de points de la régression terminale : 3\nAvertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named ».",
-   "wall_s": 0.001,
+   "wall_s": 0.002,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 2,
@@ -668,6 +674,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 2,
@@ -776,6 +783,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 1,
@@ -895,6 +903,7 @@
     ],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 4,
@@ -1040,7 +1049,7 @@
    "kind": "not_available",
    "question": "Quelle est la concentration initiale extrapolée C0 ?",
    "answer": "C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius pour cette voie d'administration : voie orale (extravasculaire). Raison donnée par Caladrius : « not defined for this route of administration ».",
-   "wall_s": 0.002,
+   "wall_s": 0.0,
    "prompt_tokens": 0,
    "rounds": 1,
    "numbers_total_before": 0,
@@ -1069,6 +1078,7 @@
     "found": [],
     "missing": [],
     "forbidden": [],
+    "forbidden_from_tools": [],
     "words_missing": [],
     "new_numbers": 0,
     "n_must": 0,

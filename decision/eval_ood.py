@@ -123,13 +123,14 @@ def renumber(prior):
 
 
 def translate_pair(pair, idmap, options):
-    """The gold compare_pair in the renumbered ids; Reject when it is not one of the options of the state."""
+    """The gold compare_pair in the renumbered ids, in the user's order (a pair is directed: "a+b", a is the reference; 2026-10-10, the
+    pair was sorted before and "2+1" became "2+3" instead of "3+2"); Reject when it is not one of the options of the state."""
     if pair in ("not_applicable", "none_available"): new = pair
     else:
         try: a, b = (int(x) for x in pair.split("+"))
         except ValueError: raise Reject(f"gold compare_pair {pair!r} is neither a key 'a+b' nor not_applicable / none_available")
         _need(a in idmap and b in idmap and a != b, f"gold compare_pair {pair!r} names an analysis that is not in prior_analyses {sorted(idmap)}")
-        new = "+".join(str(i) for i in sorted((idmap[a], idmap[b])))
+        new = f"{idmap[a]}+{idmap[b]}"
     _need(new in options, f"gold compare_pair {pair!r} is outside the options of the state ({sorted(options)})")
     return new
 
@@ -429,8 +430,10 @@ def score_section(results, has_probs, baseline, tag_of, request_of):
 def _prefix(template): return template.split("{")[0]
 
 
+# first match wins: T_NOT_SUPPORTED and T_NOT_WIRED both start "Cette demande (", so the out-of-scope template is tried first on its own
+# longer prefix (2026-10-10: it was filed under not-wired)
 REFUSAL_PREFIXES = (("no-data", H.T_NO_DATA), ("ask", "Je ne lance pas l'analyse"), ("no-analysis", H.T_NO_ANALYSIS),
-                    ("not-wired", _prefix(H.T_NOT_WIRED)), ("no-parameter", _prefix(H.T_NO_PARAMETER)),
+                    ("not-supported", H.T_NOT_SUPPORTED.split(":")[0]), ("not-wired", _prefix(H.T_NOT_WIRED)), ("no-parameter", _prefix(H.T_NO_PARAMETER)),
                     ("undecided", _prefix(H.T_UNDECIDED)), ("tool-failed", _prefix(H.T_TOOL_FAILED)),
                     ("which-pair", _prefix(H.T_WHICH_PAIR)))
 _NA_MARK = H.T_NOT_AVAILABLE.split("{label}")[1].split("{route}")[0]              # " n'est pas calculé par Caladrius pour cette voie ..."
@@ -447,9 +450,9 @@ def answer_kind(answer):
 
 def expects_refusal(gold):
     """Whether the gold decisions lead the harness to refuse or ask (not to print values): a parameter not available, an NCA with
-    no route or no dose unit, a fit or a simulation (not wired)."""
+    no route or no dose unit, a fit or a simulation (not wired), an out-of-scope request (not_supported)."""
     return (gold["is_not_available"] == "true" or (gold["analysis"] == "nca" and (gold["route"] == "unknown" or gold["dose_has_unit"] == "false"))
-            or gold["analysis"] in ("fit_pk1", "fit_pk2", "simulate"))
+            or gold["analysis"] in ("fit_pk1", "fit_pk2", "simulate", "not_supported"))
 
 
 class NotReplayable(Exception): pass

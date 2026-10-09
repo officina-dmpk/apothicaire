@@ -2,10 +2,14 @@
 
 Pure Python, no model, no engine. Three things (the third is the last section of this file):
 
-1. `score_turn(answer, expect, unverified_after)`: does the answer contain the numbers it must contain
+1. `score_turn(answer, expect, unverified_after, tool_results)`: does the answer contain the numbers it must contain
    (`expect["must"]`, each a truth value), none of the numbers it must not (`expect["must_not"]`:
    converted or computed values), the words it must (`expect["words"]`), and, for a question whose answer
-   is "not available", no number outside the sources (`expect["no_new_numbers"]`)?
+   is "not available", no number outside the sources (`expect["no_new_numbers"]`)? A `must_not` value is
+   not counted when every number of the answer that hits it is written verbatim in a tool result of that turn
+   (`tool_results`, the texts the tools returned): the engine computed it, the answer did not (2026-10-10: the
+   decision harness shows Caladrius's own L/h and L conversion next to the "dose unit" value, which the
+   "CL x 10^3" rule, written against a model that converts by itself, flagged).
    A truth value T is "found" when some number written in the answer, with n significant digits
    (n >= 2, the gate's counting), equals T rounded to n significant digits (half-up or half-even, like
    the gate). A forbidden value F is "hit" with the same rule but only for numbers written with at least
@@ -58,22 +62,29 @@ def matches(truth, readings, min_sig=2, first_only=False):
 def find_value(answer, truth, min_sig=2):
     return any(matches(truth, r, min_sig) for r, _ in written_numbers(answer))
 
-def score_turn(answer, expect, unverified_after=0):
+def tool_numbers(tool_results):
+    """The numbers written in tool results, as their raw text (what an answer copies verbatim)."""
+    return {raw for text in tool_results or () for _, raw in written_numbers(text)}
+
+def score_turn(answer, expect, unverified_after=0, tool_results=()):
     """Correctness of one answer against its expected-answer rule. Returns a dict:
-    found / missing (labels of `must`), forbidden (labels of `must_not` that appear), words_missing,
+    found / missing (labels of `must`), forbidden (labels of `must_not` that appear), forbidden_from_tools (labels of
+    `must_not` hit only by numbers copied verbatim from `tool_results`, not counted), words_missing,
     new_numbers (for `no_new_numbers`), fraction (found / must), correct."""
     nums = written_numbers(answer)
-    found, missing, forbidden, words_missing = [], [], [], []
+    from_tools = tool_numbers(tool_results)
+    found, missing, forbidden, from_tool, words_missing = [], [], [], [], []
     for item in expect.get("must", []):
         (found if any(matches(item["value"], r) for r, _ in nums) else missing).append(item["label"])
     for item in expect.get("must_not", []):
-        if any(matches(item["value"], r, min_sig=3, first_only=True) for r, _ in nums): forbidden.append(item["label"])
+        hits = [raw for r, raw in nums if matches(item["value"], r, min_sig=3, first_only=True)]
+        if hits: (from_tool if all(raw in from_tools for raw in hits) else forbidden).append(item["label"])
     for w in expect.get("words", []):
         if not re.search(w["pattern"], answer, re.I | re.S): words_missing.append(w["label"])
     new_numbers = unverified_after if expect.get("no_new_numbers") else 0
     n_must = len(expect.get("must", []))
     correct = not missing and not forbidden and not words_missing and not new_numbers
-    return {"found": found, "missing": missing, "forbidden": forbidden, "words_missing": words_missing,
+    return {"found": found, "missing": missing, "forbidden": forbidden, "forbidden_from_tools": from_tool, "words_missing": words_missing,
             "new_numbers": new_numbers, "n_must": n_must,
             "fraction": (len(found) / n_must) if n_must else 1.0, "correct": correct}
 
