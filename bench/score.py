@@ -207,10 +207,12 @@ _ALIASES = {
     # the compare turn when the model used analysis_compare: the engine's difference (b - a) and its percentage
     "compare.percent": (r"diff[ée]rence relative|[ée]cart relatif|variation relative|diff[ée]rence en pourcent\w*|en pourcent\w*|"
                         r"pourcent\w*|\brelative?\b|\brelatif\b|\bpercent\w*", False),
-    "compare.difference": (r"\bdiff[èe]re\b|\bdiff[ée]rences?\b|[ée]carts?\b|\bdiff\b|\bvariation\b|\bdelta\b|Δ|\bdifference\b", False),
+    "compare.difference": (r"\bdiff[èe]re\b|\bdiff[ée]rences?\b|[ée]carts?\b|\bdiff\b|\bvariation\b|\bdelta\b|Δ|\bdifference\b|"
+                           r"\bvaleur absolue\b|\babsolute\b", False),
 }
 _LUD_RE = re.compile(r"lin(?:ear|[ée]aire)?[\s_-]*up[\s_/-]*log[\s_-]*down|lin_up_log_down", re.I)
 _LIN_RE = re.compile(r"lin[ée]aire|linear(?!\w)", re.I)
+_LEAD_RE = re.compile(r"(?:avec|par|pour|selon|via|en|with|using)\s+(?:la\s+|the\s+)?(?:m[ée]thode\s+|method\s+)?[*_`\s]*$", re.I)
 _SKIP_EXEMPT = ("date", "power_of_ten", "unit_fragment", "label_number")
 _REF_BEFORE_RE = re.compile(r"(?:analyse|analysis|feuille|worksheet|message|n°|n[o°]\.?)\s*$", re.I)
 _ANNOTATION_RE = re.compile(r"\([^)]*\)|\b(?:obs|pred|préd|observée?|prédite?)\b", re.I)
@@ -305,6 +307,11 @@ def _spans(text, item, marks):
             nxt = next((m[0] for m in marks[i + 1:] if m[2][0] == "key"), len(text))   # does not end the span of a key label
         spans = [(b, min(nxt, _eol(text, b)))]
         if by_method:
+            # "<value> avec la méthode linéaire": the value written right before the method label, in the same line
+            lo = max(marks[i - 1][1] if i else 0, text.rfind(chr(10), 0, a) + 1)
+            if _LEAD_RE.search(text[lo:a]):
+                lead = [n for n in gate.extract_numbers(text[lo:a]) if n.exempt not in _SKIP_EXEMPT]
+                if lead: spans.append((lo + lead[-1].start, lo + lead[-1].end))
             pos = _eol(text, b) + 1
             while pos < nxt:
                 end = min(_eol(text, pos), nxt)

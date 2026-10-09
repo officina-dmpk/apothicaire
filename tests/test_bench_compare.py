@@ -166,6 +166,9 @@ class TestRule(unittest.TestCase):
             "difference then percentage in one line": f"AUC linéaire = {fmt(self.lin)} {u} ; AUC lin-up/log-down = {fmt(self.lud)} {u} ; différence = {d} {u} ({p} %)",
             "method named in the difference line": f"- linéaire : {fmt(self.lin)} {u}\n- lin-up/log-down : {fmt(self.lud)} {u}\n- Différence (lin-up/log-down − linéaire) : −{d} {u} (−{p} %)",
             "table": f"| Méthode | AUC |\n|---|---|\n| linéaire | {fmt(self.lin)} {u} |\n| lin-up/log-down | {fmt(self.lud)} {u} |\n\nDifférence : {d} {u} ; différence relative : {p} %",
+            "value before the method label": f"Avec la méthode **linear-up/log-down**, l'AUC(0-tlast) est de **{fmt(self.lud)} {u}**, contre **{fmt(self.lin)} {u}** avec la méthode linéaire.\n\n- **Différence (b − a)** : **−{d} {u}**\n- **Différence relative** : **−{p} %**",
+            "valeur absolue and pourcentage": f"Avec la méthode linear-up/log-down : {fmt(self.lud)} {u}\n\nDifférence par rapport à la méthode linéaire ({fmt(self.lin)} {u}) :\n- Valeur absolue : −{d} {u}\n- Pourcentage : −{p} %",
+            "en valeur absolue / en pourcentage": f"- Méthode linéaire : {fmt(self.lin)} {u}\n- Méthode lin_up_log_down : {fmt(self.lud)} {u}\n- En valeur absolue : −{d} {u}\n- En pourcentage : −{p} %",
             "decimal point and star": f"Linear: {self.lin:.6g} {self.unit}; lin-up/log-down: {self.lud:.6g} {self.unit}. Difference {t['difference']:.6g} {self.unit} ({t['percent']:.6g} %)."}
         for name, ans in styles.items():
             with self.subTest(style=name):
