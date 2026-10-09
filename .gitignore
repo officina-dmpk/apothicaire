@@ -5,3 +5,5 @@ runs/*.md
 runs/*.json
 bench/runs/*/*-data/
 .venv*/
+decision/models/
+unsloth_compiled_cache/
