@@ -429,3 +429,19 @@ python decision/run_harness.py --decider decider_unsloth:decide        # folder 
   whose sentence style is in its training distribution. It says that the decision pipeline works when the model answers right, which is the case on
   the held-out exercises too (99.9 %); it does not say how the model copes with a user who writes differently. The 27B pipeline was
   also tested on these wordings, but it reads free text. The next measure is a set of requests written by another person.
+## Out-of-distribution requests (`decision/eval_ood.py`)
+
+Requests written by an independent reviewer (`decision/ood/requests.jsonl`, format in `review-dsh-brief.md`) are converted to typed-decisions rows with the code
+of this folder (`make_dataset.make_state`, `questions_for`; turn 1: the first line of `request` is the dose sentence, the last line the request; turn > 1:
+the scripted first message of the exercise; prior analyses renumbered 2, 3 as the engine does), scored (per question with the always-majority baseline, per tag,
+calibration, every wrong decision) and run through the harness (one fresh session per request, prior analyses replayed first). No oracle exists for free
+requests: the report lists what a human must read and counts answers against refusals.
+
+```
+python decision/eval_ood.py --convert-only                      # rows.jsonl and schema_report.md (rejected lines and why)
+python decision/eval_ood.py --decider gold                      # must give 100 %
+python decision/eval_ood.py --decider majority
+python decision/eval_ood.py --decider decider_unsloth:decide    # the trained model (GPU, .venv-unsloth)
+```
+
+Outputs: `decision/ood/runs/<date>-<decider>/{report.md, answers.jsonl, scores.json}`. Tests: `python -m unittest tests.test_eval_ood`.
