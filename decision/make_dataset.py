@@ -5,7 +5,7 @@
 
 One row = one state and seven closed questions, with their gold answers (schema of the Hugging Face dataset
 `LocalLLaMA/typed-decisions`, subset `all`, recorded in decision/README.md): id, workflow, split, state, questions, gold, factors,
-label_agreement, n_questions; the five last-but-one fields are JSON strings. Writes data/train.jsonl and data/heldout.jsonl.
+label_agreement, n_questions; the five last-but-one fields are JSON strings. Writes data/train.jsonl, data/heldout.jsonl and data/bench.jsonl.
 
 The state is a text digest of what the harness will know at that point of the conversation: the header and first rows of the CSV, the
 dose / route / units sentence as the user wrote it, the analyses already in the project (id, kind, AUC method), the note on BLQ values,
@@ -14,8 +14,9 @@ for the route) and the intent of the turn kind (bench/scripts.py: 8 scripted kin
 questions are written by hand (WORDINGS), never by a model. No engine is needed to build the dataset, only the exercise folders:
 bench/exercises/ (the 25 of the benchmark) and decision/exercises/ (75 more, decision/make_exercises.py).
 
-The split is by exercise: HELDOUT_N whole exercises, drawn with SPLIT_SEED among the exercises that are not in the benchmark, go to
-heldout.jsonl; the benchmark exercises and the rest go to train.jsonl (the benchmark exercises carry factors.bench = true).
+The split is by exercise: the 25 benchmark exercises go to bench.jsonl (split "bench", factors.bench = true), never used for training or
+calibration, the comparison set against the 27B pipeline; of the 75 new exercises, HELDOUT_N whole ones drawn with SPLIT_SEED go to
+heldout.jsonl and the rest to train.jsonl.
 """
 import argparse, collections, json, os, random, re, sys
 
@@ -218,10 +219,10 @@ def load_exercises():
     return sorted(out, key=lambda x: x[0]["id"])
 
 def split_ids(exercises):
-    """(train ids, heldout ids): HELDOUT_N exercises drawn with SPLIT_SEED among those that are not in the benchmark."""
+    """(train ids, heldout ids, bench ids): the benchmark exercises are bench; HELDOUT_N of the new ones, drawn with SPLIT_SEED, are held out."""
     new = sorted(m["id"] for m, _, bench in exercises if not bench)
     held = set(random.Random(SPLIT_SEED).sample(new, HELDOUT_N))
-    return sorted(m["id"] for m, _, _ in exercises if m["id"] not in held), sorted(held)
+    return (sorted(i for i in new if i not in held), sorted(held), sorted(m["id"] for m, _, bench in exercises if bench))
 
 # ---------------------------------------------------------------- one row
 def route_phrase(meta, rng):
@@ -304,25 +305,27 @@ def exercise_rows(meta, csv, bench):
     return out
 
 def build():
-    """(train rows, heldout rows) with ids and split filled in; deterministic."""
+    """(train rows, heldout rows, bench rows) with ids and split filled in; deterministic."""
     exercises = load_exercises()
-    _, held = split_ids(exercises); held = set(held)
-    train, heldout = [], []
+    _, held, _ = split_ids(exercises); held = set(held)
+    train, heldout, bench_rows = [], [], []
     for meta, csv, bench in exercises:
-        (heldout if meta["id"] in held else train).extend(exercise_rows(meta, csv, bench))
+        (bench_rows if bench else heldout if meta["id"] in held else train).extend(exercise_rows(meta, csv, bench))
     out = []
-    for rows, split, pre in ((train, "train", "tr"), (heldout, "test", "te")):
+    for rows, split, pre in ((train, "train", "tr"), (heldout, "test", "te"), (bench_rows, "bench", "be")):
         random.Random(f"{ROW_SEED}:{split}").shuffle(rows)
         for n, r in enumerate(rows):
             r["id"] = f"{pre}_{WORKFLOW}_{n:06d}"; r["split"] = split
         out.append(rows)
-    return out[0], out[1]
+    return tuple(out)
 
 # ---------------------------------------------------------------- statistics, README block
-def stats(train, heldout):
+FILES = ("train", "heldout", "bench")
+
+def stats(train, heldout, bench):
     """Counts: rows, exercises and the histogram of every question's gold label, per file."""
     out = {}
-    for name, rows in (("train", train), ("heldout", heldout)):
+    for name, rows in zip(FILES, (train, heldout, bench)):
         hist = collections.defaultdict(collections.Counter)
         ex = set()
         for r in rows:
@@ -334,11 +337,11 @@ def stats(train, heldout):
 def counts_block(st):
     qs = list(questions_for([2, 3]))
     lines = [COUNTS_BEGIN, "", "| file | rows | exercises |", "|---|---|---|"]
-    for name in ("train", "heldout"): lines.append(f"| {name}.jsonl | {st[name]['rows']} | {st[name]['exercises']} |")
+    for name in FILES: lines.append(f"| {name}.jsonl | {st[name]['rows']} | {st[name]['exercises']} |")
     for q in qs:
-        labels = sorted(set(st["train"]["hist"][q]) | set(st["heldout"]["hist"][q]))
-        lines += ["", f"`{q}`", "", "| answer | train | heldout |", "|---|---|---|"]
-        lines += [f"| {l} | {st['train']['hist'][q].get(l, 0)} | {st['heldout']['hist'][q].get(l, 0)} |" for l in labels]
+        labels = sorted(set().union(*(st[n]["hist"][q] for n in FILES)))
+        lines += ["", f"`{q}`", "", "| answer | train | heldout | bench |", "|---|---|---|---|"]
+        lines += [f"| {l} | " + " | ".join(str(st[n]["hist"][q].get(l, 0)) for n in FILES) + " |" for l in labels]
     lines += ["", COUNTS_END]
     return "\n".join(lines)
 
@@ -357,9 +360,9 @@ def write(rows, path):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--out", default=OUT); ap.add_argument("--no-readme", action="store_true")
     a = ap.parse_args()
-    train, heldout = build()
+    train, heldout, bench = build()
     os.makedirs(a.out, exist_ok=True)
-    write(train, os.path.join(a.out, "train.jsonl")); write(heldout, os.path.join(a.out, "heldout.jsonl"))
-    st = stats(train, heldout)
+    for name, rows in zip(FILES, (train, heldout, bench)): write(rows, os.path.join(a.out, f"{name}.jsonl"))
+    st = stats(train, heldout, bench)
     if not a.no_readme: update_readme(counts_block(st))
     print(json.dumps({k: {"rows": v["rows"], "exercises": v["exercises"]} for k, v in st.items()}))

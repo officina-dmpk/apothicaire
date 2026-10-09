@@ -42,7 +42,7 @@ class TestDecisionDataset(unittest.TestCase):
                 assert list(r) == FIELDS
                 assert all(isinstance(r[k], str) for k in FIELDS if k != "n_questions") and isinstance(r["n_questions"], int)
                 assert r["id"] not in ids; ids.add(r["id"])
-                assert r["split"] in ("train", "test") and r["id"].startswith("tr_" if r["split"] == "train" else "te_")
+                assert r["split"] in ("train", "test", "bench") and r["id"].startswith({"train": "tr_", "test": "te_", "bench": "be_"}[r["split"]])
                 assert r["n_questions"] == len(qs) == len(gold) == 7 and set(qs) == set(gold) == set(json.loads(r["label_agreement"]))
                 assert set(state) == {"analyses", "data", "notes", "request", "user_dose_sentence"}
                 assert set(state["data"]) == {"header", "first_rows", "n_rows", "n_subjects"}
@@ -61,7 +61,7 @@ class TestDecisionDataset(unittest.TestCase):
                 assert set(json.loads(r["factors"])) >= {"exercise", "kind", "bench", "route"}
 
     def test_split_values_and_files_on_disk(self):
-        for name, rows in zip(("train", "heldout"), data()):
+        for name, rows in zip(md.FILES, data()):
             path = os.path.join(md.OUT, f"{name}.jsonl")
             if not os.path.exists(path): continue                              # decision/data/ is git-ignored: checked when present
             with open(path, encoding="utf-8") as f: disk = [json.loads(l) for l in f]
@@ -83,7 +83,7 @@ class TestDecisionDataset(unittest.TestCase):
 
     def test_is_not_available_exactly_for_the_not_available_kind(self):
         n_true = 0
-        for r, state, qs, gold, factors in parsed(data()[0] + data()[1]):
+        for r, state, qs, gold, factors in parsed(sum(data(), [])):
             flag = gold["is_not_available"]["label"] == "true"
             assert flag == (factors["kind"] == "not_available"), r["id"]
             # independent of the kind table: the parameter asked is, or is not, among those Caladrius did not compute for this route
@@ -93,7 +93,7 @@ class TestDecisionDataset(unittest.TestCase):
         assert n_true > 0
 
     def test_gold_against_the_truth_of_the_exercise(self):
-        for r, state, qs, gold, factors in parsed(data()[0] + data()[1]):
+        for r, state, qs, gold, factors in parsed(sum(data(), [])):
             meta = metas()[factors["exercise"]]; kind = factors["kind"]; label = lambda q: gold[q]["label"]
             route = scripts.kind_of(meta)
             sentence = state["user_dose_sentence"]
@@ -121,7 +121,7 @@ class TestDecisionDataset(unittest.TestCase):
 
     def test_scripted_rows_are_the_benchmark_wording(self):
         n = 0
-        for r, state, qs, gold, factors in parsed(data()[0] + data()[1]):
+        for r, state, qs, gold, factors in parsed(sum(data(), [])):
             if not factors["scripted_wording"]: continue
             meta = metas()[factors["exercise"]]
             with open(os.path.join(md.BENCH_DIR if factors["bench"] else md.EXTRA_DIR, meta["id"], "data.csv"), encoding="utf-8") as f: csv = f.read()
@@ -130,7 +130,7 @@ class TestDecisionDataset(unittest.TestCase):
             assert factors["kind"] in scripts.KINDS and state["user_dose_sentence"] == t1[0]
             assert state["request"] == (t1[-1] if factors["kind"] == "import_nca" else turns[factors["kind"]]["question"])
             n += 1
-        assert n == 8 * (80 + 20)
+        assert n == 8 * 100
 
     # ---------------------------------------------------------------- paraphrases
     def test_paraphrases_are_french_hand_written_and_several_per_kind(self):
@@ -145,7 +145,7 @@ class TestDecisionDataset(unittest.TestCase):
 
     def test_each_scripted_kind_has_distinct_rows_per_exercise(self):
         seen = collections.defaultdict(list)
-        for r, state, qs, gold, factors in parsed(data()[0] + data()[1]):
+        for r, state, qs, gold, factors in parsed(sum(data(), [])):
             seen[(factors["exercise"], factors["kind"])].append(state["request"])
         assert len(seen) == 100 * 12
         for key, requests in seen.items():
@@ -153,17 +153,20 @@ class TestDecisionDataset(unittest.TestCase):
 
     # ---------------------------------------------------------------- split by exercise
     def test_split_is_by_exercise(self):
-        train, held = data()
-        tr_ex = {f["exercise"] for *_, f in parsed(train)}; he_ex = {f["exercise"] for *_, f in parsed(held)}
-        assert tr_ex and he_ex and not tr_ex & he_ex                            # no row of a held-out exercise in train
-        assert len(he_ex) == md.HELDOUT_N and tr_ex | he_ex == set(metas())
-        assert all(not metas()[e].get("id", "").startswith("ex") for e in he_ex)  # held-out exercises are new ones, never the benchmark's
+        train, held, bench = data()
+        ex = lambda rows: {f["exercise"] for *_, f in parsed(rows)}
+        tr_ex, he_ex, be_ex = ex(train), ex(held), ex(bench)
+        assert tr_ex and he_ex and be_ex and not (tr_ex & he_ex or tr_ex & be_ex or he_ex & be_ex)   # whole exercises, in one file only
+        assert tr_ex | he_ex | be_ex == set(metas())
         bench_ids = {os.path.basename(d) for d in mk.list_exercises(md.BENCH_DIR)}
-        assert not he_ex & bench_ids and bench_ids <= tr_ex
-        assert 0.15 <= len(he_ex) / len(metas()) <= 0.25
-        for r, *_ in parsed(train): assert r["split"] == "train"
-        for r, *_ in parsed(held): assert r["split"] == "test"
-        assert md.split_ids(md.load_exercises()) == (sorted(tr_ex), sorted(he_ex))   # fixed seed
+        new_ids = {os.path.basename(d) for d in mk.list_exercises(md.EXTRA_DIR)}
+        assert be_ex == bench_ids and len(bench_ids) == 25                       # every benchmark exercise in bench.jsonl, none elsewhere
+        assert not (tr_ex | he_ex) & bench_ids and tr_ex | he_ex == new_ids       # train and held-out come from the 75 new exercises
+        assert len(he_ex) == md.HELDOUT_N == 20 and 0.2 <= len(he_ex) / len(new_ids) <= 0.3
+        for rows, split in ((train, "train"), (held, "test"), (bench, "bench")):
+            for r, state, qs, gold, f in parsed(rows):
+                assert r["split"] == split and f["bench"] == (split == "bench")
+        assert md.split_ids(md.load_exercises()) == (sorted(tr_ex), sorted(he_ex), sorted(be_ex))   # fixed seed
 
     def test_exercise_folders(self):
         ids = [os.path.basename(d) for d in mk.list_exercises(md.EXTRA_DIR)]
@@ -194,7 +197,7 @@ class TestDecisionDataset(unittest.TestCase):
         assert block == md.counts_block(st), "README counts are stale: run python decision/make_dataset.py"
         for q in ("analysis", "route", "auc_method", "parameter_asked", "dose_has_unit", "is_not_available", "compare_pair"):
             assert f"`{q}`" in block
-        assert st["train"]["rows"] + st["heldout"]["rows"] >= 3000
+        assert sum(st[n]["rows"] for n in md.FILES) >= 3000
         # every declared option of the closed set has examples in train, except the placeholder of a pair-less state
         for q, hist in st["train"]["hist"].items():
             declared = set(md.questions_for([2, 3])[q]["criteria"])
