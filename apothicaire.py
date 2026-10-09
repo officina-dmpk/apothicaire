@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(OFFICINA, "optchat"))
 import optchat  # noqa: E402
 sys.path.insert(0, HERE)
 import gate  # noqa: E402
+from numtext import value_text  # noqa: E402
 
 optchat.CFG["data_dir"] = os.environ.get("APOTHICAIRE_DATA", os.path.join(HERE, "data"))
 
@@ -125,6 +126,11 @@ def _sig(x, n=6):
     """Round to n significant digits (a display choice made by the client, not a computation)."""
     return float(f"{x:.{n}g}") if isinstance(x, float) else x
 
+def _shown(x):
+    """The text of a digest value: the 6 significant digits, without the ".0" Python prints after an integral float
+    ("2128760", not "2128760.0", which would claim 8 digits). Same rule as the decision harness (numtext.value_text)."""
+    return "0" if x == 0 else value_text(_sig(x))        # "0", never "-0" or "0.0"
+
 def param_unit(name, u):
     """Unit label of a PKNCA parameter from the worksheet's units (u: time, conc, dose, derived).
     Labels only: no value is converted. Unknown units are written as such, never guessed."""
@@ -169,7 +175,7 @@ def digest_analysis(d, units=None):
                 v = p.get("value", {})
                 if "value" in v:
                     un = param_unit(p["name"], u)
-                    vals[p["name"]] = f"{_sig(v['value'])} {un}".strip() if un else _sig(v["value"])
+                    vals[p["name"]] = f"{_shown(v['value'])} {un}".strip() if un else _sig(v["value"])
                 else: nc.setdefault(str(v.get("not_calculated")), []).append(p["name"])
             o["flags"] = ok.get("flags", [])
             o["flag_messages"] = s.get("flag_messages", [])
@@ -205,7 +211,7 @@ def digest_compare(d, units=None):
         u = param_unit(name, wu); return None if u == "?" else u
     def val(x, unit=None):
         if x is None: return None
-        return f"{_sig(x)} {unit}".strip() if unit else f"{_sig(x)}"
+        return f"{_shown(x)} {unit}".strip() if unit else _shown(x)
     info = lambda s: {"analysis": s.get("analysis"), "label": s.get("label"), "status": s.get("status")}
     out = {"a": info(d.get("a") or {}), "b": info(d.get("b") or {}), "subject": (d.get("a") or {}).get("subject"),
            "parameters": {}, "not_comparable": {}}

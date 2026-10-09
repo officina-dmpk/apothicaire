@@ -36,6 +36,7 @@ AGENT = os.path.dirname(HERE)
 for p in (AGENT, HERE):
     if p not in sys.path: sys.path.insert(0, p)
 import apothicaire  # noqa: E402
+from numtext import value_text  # noqa: E402,F401  (shared with the digest of apothicaire.py)
 import make_dataset as md  # noqa: E402
 
 METHODS = ("linear", "lin_up_log_down")
@@ -131,14 +132,6 @@ def label_fr(param, route):
             "lambda_z_points": "Nombre de points de la régression terminale", "adj_r2": "R² ajusté de la régression terminale",
             "half_life": "t½ (demi-vie terminale)", "cl": f"CL{f} (clairance)", "vz": f"Vz{f} (volume de distribution)",
             "mrt": "MRT (temps moyen de résidence)", "tlag": "Tlag (temps de latence)"}.get(param, param)
-
-_TRAILING_ZERO_RE = re.compile(r"(?<![\d.])(-?\d+)\.0(?![\deE])")
-
-def value_text(v):
-    """A digest value as shown ("2.108 mg/L", or a bare number such as the adjusted R²), with one display change: the ".0" that
-    Python prints after an integral float is dropped (the digest rounds to 6 significant digits, so "1701680.0" would claim 8 of
-    them; "1701680" has 6 by the gate's counting). The digits are never changed."""
-    return _TRAILING_ZERO_RE.sub(lambda m: m.group(1), v if isinstance(v, str) else f"{v}")
 
 def route_fr(route, time_unit=None, with_duration=True):
     if route == "extravascular": return "voie orale (extravasculaire)"

@@ -347,7 +347,8 @@ def compare_units():
 
 def fmt6(x):
     """A float at 6 significant digits the way the digest writes it (independent: Decimal, then Python's repr of the float)."""
-    return repr(float(round6(x)))
+    t = repr(float(round6(x)))
+    return t[:-2] if t.endswith(".0") else t        # the digest drops the ".0" of an integral float (2026-10-09)
 
 class TestCompareDigest(unittest.TestCase):
     """Golden test of the digest of analysis_compare on PUBLIC data: Theoph subject 1 (dose as an argument), the
@@ -421,8 +422,8 @@ class TestCompareDigest(unittest.TestCase):
                  "relative_percent": None, "ratio": None, "not_comparable": "analysis a: not calculated"}]
         payload = {"a": {"analysis": 2, "label": "x", "status": "fresh", "subject": "1"}, "b": {"analysis": 3, "label": "y", "status": "fresh", "subject": "1"}, "rows": rows}
         shown = json.loads(apothicaire.render_tool_result("analysis_compare", True, json.dumps(payload), {}))
-        self.assertEqual(shown["parameters"]["auclast"], "a 10.0 h*mg/L | b 12.0 h*ng/mL | not comparable: unit mismatch: a is in `h*mg/L`, b is in `h*ng/mL`; no unit is converted")
-        self.assertEqual(shown["parameters"]["tlag"], "a none | b 1.0 h | not comparable: analysis a: not calculated")
+        self.assertEqual(shown["parameters"]["auclast"], "a 10 h*mg/L | b 12 h*ng/mL | not comparable: unit mismatch: a is in `h*mg/L`, b is in `h*ng/mL`; no unit is converted")
+        self.assertEqual(shown["parameters"]["tlag"], "a none | b 1 h | not comparable: analysis a: not calculated")
         self.assertNotIn("difference", shown["parameters"]["auclast"])
 
     def test_errors_pass_through(self):
@@ -438,6 +439,53 @@ class TestCompareDigest(unittest.TestCase):
         self.assertIn("Differences, percentages and ratios between two results come from analysis_compare", apothicaire.SYSTEM_ADDITION)
         self.assertLess(len(json.dumps(f)), 1200)
 
+
+class TestIntegralValueFormatting(unittest.TestCase):
+    """2026-10-09: an integral float is shown without Python's trailing ".0" ("2128760.0" claimed 8 digits for a 6-digit
+    value and the model copied them). The digits are never changed; only the ".0" goes."""
+    UNITS = {"time": "min", "conc": "ng/mL", "dose": "mg", "derived": {"auc": "min*ng/mL"}}
+
+    def nca(self, value, name="auc.last"):
+        d = {"id": 1, "kind": "nca", "status": {"state": "done"}, "spec": {"options": {}},
+             "result": {"subjects": [{"subject": "1", "outcome": {"ok": {"parameters": [{"name": name, "value": {"value": value}}]}}}]}}
+        return apothicaire.digest_analysis(d, self.UNITS)["subjects"][0]["parameters"][name]
+
+    def test_integral_large_value_has_no_trailing_zero(self):
+        self.assertEqual(self.nca(2128757.3), "2128760 min*ng/mL")       # 6 significant digits: 212876e1
+        self.assertEqual(self.nca(1701680.0), "1701680 min*ng/mL")
+        self.assertEqual(self.nca(1e15), "1000000000000000 min*ng/mL")
+
+    def test_non_integral_value_is_unchanged(self):
+        self.assertEqual(self.nca(2.108), "2.108 min*ng/mL")
+        self.assertEqual(self.nca(21287.57), "21287.6 min*ng/mL")
+        self.assertEqual(self.nca(3.0e-05, "lambda.z"), "3e-05 1/min")
+
+    def test_small_negative_and_zero(self):
+        self.assertEqual(self.nca(0.000123456789), "0.000123457 min*ng/mL")
+        self.assertEqual(self.nca(-41195.62), "-41195.6 min*ng/mL")
+        self.assertEqual(self.nca(-2128757.3), "-2128760 min*ng/mL")
+        self.assertEqual(self.nca(0.0), "0 min*ng/mL")
+        self.assertEqual(self.nca(-0.0), "0 min*ng/mL")
+        self.assertEqual(self.nca(12.0, "tlast"), "12 min")
+
+    def test_unitless_value_stays_a_json_number(self):
+        self.assertEqual(self.nca(0.996288, "adj.r.squared"), 0.996288)
+        self.assertEqual(self.nca(4, "lambda.z.n.points"), 4)
+
+    def test_what_the_model_is_shown(self):
+        d = {"id": 1, "kind": "nca", "status": {"state": "done"}, "spec": {"options": {}},
+             "result": {"subjects": [{"subject": "1", "outcome": {"ok": {"parameters": [
+                 {"name": "auc.last", "value": {"value": 2128757.3}}, {"name": "cmax", "value": {"value": 12.0}}]}}}]}}
+        shown = apothicaire.render_tool_result("nca_run", True, json.dumps(d), {})
+        self.assertIn('"auc.last":"2128760 ', shown); self.assertIn('"cmax":"12 ', shown)
+        self.assertNotIn(".0", shown)
+
+    def test_compare_digest_values(self):
+        row = {"parameter": "auclast", "a": 2128757.3, "b": 2100000.0, "unit_a": "min*ng/mL", "unit_b": "min*ng/mL",
+               "difference": -28757.3, "difference_unit": "min*ng/mL", "relative_percent": -1.35, "ratio": 0.986}
+        d = {"a": {"analysis": 1}, "b": {"analysis": 2}, "rows": [row]}
+        line = apothicaire.digest_compare(d, {})["parameters"]["auclast"]
+        self.assertEqual(line, "a 2128760 min*ng/mL | b 2100000 min*ng/mL | difference -28757.3 min*ng/mL | percent -1.35 % | ratio 0.986")
 
 class TestSchemaFlattening(unittest.TestCase):
     @classmethod
