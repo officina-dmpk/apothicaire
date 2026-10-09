@@ -16,6 +16,7 @@ except ImportError:
 
 import train_unsloth as tu  # noqa: E402  (stdlib only at import time)
 import predict_unsloth as pu  # noqa: E402
+import decider_unsloth as du  # noqa: E402  (torch and unsloth are imported lazily, at the first decide call)
 
 STATE = {"analyses": [], "data": {"header": "time (h),conc (mg/L)", "n_rows": 11}, "request": "Cmax ?"}
 QUESTIONS = {"analysis": {"type": "choice", "instructions": "Which computation?", "criteria": {"nca": "NCA", "none_needed": "none"}},
@@ -139,6 +140,38 @@ class TestPredictUsesTheD1Metrics(unittest.TestCase):
         self.assertEqual(pu.z.normalise_answer(q, ans)["label"], "nca")
         noul = pu.z.normalise_answer(QUESTIONS["asked_cmax"], {"type": "noul", "noul": 0.2, "answer": False, "probabilities": {"true": 0.2, "false": 0.8}})
         self.assertEqual(noul["label"], "false"); self.assertAlmostEqual(noul["probs"]["false"], 0.8)
+
+
+class TestDecider(unittest.TestCase):
+    def test_labels_and_confidences_from_predict_answers(self):
+        answers = {"analysis": {"type": "choice", "choice": "nca", "probabilities": {"nca": 0.7, "none_needed": 0.3}, "answer": "nca"},
+                   "asked_cmax": {"type": "noul", "noul": 0.2, "answer": False, "probabilities": {"true": 0.2, "false": 0.8}}}
+        labels, info = du.labels_of(QUESTIONS, answers)
+        self.assertEqual(labels, {"analysis": "nca", "asked_cmax": "false"})
+        self.assertEqual(info["analysis"]["confidence"], 0.7)
+        self.assertEqual(info["asked_cmax"]["confidence"], 0.8)
+        self.assertEqual(info["asked_cmax"]["probabilities"], {"false": 0.8, "true": 0.2})
+
+    def test_noul_threshold_and_choice_without_choice_key(self):
+        answers = {"analysis": {"type": "choice", "probabilities": {"nca": 0.4, "none_needed": 0.6}},
+                   "asked_cmax": {"type": "noul", "noul": 0.5}}
+        labels, _ = du.labels_of(QUESTIONS, answers)
+        self.assertEqual(labels, {"analysis": "none_needed", "asked_cmax": "true"})
+
+    def test_labels_pass_the_harness_normalisation(self):
+        import harness
+        labels, _ = du.labels_of(QUESTIONS, {"analysis": {"probabilities": {"nca": 0.9, "none_needed": 0.1}},
+                                             "asked_cmax": {"noul": 0.9}})
+        out, outside = harness.normalize_answers(labels, QUESTIONS)
+        self.assertEqual((out, outside), ({"analysis": "nca", "asked_cmax": "true"}, []))
+
+
+class TestBaselineSection(unittest.TestCase):
+    def test_lists_the_questions_not_above_their_majority(self):
+        def row(g, p): return {"gold": {"q1": g, "q2": g}, "pred": {"q1": {"label": p, "probs": {p: 1.0}}, "q2": {"label": g, "probs": {g: 1.0}}}}
+        res = [row("a", "a"), row("a", "a"), row("a", "a"), row("b", "a")]    # q1: always "a" = the majority (3/4); q2: perfect (4/4)
+        text = pu.baseline_section(res)
+        self.assertIn("| q1 |", text); self.assertNotIn("| q2 |", text)
 
 
 if __name__ == "__main__":

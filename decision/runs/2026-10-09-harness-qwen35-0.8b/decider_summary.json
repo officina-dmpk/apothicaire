@@ -1,0 +1,9 @@
+{
+ "model": "C:\\Users\\abdou\\apothicaire\\agent\\decision\\models\\qwen35-0.8b-d01\\merged",
+ "load_s": 6.9,
+ "decide_calls": 225,
+ "model_seconds_total": 44.25,
+ "model_seconds_per_call": 0.1966,
+ "torch_peak_allocated_mib": 1936,
+ "nvidia_smi_used_mib_at_end": 2859
+}

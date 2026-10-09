@@ -370,3 +370,62 @@ Gold run on the 25 benchmark exercises (`python decision/run_harness.py --decide
   harness runs for this request) and the compare rows have to be described before the re-run. That changes the answer set of every state with
   at least one analysis, so it is left for the step 3 / 5 design. The harness still asks twice on the compare turn (225 decide calls in 200
   turns); the first ask's `compare_pair` is outside the options (25 / 25), unused.
+
+
+## Step 3: fine-tuning Qwen3.5-0.8B (Unsloth, native Windows)
+
+`decision/train_unsloth.py` (recipe of the Unsloth decision-model page: `FastDecisionModel` 4-bit, LoRA r=16, `DecisionTrainer`, `calibrate`,
+`save_pretrained` and `save_pretrained_merged`) trains on `train.jsonl` and evaluates and calibrates on `heldout.jsonl`; it reads the questions each row
+declares. `decision/predict_unsloth.py` scores a saved model with the metric functions of `zero_shot_d1.py` (accuracy per question next to the
+always-majority baseline, confusion tables, calibration). Environment: `requirements-unsloth.txt` (PyPI `unsloth==2026.10.3`, no WSL). Smoke run and
+install problems: [`runs/2026-10-09-smoke-unsloth/report.md`](runs/2026-10-09-smoke-unsloth/report.md). Full run, 1980 rows, 2 epochs, `--max-seq-length 2560`
+(0 inputs cut, the 2048 of the smoke run cut 2 to 6 %), 54 min of training, 3.6 GB torch peak:
+[`runs/2026-10-09-train-qwen35-0.8b/report.md`](runs/2026-10-09-train-qwen35-0.8b/report.md).
+
+| set | rows | questions right | always-majority | ECE | ms per row (cuda) |
+|---|---|---|---|---|---|
+| held-out | 720 | 14386 / 14400 = 99.9 % | 84.6 % | 0.0011 | 175 |
+| bench | 900 | 17982 / 18000 = 99.9 % | 85.0 % | 0.0011 | 176 |
+
+Every question is at 100.0 % except `is_not_available` (98.1 % held-out, 98.0 % bench, against 91.7 % for always answering `false`; recall of the `true`
+class 78 % and 77 %). **No question is at or below its majority baseline.** The result is within the distribution of the generator: new exercises, but
+the same hand-written wordings (see the report, and the limit stated at the end of Step 5).
+
+## Step 5: the trained model drives the harness on the 25 benchmark exercises
+
+`decision/decider_unsloth.py` is the decider: the merged model is loaded once on cuda, one `FastDecisionModel.predict` call answers the 20 questions of
+the harness's state, a choice is its likeliest option, a `noul` is `true` when P(true) is at least 0.5. The confidence of each answer (and the seconds of the call) go into the
+run JSON (`decisions[i].model_info`), and `decider_summary.json` has the calls and the GPU memory. `harness.py` and `run_harness.py` only gained that
+pass-through (and the run folder name now keeps a dot).
+
+```
+python decision/run_harness.py --decider decider_unsloth:decide        # folder runs/2026-10-09-harness-qwen35-0.8b/, scored by the unchanged bench/score.py
+```
+
+| pipeline | oracle-correct turns | oracle-correct numbers | invalid or failed tool calls | gate: unverified numbers | time per turn | GPU memory |
+|---|---|---|---|---|---|---|
+| 27B + gate (2026-10-09b) | 170 / 175 | 549 / 556 | 0 / 160 | 0 / 926 | 10.4 s | not measured in this comparison |
+| decision harness, gold decisions (step 4b) | 175 / 175 | 558 / 558 | 0 / 250 | 0 / 691 | 1 ms | none |
+| decision harness, trained Qwen3.5-0.8B | **175 / 175** | **558 / 558** | **0 / 250** | 0 / 709 | 0.34 s (0.30 s without the first exercise's warm-up) | 1.9 GB torch peak, 2.9 GB `nvidia-smi` (0.7 GB of it other processes) |
+
+- Folder: [`runs/2026-10-09-harness-qwen35-0.8b/`](runs/2026-10-09-harness-qwen35-0.8b/report.md). 225 decide calls in 200 turns (the compare turn asks twice,
+  see Step 4b), 0.197 s per call (44.3 s in the model out of 88.8 s for the whole run), the rest is the engine and the scorer. The first exercise
+  took 30 s instead of 2.4 s (CUDA kernel warm-up of the first calls); a warm server would not pay it.
+- **No failing turn.** Oracle and scorer agree on every turn (0 disagreements), 0 deviating tool calls, 0 unverified numbers; the failure counts
+  by class are all 0 (wrong decision 0, template 0, engine 0, scorer 0).
+- **Where the model's decisions differ from the gold's (44 of 4500 answers), none changed a scored answer:**
+  - 19 of the 25 `not_available` turns: `is_not_available` = `false` where the gold says `true` (confidence 0.54 to 0.85, the weakest answers of the
+    run; the 6 other exercises are right). This is the known weak question (recall of the true class 78 %). The harness then takes its reading
+    path: it calls `analysis_get` and the answer carries the engine's own statement "n'est pas calculé par Caladrius (« not defined for this route
+    of administration »)" with a header line (analysis, method, dose, route) and the engine's unit warning in front, instead of the shorter refusal. The
+    content is true and shows no value, but it is a different answer from the refusal template. The oracle does not cover the `not_available` kind
+    (`not_covered`) and the scorer expects no number there, so both score it as correct: they cannot tell the two answers apart. The gate counts 709 numbers in the run against 691 for the gold run;
+    the extra ones are in those headers (analysis id, dose), all engine values or user numbers, none unverified.
+  - 25 of 25 compare turns: the first ask of `compare_pair` is `not_applicable`, which is within the offered options, where the gold is outside
+    them (the pair does not exist before the re-run). Unused by the harness, which decides again after the re-run; both asks right.
+- The model, when wrong, is unsure: all 19 wrong answers are below 0.86. A threshold (for example "below 0.9, ask or read the engine") would catch
+  them, at the price of 26 of 4500 answers below 0.9; not implemented.
+- **Limits of this comparison.** The 175 / 175 is on the benchmark exercises with the benchmark's wordings, which the model has not seen as exercises but
+  whose sentence style is in its training distribution. It says that the decision pipeline works when the model answers right, which is the case on
+  the held-out exercises too (99.9 %); it does not say how the model copes with a user who writes differently. The 27B pipeline was
+  also tested on these wordings, but it reads free text. The next measure is a set of requests written by another person.

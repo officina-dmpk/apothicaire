@@ -162,8 +162,8 @@ def run_section(run):
     L.append("Rows %d, questions %d, device %s, dtype %s, model load %.1f s, inference wall %.1f s (after %d untimed warm-up rows)." %
              (meta["n_rows"], tot[1], meta["device"], meta["dtype"], meta["load_s"], meta["wall_s"], meta.get("warmup_rows", 0)))
     t = timing(res)
-    L.append("Time per row (one call, seven questions): mean %.1f ms, median %.1f ms, p95 %.1f ms. VRAM: %s." %
-             (t["mean_ms"], t["median_ms"], t["p95_ms"], meta.get("vram_text", "n/a")))
+    L.append("Time per row (one call, %d questions): mean %.1f ms, median %.1f ms, p95 %.1f ms. VRAM: %s." %
+             (round(tot[1] / meta["n_rows"]), t["mean_ms"], t["median_ms"], t["p95_ms"], meta.get("vram_text", "n/a")))
     L += ["", "### Accuracy per question", ""]
     maj = majority(res)
     maj_tot = (sum(v[0] for v in maj.values()), sum(v[1] for v in maj.values()))

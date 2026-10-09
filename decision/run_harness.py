@@ -91,7 +91,8 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
                        regenerated=False, kept="first", badge=bool(g["findings"]), findings_before=cls, findings_after=cls,
                        first_answer=None, tool_calls=tool_recs, memory_calls=0, score=sc,
                        decisions=[{"answers": d["answers"], "outside_options": d["outside_options"],
-                                   "analyses_in_state": [x["id"] for x in d["state"]["analyses"]]} for d in info["decisions"]],
+                                   "analyses_in_state": [x["id"] for x in d["state"]["analyses"]],
+                                   **({"model_info": d["model_info"]} if d.get("model_info") else {})} for d in info["decisions"]],
                        harness_notes=info["notes"])
             if usage is not None: rec["compare_tool"] = usage
             turns.append(rec)
@@ -120,7 +121,7 @@ def decision_section(records):
     walls = [t["wall_s"] for t in turns]
     L = ["## Decision harness", "",
          f"{len(decs)} decide calls in {len(turns)} turns; mean {sum(walls) / len(walls):.3f} s per turn (engine calls and rendering; "
-         f"no language model in this run, so no prompt tokens and no VRAM)." if walls else "No turn.", "",
+         f"no prompt tokens; with a trained decider the time includes its forward passes, see the decision model section if any)." if walls else "No turn.", "",
          "Answers outside the options offered by the question set (left unused by the harness): " +
          ("; ".join(f"{k}: {len(v)}" for k, v in sorted(outside.items())) if outside else "none") + ".", "",
          "Harness notes: " + ("; ".join(notes) if notes else "none") + ".", ""]
@@ -142,7 +143,7 @@ def main():
     ap.add_argument("--ids", default="")
     a = ap.parse_args()
     decide = load_decider(a.decider)
-    name = "".join(c if c.isalnum() or c in "-_" else "-" for c in getattr(decide, "name", "custom"))
+    name = "".join(c if c.isalnum() or c in "-_." else "-" for c in getattr(decide, "name", "custom"))
     run_dir = os.path.join(RUNS, f"{a.date}-harness-{name}"); os.makedirs(run_dir, exist_ok=True)
     dirs = mk.list_exercises()
     if a.ids: dirs = [d for d in dirs if os.path.basename(d) in a.ids.split(",")]
@@ -154,8 +155,16 @@ def main():
         ok = [t for t in r["turns"] if "error" not in t]
         print(f"{r['id']}: {len(ok)}/{len(r['turns'])} turns, oracle-correct {sum(1 for t in ok if (t.get('oracle') or {}).get('correct'))}"
               f"/{sum(1 for t in ok if t.get('oracle'))}, {r['wall_s']:.2f} s", flush=True)
+    uses_model = hasattr(decide, "summary")       # a trained decider reports its own calls, seconds and GPU memory
     rep = write_report(run_dir, records, {"date": a.date, "exercises_run": len(records),
-                                          "model": f"decision harness (decision/harness.py), decider {a.decider}, no language model"})
+                                          "model": f"decision harness (decision/harness.py), decider {a.decider}" +
+                                                   ("" if uses_model else ", no language model")})
+    if uses_model:
+        summ = decide.summary()
+        with open(os.path.join(run_dir, "decider_summary.json"), "w", encoding="utf-8") as f: json.dump(summ, f, indent=1)
+        with open(os.path.join(run_dir, "report.md"), "a", encoding="utf-8") as f:
+            f.write("\n## Decision model\n\n" + "\n".join(f"- {k}: {v}" for k, v in summ.items()) + "\n")
+        print("decider:", summ)
     o, tc = rep["oracle"], rep["tool_calls"]
     print(f"oracle {o['correct_turns']}/{o['turns']} turns, {o['numbers_ok']}/{o['numbers']} numbers; tool calls invalid {tc['invalid']}, "
           f"failed {tc['failed']} of {tc['total']}; gate unverified {rep['hallucination']['after_gate']['unverified']}/"

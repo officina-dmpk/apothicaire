@@ -313,7 +313,8 @@ class Harness:
                               [{"id": a["id"], "kind": a["kind"], "auc_method": a["auc_method"]} for a in self.analyses])
         questions = md.questions_for(sorted(a["id"] for a in self.analyses))
         answers, outside = normalize_answers(self.decide(state, questions), questions)
-        self._info["decisions"].append({"state": state, "answers": answers, "outside_options": outside})
+        self._info["decisions"].append({"state": state, "answers": answers, "outside_options": outside,
+                                        "model_info": getattr(self.decide, "last_info", None)})   # confidences and seconds of a trained decider
         return answers
 
     def turn(self, text):

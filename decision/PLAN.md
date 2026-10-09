@@ -1,6 +1,6 @@
 # Spike: a decision harness for Apothicaire (D-01)
 
-- **State:** in progress (validated by the human on 2026-10-09, evening); steps 1 and 4 done, step 2 running, step 3 and 5 todo
+- **State:** in progress (validated by the human on 2026-10-09, evening); steps 1 to 5 done (2026-10-09, night): the trained harness scores 175 / 175 on the benchmark; open: free-wording test, fit/simulate wiring
 - **Depends on:** the benchmark of `bench/` (runs 2026-10-09 and 2026-10-09b), Caladrius v0.2.0 MCP server
 - **Order:** this spike first, then the Saluki 27B test (`notes/`), then the out-of-sample benchmark of the 27B pipeline
 
@@ -32,3 +32,4 @@ A report `decision/runs/<date>/report.md` with, per pipeline (27B + gate, decisi
 
 - 2026-10-09 orchestrator: card written after the human's idea (a decision model that "chooses what to do" on the data), corrected on one point: the model decides, the harness acts. Size set to 0.8B-3B, not 8B.
 - 2026-10-09 orchestrator: step 1 done (3600 rows; the 25 benchmark exercises kept out of train in `data/bench.jsonl`). Step 4 done: with gold decisions the harness scores 175 / 175 oracle-correct turns (27B pipeline: 170 / 175), 0 unverified numbers of 1698, 1.4 ms per turn. Open items for step 3 and 5: (a) `parameter_asked = several` lets the harness answer with the full table, which the scorer does not penalise; add one `noul` question per parameter (`asked_<param>`) to the dataset and the harness so the ceiling is honest; (b) the gold decider's compare answer is defined on the state after the re-run, so the harness asks twice in the compare turn; (c) `fit_pk1`, `fit_pk2`, `simulate` are not wired (refusal template); (d) the digest of `apothicaire.py` prints large integral values with a trailing `.0` (the 27B's ex23 failure): fix there too, as a separate card.
+- 2026-10-09 engine: step 3 done (Qwen3.5-0.8B, 1980 rows, 2 epochs, 54 min, 3.6 GB torch peak; held-out 99.9 %, ECE 0.001; only `is_not_available` is imperfect, 98 %). Step 5 done: the trained harness scores 175 / 175 turns, 558 / 558 numbers, 0 / 250 invalid calls, 0.34 s per turn, 1.9 GB (see README, Step 5). Not measured: requests in wordings outside the generator's.

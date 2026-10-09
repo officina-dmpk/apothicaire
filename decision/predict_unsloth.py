@@ -19,6 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import zero_shot_d1 as z  # noqa: E402  (load_rows, to_call, normalise_answer, predict_rows, accuracy, calibration, run_section ...)
 
+CONFUSION_OF = ("analysis", "route", "auc_method", "compare_pair", "is_not_available")  # confusion tables of the report (set on z in main)
+
 
 def split_path(split):
     """decision/data/<split>.jsonl for a split name, the path itself for an existing file."""
@@ -77,7 +79,19 @@ def load_model(path, device, load_in_4bit, max_seq_length):
     return model, tokenizer, str(p.dtype).replace("torch.", ""), str(p.device)
 
 
+def baseline_section(res):
+    """Markdown: the questions whose accuracy is at or below the always-majority baseline."""
+    per, _ = z.accuracy(res); maj = z.majority(res)
+    low = sorted((q for q in per if per[q][0] <= maj[q][0]), key=lambda q: per[q][0] / per[q][1] - maj[q][0] / maj[q][1])
+    L = ["### Questions at or below the always-majority baseline", ""]
+    if not low: return "\n".join(L + ["None: every question is above its baseline.", ""])
+    L.append(z.md_table(["question", "accuracy", "always-majority", "difference (points)"],
+                        [(q, z.pct(*per[q]), z.pct(*maj[q]), "%+.1f" % (100 * (per[q][0] / per[q][1] - maj[q][0] / maj[q][1]))) for q in low]))
+    return "\n".join(L + [""])
+
+
 def main(argv=None):
+    z.CONFUSION_OF = CONFUSION_OF       # here, not at import: the tests of zero_shot_d1 import this module in the same process
     a = parse_args(argv)
     rows = z.load_rows(split_path(a.split), a.limit, a.stride)
     if not rows: sys.exit("no rows in %s" % a.split)
@@ -118,7 +132,7 @@ def main(argv=None):
             "certain label; `noul` probabilities are P(true). Python %s, torch %s." % (meta["python"], meta["torch"]), "",
             z.summary_table([run]), ""]
     with open(base + ".md", "w", encoding="utf-8", newline="\n") as f:
-        f.write("\n".join(head) + "\n" + z.run_section(run) + "\n")
+        f.write("\n".join(head) + "\n" + z.run_section(run) + "\n\n" + baseline_section(res) + "\n")
     per, tot = z.accuracy(res)
     print("wrote", base + ".json / .md")
     print("overall %d/%d = %s; ECE %.3f; mean %.1f ms/row" % (tot[0], tot[1], z.pct(*tot), z.calibration(res)[1], z.timing(res)["mean_ms"]))
