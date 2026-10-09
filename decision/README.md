@@ -82,6 +82,36 @@ python -m unittest discover -s tests -t .     # whole suite (about 45 s); only t
 The tests are `unittest`-based like the others (pytest is not installed here, but collects them). `decision/data/` is git-ignored (22 MB,
 deterministic: regeneration is byte-identical); the exercises are versioned.
 
+## Step 2: zero-shot baseline
+
+Liquid AI `d1-omni-600M` and `d1-3B` (license lfm1.0), no training, asked the 7 questions of every row in one `system_one(state, questions)` call
+(`decision/zero_shot_d1.py`; environment in `decision/requirements-d1.txt`: torch 2.14.1+cu130, transformers 5.19.0). Full report with the
+confusion of `analysis` and `parameter_asked`, the calibration tables and the times: [`runs/2026-10-09/report.md`](runs/2026-10-09/report.md)
+(run folder: [`runs/2026-10-09/`](runs/2026-10-09/)). Accuracy over all questions of the rows (one-hot gold):
+
+| model | split | rows | overall | ECE | ms per row |
+|---|---|---|---|---|---|
+| d1-omni-600M (cuda, float16) | held-out | 720 (all) | 61.8 % | 0.084 | 134 |
+| d1-omni-600M (cuda, float16) | bench | 900 (all) | 62.2 % | 0.076 | 140 |
+| d1-omni-600M (cuda, float16) | held-out, every 6th row | 120 | 63.1 % | 0.083 | 136 |
+| d1-3B (cpu, float32) | held-out, every 6th row | 120 | 66.3 % | 0.101 | 14160 |
+| d1-omni-600M (cuda, float16) | bench, every 8th row | 112 | 65.2 % | 0.087 | 136 |
+| d1-3B (cpu, float32) | bench, every 8th row | 112 | 66.8 % | 0.090 | 14180 |
+
+Per question (held-out rows every 6th, 600M / 3B): `analysis` 68.3 / 90.0 %, `parameter_asked` 51.7 / 86.7 %, `route` 68.3 / 74.2 %,
+`auc_method` 60.8 / 75.8 %, `dose_has_unit` 75.8 / 87.5 %, `is_not_available` 70.8 / 28.3 %, `compare_pair` 45.8 / 21.7 %.
+
+- **d1-3B does not run on the RTX 3060 here.** The weights fit (6.8 GB used of 12 after load) but the model's remote code calls
+  `torch.ops.aten._flash_attention_forward`, which the PyTorch Windows wheel was not built with (`USE_FLASH_ATTENTION was not enabled for build`).
+  Nothing was patched; the 3B was run on CPU in float32 on a strided subset (about 14 s per row, so 120 and 112 rows). Details in the report notes.
+- Two questions are below the always-answer-the-majority baseline on both models: `is_not_available` (92 % false) and `compare_pair`
+  (92 % `not_applicable`); the 3B is at 28 % and 22 % there: it answers `true` on 86 of the 107 rows that are false (and finds all 13 true ones), and gives a pair or `none_available` on 94 of 112 rows that compare nothing. `auc_method` is below the majority
+  baseline too. The models are better than the baseline only on `analysis`, `parameter_asked`, `route` and `dose_has_unit`.
+- Calibration: the 600M is under-confident at low probability (bins below 0.5 are right about 50 % of the time) and well calibrated
+  above 0.7; ECE about 0.08. The 3B is overconfident on the two rare-class questions.
+- The 3B is better than the 600M on the same rows except on the two rare-class questions, with the largest gain on `analysis` (+22 points)
+  and `parameter_asked` (+35 points). This is what fine-tuning (step 3) has to fix: rare classes and calibration.
+
 ## Counts (class balance)
 
 <!-- counts:begin -->

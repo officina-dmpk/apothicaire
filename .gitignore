@@ -4,3 +4,4 @@ runs/*-data/
 runs/*.md
 runs/*.json
 bench/runs/*/*-data/
+.venv*/
