@@ -110,6 +110,130 @@
     "n_must": 9,
     "fraction": 0.5555555555555556,
     "correct": false
+   },
+   "oracle": {
+    "n_items": 9,
+    "n_ok": 4,
+    "correct": false,
+    "items": [
+     {
+      "label": "Cmax",
+      "key": "cmax",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "23,93 ng/ml"
+      ]
+     },
+     {
+      "label": "Tmax",
+      "key": "tmax",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "1,2 h"
+      ]
+     },
+     {
+      "label": "AUC(0-tlast)",
+      "key": "auclast",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "159,97 h*ng/ml",
+       "159,97 h*ng/ml",
+       "23 h",
+       "20 %"
+      ]
+     },
+     {
+      "label": "AUC(0-inf)",
+      "key": "aucinf.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "164,88 h*ng/ml",
+       "164,88 h*ng/ml",
+       "3,2 h",
+       "7"
+      ]
+     },
+     {
+      "label": "lambda_z",
+      "key": "lambda.z",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "0,1558 1/h"
+      ]
+     },
+     {
+      "label": "t1/2",
+      "key": "half.life",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "4,45 h"
+      ]
+     },
+     {
+      "label": "CL",
+      "key": "cl.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "12,13 doseunit/(h*ng/ml)",
+       "12,13 h*ng/ml"
+      ]
+     },
+     {
+      "label": "Vz",
+      "key": "vz.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "77,88 doseunit/(ng/ml)",
+       "77,88 µg/(ng/ml)"
+      ]
+     },
+     {
+      "label": "MRT",
+      "key": "mrt.iv.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "7,07 h",
+       "7,07 h"
+      ]
+     }
+    ]
    }
   },
   {
@@ -147,6 +271,49 @@
     "n_must": 3,
     "fraction": 1.0,
     "correct": true
+   },
+   "oracle": {
+    "n_items": 3,
+    "n_ok": 3,
+    "correct": true,
+    "items": [
+     {
+      "label": "C0",
+      "key": "c0",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "28,18 ng/ml"
+      ]
+     },
+     {
+      "label": "Cmax",
+      "key": "cmax",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "23,93 ng/ml"
+      ]
+     },
+     {
+      "label": "Tmax",
+      "key": "tmax",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "1,2 h"
+      ]
+     }
+    ]
    }
   },
   {
@@ -183,6 +350,37 @@
     "n_must": 2,
     "fraction": 0.0,
     "correct": false
+   },
+   "oracle": {
+    "n_items": 2,
+    "n_ok": 0,
+    "correct": false,
+    "items": [
+     {
+      "label": "CL",
+      "key": "cl.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "12,13 doseunit/(h*ng/ml)"
+      ]
+     },
+     {
+      "label": "Vz",
+      "key": "vz.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "77,88 doseunit/(ng/ml)"
+      ]
+     }
+    ]
    }
   },
   {
@@ -220,6 +418,39 @@
     "n_must": 2,
     "fraction": 0.5,
     "correct": false
+   },
+   "oracle": {
+    "n_items": 2,
+    "n_ok": 1,
+    "correct": false,
+    "items": [
+     {
+      "label": "t1/2",
+      "key": "half.life",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "4,45 h"
+      ]
+     },
+     {
+      "label": "AUC % extrapolated",
+      "key": "aucpext.obs",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "2,98 %",
+       "0",
+       "2,98 %"
+      ]
+     }
+    ]
    }
   },
   {
@@ -256,6 +487,39 @@
     "n_must": 2,
     "fraction": 1.0,
     "correct": true
+   },
+   "oracle": {
+    "n_items": 2,
+    "n_ok": 2,
+    "correct": true,
+    "items": [
+     {
+      "label": "lambda_z points",
+      "key": "lambda.z.n.points",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "7",
+       "3,2 h",
+       "23 h"
+      ]
+     },
+     {
+      "label": "adjusted R2",
+      "key": "adj.r.squared",
+      "method": "linear",
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "0,9977"
+      ]
+     }
+    ]
    }
   },
   {
@@ -291,6 +555,25 @@
     "n_must": 1,
     "fraction": 1.0,
     "correct": true
+   },
+   "oracle": {
+    "n_items": 1,
+    "n_ok": 1,
+    "correct": true,
+    "items": [
+     {
+      "label": "dose",
+      "key": "dose",
+      "method": null,
+      "ok": true,
+      "class": null,
+      "detail": null,
+      "labelled": true,
+      "claimed": [
+       "2000 µg"
+      ]
+     }
+    ]
    }
   },
   {
@@ -390,6 +673,37 @@
     "n_must": 2,
     "fraction": 0.0,
     "correct": false
+   },
+   "oracle": {
+    "n_items": 2,
+    "n_ok": 0,
+    "correct": false,
+    "items": [
+     {
+      "label": "AUC(0-tlast) linear",
+      "key": "auclast",
+      "method": "linear",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "159,967 h*ng/ml"
+      ]
+     },
+     {
+      "label": "AUC(0-tlast) lin-up/log-down",
+      "key": "auclast",
+      "method": "lin_up_log_down",
+      "ok": false,
+      "class": "wrong_option",
+      "detail": "options.start=zero",
+      "labelled": true,
+      "claimed": [
+       "157,492 h*ng/ml"
+      ]
+     }
+    ]
    }
   },
   {
@@ -435,5 +749,27 @@
     "correct": true
    }
   }
- ]
+ ],
+ "tool_arg_audit": {
+  "calls": 3,
+  "deviating_calls": 2,
+  "deviations": [
+   {
+    "turn": 1,
+    "tool": "nca_run",
+    "status": "valid",
+    "field": "options.start",
+    "got": "zero",
+    "intended": null
+   },
+   {
+    "turn": 7,
+    "tool": "nca_run",
+    "status": "valid",
+    "field": "options.start",
+    "got": "zero",
+    "intended": null
+   }
+  ]
+ }
 }

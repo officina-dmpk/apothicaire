@@ -41,9 +41,54 @@ Classes are heuristics (`bench/score.py`); the unverified counts above never dep
 | compare | 25 | 23 (92.0 %) | 46 / 50 | 76 / 168 | 0 / 63 |
 | not_available | 25 | 25 (100.0 %) | 0 / 0 | 0 / 0 | 0 / 0 |
 
+## Oracle check: 168 / 175 turns = 96.0 % (95 % CI, exercises resampled: 89.7-100.0 %); 494 / 508 expected numbers = 97.2 % (95 % CI, exercises resampled: 92.3-100.0 %)
+
+Second judgement, independent of the gate (`bench/score.py`, `oracle_turn`): the number written after the label of the parameter the question asks for must be Caladrius's value of THAT parameter, of the right AUC method, with the unit Caladrius reports. The gate counts above are untouched; the denominators here are the turns that expect numbers and the numbers they expect (not covered: not_available, no value to check).
+
+| question type | turns | oracle-correct | expected numbers ok | wrong_parameter | wrong_method | wrong_option | missing_unit | wrong_unit | missing_value |
+|---|---|---|---|---|---|---|---|---|---|
+| import_nca | 25 | 23 (92.0 %) | 219 / 225 | 1 | 0 | 5 | 0 | 0 | 0 |
+| cmax_tmax | 25 | 25 (100.0 %) | 58 / 58 | 0 | 0 | 0 | 0 | 0 | 0 |
+| clearance_volume | 25 | 24 (96.0 %) | 48 / 50 | 0 | 0 | 2 | 0 | 0 | 0 |
+| half_life | 25 | 24 (96.0 %) | 49 / 50 | 0 | 0 | 1 | 0 | 0 | 0 |
+| lambda_z_regression | 25 | 25 (100.0 %) | 50 / 50 | 0 | 0 | 0 | 0 | 0 | 0 |
+| recall | 25 | 24 (96.0 %) | 24 / 25 | 0 | 0 | 0 | 1 | 0 | 0 |
+| compare | 25 | 23 (92.0 %) | 46 / 50 | 2 | 0 | 2 | 0 | 0 | 0 |
+| **total** | 175 | 168 (96.0 %) | 494 / 508 | 3 | 0 | 10 | 1 | 0 | 0 |
+
+Against the scorer's expected-number check (the global search of the numbers, above): items the scorer found but the oracle rejects 2 (ex07_iv_bolus t1 CL (wrong_option); ex21_oral_0 t6 dose (missing_unit)); items the scorer missed but the oracle accepts 0; turns oracle-wrong but scorer-correct 0; turns oracle-correct but scorer-incorrect 0.
+
+Every expected number the oracle rejects:
+
+| exercise | turn | expected | class | detail | numbers written after the label |
+|---|---|---|---|---|---|
+| ex07_iv_bolus | 1 import_nca | AUC(0-tlast) | wrong_option | options.start=zero | 159,97 h*ng/ml, 159,97 h*ng/ml, 23 h, 20 % |
+| ex07_iv_bolus | 1 import_nca | AUC(0-inf) | wrong_option | options.start=zero | 164,88 h*ng/ml, 164,88 h*ng/ml, 3,2 h, 7 |
+| ex07_iv_bolus | 1 import_nca | CL | wrong_option | options.start=zero | 12,13 doseunit/(h*ng/ml), 12,13 h*ng/ml |
+| ex07_iv_bolus | 1 import_nca | Vz | wrong_option | options.start=zero | 77,88 doseunit/(ng/ml), 77,88 µg/(ng/ml) |
+| ex07_iv_bolus | 1 import_nca | MRT | wrong_option | options.start=zero | 7,07 h, 7,07 h |
+| ex07_iv_bolus | 3 clearance_volume | CL | wrong_option | options.start=zero | 12,13 doseunit/(h*ng/ml) |
+| ex07_iv_bolus | 3 clearance_volume | Vz | wrong_option | options.start=zero | 77,88 doseunit/(ng/ml) |
+| ex07_iv_bolus | 4 half_life | AUC % extrapolated | wrong_option | options.start=zero | 2,98 %, 0, 2,98 % |
+| ex07_iv_bolus | 7 compare | AUC(0-tlast) linear | wrong_option | options.start=zero | 159,967 h*ng/ml |
+| ex07_iv_bolus | 7 compare | AUC(0-tlast) lin-up/log-down | wrong_option | options.start=zero | 157,492 h*ng/ml |
+| ex13_oral_1 | 1 import_nca | AUC(0-tlast) | wrong_parameter | aucall | 3152.57 h*ng/ml |
+| ex13_oral_1 | 7 compare | AUC(0-tlast) linear | wrong_parameter | aucall | 3152.57 h*ng/ml |
+| ex13_oral_1 | 7 compare | AUC(0-tlast) lin-up/log-down | wrong_parameter | aucall | 3056.08 h*ng/ml |
+| ex21_oral_0 | 6 recall | dose | missing_unit |  | 5000 |
+
 ## Tool calls: 112 valid, 2 invalid, 0 failed of 114 (validity 98.2 %)
 
 `nca_run` calls: 50, with the right dose 50, with the right route 50; memory calls (zoom / read_message): 6; by tool: {'analysis_get': 38, 'data_import': 26, 'nca_run': 50}. invalid = unknown tool, invalid_parameters, unknown_worksheet / unknown_analysis or any rejection; failed = accepted but the analysis errs for every subject.
+
+## Tool-call argument audit: 3 of 76 `nca_run` / `data_import` calls differ from the exercise's intent (dose, route, AUC method alone as options; the CSV and the column units)
+
+| deviation | calls |
+|---|---|
+| nca_run: options.start = "zero" (intended null) | 2 |
+| data_import: csv = "<95 chars, DIFFERENT from the exercise CSV>" (intended "identical to the exercise CSV") | 1 |
+
+In exercises: ex07_iv_bolus, ex23_iv_bolus. A deviation is listed here whatever its effect; the oracle check calls it `wrong_option` only when the answer's value is wrong (`run_bench.py --tool-arg-audit` prints every call).
 
 ## Time: mean 10.1 s per turn, mean 4289 prompt tokens (first call), total 64 min
 
