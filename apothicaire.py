@@ -104,11 +104,9 @@ def to_openai(tool):
         opts["properties"] = {k: v for k, v in opts["properties"].items() if k in NCA_OPTIONS_KEPT}
         opts["description"] = ("NCA conventions, all optional. auc_method: linear = linear trapezoids, "
                                "lin_up_log_down = linear-up/log-down. Other options (blq, missing...) exist but are not shown.")
-        params["properties"]["route"] = {
-            "anyOf": [{"type": "string", "enum": ["extravascular", "iv_bolus"]},
-                      {"type": "object", "properties": {"iv_infusion": {"type": "object", "properties": {
-                          "duration": {"type": "number"}}, "required": ["duration"]}}, "required": ["iv_infusion"]}],
-            "description": "oral = extravascular; infusion = {\"iv_infusion\": {\"duration\": <time>}}"}
+        params["properties"]["route"] = {"type": "string", "enum": ["extravascular", "iv_bolus", "iv_infusion"],
+                                         "description": "oral = extravascular; infusion = iv_infusion with infusion_duration"}
+        params["properties"]["infusion_duration"] = {"type": "number", "description": "Only with route iv_infusion: duration of the infusion in the time unit of the data (2 h -> 2)."}
         params["properties"]["dose"] = {"type": "number", "description": "Dose amount in the unit the user gives (10 mg -> 10)."}
         params["properties"]["subject"] = {"description": "One subject label; omit for all subjects."}
     if tool["name"] == "data_import":
@@ -238,12 +236,30 @@ class Apothicaire(optchat.Agent):
             try:
                 with open(args.pop("path"), encoding="utf-8") as f: args["csv"] = f.read()
             except OSError as e: return f"tool error: cannot read file: {e}"
+        if name == "nca_run":
+            err = self._nca_route(args)
+            if err: return err
         try: ok, text = self.mcp.call(name, args)
         except MCPError as e: ok, text = False, f"mcp error: {e}"
         shown = render_tool_result(name, ok, text, self.units)
         self.tool_log.append({"turn": len(self.turn_stats), "name": name, "args": args, "ok": ok,
                               "text": text, "shown": shown})
         return shown if ok else f"TOOL ERROR: {text}"
+
+    @staticmethod
+    def _nca_route(args):
+        """The server's infusion route is an object, {"iv_infusion": {"duration": d}}, which the 27B cannot write as a
+        tool argument (it sends a string). The model sees route = "iv_infusion" plus infusion_duration; this builds the
+        object. A route sent as a JSON string is parsed. Returns a TOOL ERROR text, or None when the arguments are fine."""
+        dur = args.pop("infusion_duration", None); route = args.get("route")
+        if isinstance(route, str) and route.strip().startswith("{"):
+            try: route = args["route"] = json.loads(route)
+            except ValueError: return "TOOL ERROR: route is not valid JSON"
+        if route == "iv_infusion":
+            if not isinstance(dur, (int, float)) or isinstance(dur, bool) or dur <= 0:
+                return "TOOL ERROR: route iv_infusion needs infusion_duration, a positive number in the time unit of the data"
+            args["route"] = {"iv_infusion": {"duration": dur}}
+        return None
 
     # -- number gate: every final answer is checked against the tool results and the user's messages
     def _chat_call(self, msgs, tools=None):

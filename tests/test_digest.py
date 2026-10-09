@@ -394,8 +394,9 @@ class TestSchemaFlattening(unittest.TestCase):
                          {"minimum": 3, "type": "integer"})
         q = f["options"]["properties"]["quality"]["properties"]
         self.assertEqual(set(q), {"max_extrapolated_percent", "min_adj_r_squared", "min_points", "min_span_ratio"})
-        self.assertEqual(f["route"]["anyOf"][0]["enum"], ["extravascular", "iv_bolus"])
-        self.assertEqual(f["route"]["anyOf"][1]["required"], ["iv_infusion"])           # an infusion can be expressed
+        self.assertEqual(f["route"]["enum"], ["extravascular", "iv_bolus", "iv_infusion"])
+        self.assertEqual(f["infusion_duration"]["type"], "number")                       # the model never writes the route object
+        self.assertNotIn("anyOf", f["route"])
         self.assertEqual(f["dose"]["type"], "number")
         self.assertEqual(f["worksheet"]["minimum"], 1); self.assertEqual(f["worksheet"]["type"], "integer")
         self.assertEqual(f["analysis"]["type"], "integer")
