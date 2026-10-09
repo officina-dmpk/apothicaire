@@ -52,10 +52,10 @@ class TestTaxonomy(unittest.TestCase):
     def setUp(self):
         self.tool = [tool_result(**{"cl.obs": 0.00271828, "auclast": 100.0, "auclast.alt": 96.5, "aucpext.obs": 5.23, "half.life": 3.1})]
 
-    def cls(self, answer, kind=None, users=()):
+    def cls(self, answer, kind=None, users=(), with_answer=False):
         f, allowed = findings_of(answer, self.tool, users)
         self.assertEqual(len(f), 1, (answer, f))
-        return score.classify(f[0], allowed, kind)
+        return score.classify(f[0], allowed, kind, answer if with_answer else None)
 
     def test_unit_conversion(self):
         self.assertEqual(self.cls("CL/F = 27,1828 L/h"), "unit_conversion")           # x 10^4
@@ -69,6 +69,15 @@ class TestTaxonomy(unittest.TestCase):
         self.assertEqual(self.cls("soit une baisse de 3,500 %"), "arithmetic")
         self.assertEqual(self.cls("la somme vaut 196,5"), "arithmetic")                # 100 + 96.5
         self.assertNotEqual(self.cls("la différence est de 3,50"), "arithmetic")       # 3 digits: chance, not claimed
+
+    def test_local_arithmetic_uses_the_numbers_written_in_the_answer(self):
+        # 3 digits: the percentage 3.5 % of 96.5 -> 100.0 is the model's own computation from numbers it wrote next to it
+        ans = "AUC 100.0 contre 96.5 : écart 3,50 soit 3,63 %"
+        f, allowed = findings_of(ans, self.tool)
+        out = {x["text"]: score.classify(x, allowed, None, ans) for x in f}
+        self.assertEqual(out["3,63 %"], "arithmetic")                       # (100.0 - 96.5) / 96.5 * 100
+        self.assertEqual(out["3,50"], "arithmetic")                         # 100.0 - 96.5
+        self.assertNotEqual(score.classify(f[0], allowed, None), "arithmetic")   # without the answer, 3 digits: not claimed
 
     def test_two_digits_are_not_called_a_conversion(self):
         # with 2 digits a power-of-ten coincidence is chance, not evidence

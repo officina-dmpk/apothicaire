@@ -48,7 +48,7 @@ def elide(args, csv_text):
 def tool_records(calls, meta, csv_text, known_tools):
     out = []
     for c in calls:
-        r = {"name": c["name"], "args": elide(c["args"], csv_text), "ok": c["ok"],
+        r = {"name": c["name"], "args": elide(c["args"], csv_text), "ok": c["ok"], "shown": c["shown"][:6000],
              "status": classify_call(c["name"], c["ok"], c["text"], known_tools)}
         if not c["ok"]: r["error"] = c["text"][:240]
         if c["name"] == "data_import":
@@ -91,8 +91,9 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
             allowed = gate.allowed_numbers(tool_texts, users)
             f_before = g.get("first_findings") if g.get("regenerated") else g.get("findings", [])
             f_after = g.get("findings", [])
-            cls = lambda fs: [{"text": f["text"], "value": f["value"], "nearest": f.get("nearest_allowed"),
-                               "class": score.classify(f, allowed, t["kind"])} for f in (fs or [])]
+            cls = lambda fs, text: [{"text": f["text"], "value": f["value"], "significant_digits": f.get("significant_digits"),
+                                     "position": f.get("position"), "nearest": f.get("nearest_allowed"),
+                                     "class": score.classify(f, allowed, t["kind"], text)} for f in (fs or [])]
             msgs = ag.store.log[n_msgs:]
             mem_calls = sum(1 for m in msgs if m["role"] == "tool_call" for c in optchat._calls_of(m) if c["name"] in ("zoom", "read_message"))
             sc = score.score_turn(answer, t["expect"], after.get("numbers_unverified", 0))
@@ -101,7 +102,7 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
                 numbers_total_before=before.get("numbers_total", 0), numbers_unverified_before=before.get("numbers_unverified", 0),
                 numbers_total_after=after.get("numbers_total", 0), numbers_unverified_after=after.get("numbers_unverified", 0),
                 regenerated=bool(g.get("regenerated")), kept=g.get("kept"), badge=bool(f_after),
-                findings_before=cls(f_before), findings_after=cls(f_after),
+                findings_before=cls(f_before, g.get("first_answer") if g.get("regenerated") else answer), findings_after=cls(f_after, answer),
                 first_answer=g.get("first_answer") if g.get("regenerated") else None,
                 tool_calls=tool_records(ag.tool_log[n_log:], meta, csv_text, set(ag.mcp.tools)),
                 memory_calls=mem_calls, score=sc)

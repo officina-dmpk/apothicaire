@@ -18,8 +18,9 @@ Pure Python, no model, no engine. Two things:
      recall_error        the turn is a recall turn (the number should have come from the user's message)
      unit_conversion     the number is an allowed number times a power of ten (3 digits or more), or times 60 or
                          1/60 and a power of ten (4 digits or more): a unit factor (ng to mg, h to min, mL to L...)
-     arithmetic          (4 digits or more) the sum, difference, product, ratio or percentage ratio of two
-                         allowed numbers (a computation the model did itself)
+     arithmetic          the sum, difference, product, ratio or percentage ratio of two numbers written in the same
+                         answer (3 digits or more) or of two allowed numbers (4 digits or more): a computation the
+                         model did itself
      unlabelled_misread  a near miss of an allowed number: within 2 % of it, or the same digits with one
                          digit changed (a value copied wrongly, or taken from another parameter)
      other               none of the above (an invented value)
@@ -101,9 +102,20 @@ def _near_miss(c, vals):
         if len(ad) == len(cd) >= 3 and sum(x != y for x, y in zip(ad, cd)) == 1: return True
     return False
 
-def classify(finding, allowed, kind=None):
+def _local_operands(answer, finding):
+    """The other numbers written in the same answer (the likely operands of a computation the model did)."""
+    pos = finding.get("position") or [-1, -1]
+    out = []
+    for nm in gate.extract_numbers(answer):
+        if nm.start < pos[1] and nm.end > pos[0]: continue            # the finding itself
+        v = abs(float(nm.readings[0][0]))
+        if v > 0 and v not in out: out.append(v)
+    return out
+
+def classify(finding, allowed, kind=None, answer=None):
     """Class of one unverified number. `finding` is a gate finding (value, significant_digits, ...),
-    `allowed` the gate's allowed set (gate.allowed_numbers), `kind` the question type of the turn."""
+    `allowed` the gate's allowed set (gate.allowed_numbers), `kind` the question type of the turn, `answer` the text
+    the finding comes from (lets the arithmetic rule use the numbers written next to it, with 3 digits)."""
     if kind == "recall": return "recall_error"
     cd = abs(D(finding["value"])); n = max(finding.get("significant_digits", 2), 2)
     if cd == 0: return "other"
@@ -113,7 +125,12 @@ def classify(finding, allowed, kind=None):
         for a in fl:
             for f in factors:
                 if _close(c, a * f, n): return "unit_conversion"
-    if n >= 4:                                                       # 2. arithmetic on two allowed numbers
+    if answer is not None and n >= 3:                                # 2a. arithmetic on two numbers written in the same answer
+        ops = _local_operands(answer, finding)[:14]
+        for a, b in itertools.permutations(ops, 2):
+            for r in (a - b, a + b, a / b, a / b * 100.0, (a - b) / b * 100.0, a * b):
+                if _close(c, r, n): return "arithmetic"
+    if n >= 4:                                                       # 2b. arithmetic on two allowed numbers
         pool = fl if len(fl) <= 250 else fl[:250]                     # (with fewer digits it is chance, see chance_baseline)
         for a, b in itertools.permutations(pool, 2):
             for r in (a - b, a + b, a / b, a / b * 100.0, (a - b) / b * 100.0, a * b):
@@ -121,8 +138,8 @@ def classify(finding, allowed, kind=None):
     if _near_miss(cd, vals): return "unlabelled_misread"            # 3. a copy that is not verbatim
     return "other"
 
-def classify_all(findings, allowed, kind=None):
-    return [classify(f, allowed, kind) for f in findings]
+def classify_all(findings, allowed, kind=None, answer=None):
+    return [classify(f, allowed, kind, answer) for f in findings]
 
 def chance_baseline(allowed, n=100, seed=0, digits=3):
     """How the rules classify RANDOM numbers (log-uniform over the allowed set's range, `digits` significant
