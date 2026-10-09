@@ -204,6 +204,10 @@ _ALIASES = {
     "lambda.z.n.points": (r"nombre de points|\bn[ _]?points|\bpoints\b|\bn\s?pts|lambda\.z\.n\.points", True),
     "adj.r.squared": (r"(?<![a-z])r\s?[²2](?!\d)|adj\.r\.squared", False),
     "dose": (r"\bdose\b", False),
+    # the compare turn when the model used analysis_compare: the engine's difference (b - a) and its percentage
+    "compare.percent": (r"diff[ée]rence relative|[ée]cart relatif|variation relative|diff[ée]rence en pourcent\w*|en pourcent\w*|"
+                        r"pourcent\w*|\brelative?\b|\brelatif\b|\bpercent\w*", False),
+    "compare.difference": (r"\bdiff[èe]re\b|\bdiff[ée]rences?\b|[ée]carts?\b|\bdiff\b|\bvariation\b|\bdelta\b|Δ|\bdifference\b", False),
 }
 _LUD_RE = re.compile(r"lin(?:ear|[ée]aire)?[\s_-]*up[\s_/-]*log[\s_-]*down|lin_up_log_down", re.I)
 _LIN_RE = re.compile(r"lin[ée]aire|linear(?!\w)", re.I)
@@ -297,6 +301,8 @@ def _spans(text, item, marks):
     for i, (a, b, t) in enumerate(marks):
         if t != tag: continue
         nxt = marks[i + 1][0] if i + 1 < len(marks) else len(text)
+        if not by_method:                                                # a method named inside the line ("lin-up/log-down - linéaire")
+            nxt = next((m[0] for m in marks[i + 1:] if m[2][0] == "key"), len(text))   # does not end the span of a key label
         spans = [(b, min(nxt, _eol(text, b)))]
         if by_method:
             pos = _eol(text, b) + 1
@@ -443,4 +449,58 @@ def oracle_exercise(meta, script, turns, badge_mark="\n\n⚠ "):
             m = ((c.get("args") or {}).get("options") or {}).get("auc_method")
             if m in METHODS: state[m] = nca_call_deviations(meta, c["args"])
         out.append(None if "error" in t else oracle_turn(t["answer"].split(badge_mark)[0], st["expect"], meta, state, vocab))
+    return out
+
+
+# ---------------------------------------------------------------- the compare turn: what the model did with analysis_compare
+_ID_RE = re.compile(r'"analysis":\s*(\d+)'); _METHOD_RE = re.compile(r'"auc_method":\s*"(\w+)"')
+_AUCLAST_ROW_RE = re.compile(r'"auclast":\s*"([^"]*)"')
+
+def analysis_methods(calls):
+    """{analysis id: AUC method in effect} of the valid `nca_run` calls (stored form: name, status, shown), read from the digest the
+    model was shown (`"analysis":N`, `options_used.auc_method`)."""
+    out = {}
+    for c in calls:
+        if c.get("name") != "nca_run" or c.get("status") != "valid": continue
+        i, m = _ID_RE.search(c.get("shown") or ""), _METHOD_RE.search(c.get("shown") or "")
+        if i and m: out[int(i.group(1))] = m.group(1)
+    return out
+
+def parse_compare_row(shown):
+    """The auclast row of an `analysis_compare` digest (apothicaire.digest_compare): {"a", "b", "difference", "percent", "ratio"} as
+    floats (units dropped), or None when there is no such row or it lacks the difference or the percentage."""
+    m = _AUCLAST_ROW_RE.search(shown or "")
+    if not m: return None
+    row = {}
+    for part in m.group(1).split(" | "):
+        k, _, rest = part.partition(" ")
+        if k in ("a", "b", "difference", "percent", "ratio"):
+            try: row[k] = float(rest.split(" ")[0])
+            except ValueError: pass
+    return row if {"a", "b", "difference", "percent", "ratio"} <= set(row) else None
+
+def compare_usage(prior_calls, turn_calls, truth=None):
+    """What the model did with `analysis_compare` in a turn. `prior_calls`: the stored tool calls of the earlier turns (they say which
+    analysis id is which AUC method), `turn_calls`: those of this turn. Returns
+    {"calls": analysis_compare calls, "valid": of those, "usable": bool, "reference": method of analysis a, "row": the auclast row}.
+    usable = the last valid call compares the linear and the lin-up/log-down analysis and its result holds the auclast row with the
+    difference and the percentage; `truth(reference)` (optional, scripts.compare_truth) is the independent check: the row must equal the
+    ground-truth arithmetic of meta.json to 5e-5 (6 significant digits displayed), otherwise usable is False and `mismatch` is set."""
+    methods = analysis_methods(list(prior_calls) + list(turn_calls))
+    cc = [c for c in turn_calls if c.get("name") == "analysis_compare"]
+    out = {"calls": len(cc), "valid": sum(c.get("status") == "valid" for c in cc), "usable": False, "reference": None, "row": None}
+    for c in reversed([c for c in cc if c.get("status") == "valid"]):
+        args = c.get("args") or {}
+        try: ma, mb = methods.get(int(args.get("a"))), methods.get(int(args.get("b")))
+        except (TypeError, ValueError): continue
+        if {ma, mb} != set(METHODS): continue
+        row = parse_compare_row(c.get("shown"))
+        if row is None: continue
+        out.update(reference=ma, row=row)
+        if truth is not None:
+            t = truth(ma)
+            if any(abs(row[k] - t[k]) > 5e-5 * max(abs(t[k]), 1e-12) for k in ("difference", "percent", "ratio")):
+                out["mismatch"] = {"tool": row, "truth": t}; return out
+        out["usable"] = True
+        return out
     return out

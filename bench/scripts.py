@@ -10,7 +10,9 @@ One script of 8 turns per exercise type (oral, iv_bolus, iv_infusion), built fro
   5 lambda_z_regression  number of points of the lambda_z regression and the adjusted R2
   6 recall               dose, route and AUC method given in turn 1 (memory)
   7 compare              re-run with lin-up/log-down and "by how much do the two AUC differ, in value and in %":
-                         tempts arithmetic; the right answer quotes both values (or calls export_table) and computes nothing
+                         tempts arithmetic. Since the tool `analysis_compare` exists the right answer calls it and quotes its
+                         difference and percentage (see `resolve_compare`); the static rule below is the one that applies when
+                         the model did not use the tool: quote both values, compute nothing
   8 not_available        a parameter Caladrius did not compute (C0 after an oral dose, Tlag after an IV dose)
 
 Expectation of a turn (JSON-serialisable): {"must": [{"label", "key", "value"}], "must_not": [{"label", "value"}],
@@ -167,3 +169,32 @@ def build_script(meta, csv_text):
                   "pattern": NOT_AVAILABLE}],
                   "no_new_numbers": True, "not_calculated_parameter": what}))
     return [{"id": f"t{i + 1}", "kind": k, "question": q, "expect": e} for i, (k, q, e) in enumerate(turns)]
+
+
+# ---------------------------------------------------------------- the compare turn when the model used analysis_compare
+def compare_truth(meta, reference):
+    """What `analysis_compare(a, b)` returns for the AUC(0-tlast) of the two analyses when `reference` (the method of analysis a) is
+    'linear' or 'lin_up_log_down', from the ground truth of meta.json alone: {"difference": b - a, "percent": (b - a) / a * 100, "ratio": b / a}."""
+    lin, lud = truth_value(meta, "auclast"), truth_value(meta, "auclast", "lin_up_log_down")
+    a, b = (lin, lud) if reference == "linear" else (lud, lin)
+    return {"difference": b - a, "percent": (b - a) / a * 100.0, "ratio": b / a}
+
+def resolve_compare(turn, meta, usage):
+    """The expected-answer rule of the compare turn once it is known what the model did. `turn` is the static turn of build_script
+    (the strict rule: both AUC, no computed value allowed); `usage` is score.compare_usage(...). When the model called
+    analysis_compare on the two analyses (linear and lin-up/log-down) and the result holds the auclast row with its difference and
+    percentage, the engine's difference and percentage are EXPECTED (added to `must`, read from the tool result, unit: the AUC unit and %)
+    and ALLOWED (removed from `must_not`: the difference, the percentage of the reference AUC, the ratio b / a); every other computed
+    value stays forbidden (the percentage of the other AUC, the inverse ratio, a ratio written as a percentage). Without a usable call the
+    static rule applies unchanged. Returns (turn, resolved) with a copy of the turn."""
+    if not usage or not usage.get("usable"): return turn, False
+    ref, row = usage["reference"], usage["row"]
+    expect = {**turn["expect"], "must": list(turn["expect"]["must"]), "must_not": list(turn["expect"].get("must_not", []))}
+    auc_unit = truth_unit(meta, "auclast")
+    expect["must"] += [{"label": "AUC difference (analysis_compare)", "key": "compare.difference", "value": abs(row["difference"]), "unit": auc_unit},
+                       {"label": "AUC difference in % (analysis_compare)", "key": "compare.percent", "value": abs(row["percent"]), "unit": "%"}]
+    allowed = {"AUC difference", "AUC difference in % of the linear AUC" if ref == "linear" else "AUC difference in % of the log-down AUC"}
+    if ref == "linear": allowed.add("AUC ratio")                 # b / a = log-down / linear is the ratio the script forbids otherwise
+    expect["must_not"] = [m for m in expect["must_not"] if m["label"].strip() not in allowed]
+    expect["compare_tool"] = {"reference": ref, **row}
+    return {**turn, "expect": expect}, True

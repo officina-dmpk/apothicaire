@@ -60,10 +60,27 @@ def tool_records(calls, meta, csv_text, known_tools):
         out.append(r)
     return out
 
+# ---------------------------------------------------------------- the compare turn
+def resolve_turn(meta, st, prior_turns, this_calls):
+    """(script turn to score against, compare usage). Only the compare turn changes: when the model called `analysis_compare` on the
+    linear and the lin-up/log-down analyses, the engine's difference and percentage are expected and allowed (scripts.resolve_compare);
+    otherwise the static strict rule applies. `prior_turns`: the records of the earlier turns (their tool calls say which analysis is
+    which method); `this_calls`: the tool records of this turn."""
+    if st["kind"] != "compare": return st, None
+    usage = score.compare_usage([c for t in prior_turns for c in t.get("tool_calls", [])], this_calls,
+                                truth=lambda ref: scripts.compare_truth(meta, ref))
+    return scripts.resolve_compare(st, meta, usage)[0], usage
+
+def resolved_script(meta, script, turns):
+    """The script with the compare turn's rule resolved from what the stored turns did."""
+    return [resolve_turn(meta, st, turns[:k], turns[k].get("tool_calls", []))[0] if k < len(turns) else st for k, st in enumerate(script)]
+
 # ---------------------------------------------------------------- oracle
 def attach_oracle(rec, meta, script):
     """Adds the oracle verdict to every turn (`oracle`, see score.oracle_exercise) and the tool-call argument audit to the
-    record (`tool_arg_audit`). Pure function of the stored answers and tool calls; the gate counts are not touched."""
+    record (`tool_arg_audit`). Pure function of the stored answers and tool calls; the gate counts are not touched.
+    The compare turn is judged against its resolved rule (resolve_turn)."""
+    script = resolved_script(meta, script, rec["turns"])
     for t, o in zip(rec["turns"], score.oracle_exercise(meta, script, rec["turns"], BADGE_MARK)):
         if o is None: t.pop("oracle", None)
         else: t["oracle"] = o
@@ -105,7 +122,9 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
                                      "class": score.classify(f, allowed, t["kind"], text)} for f in (fs or [])]
             msgs = ag.store.log[n_msgs:]
             mem_calls = sum(1 for m in msgs if m["role"] == "tool_call" for c in optchat._calls_of(m) if c["name"] in ("zoom", "read_message"))
-            sc = score.score_turn(answer, t["expect"], after.get("numbers_unverified", 0))
+            tool_recs = tool_records(ag.tool_log[n_log:], meta, csv_text, set(ag.mcp.tools))
+            st_resolved, usage = resolve_turn(meta, t, turns, tool_recs)
+            sc = score.score_turn(answer, st_resolved["expect"], after.get("numbers_unverified", 0))
             rec.update(
                 answer=ans, wall_s=round(wall, 1), prompt_tokens=st["prompt_tokens"], rounds=st["rounds"],
                 numbers_total_before=before.get("numbers_total", 0), numbers_unverified_before=before.get("numbers_unverified", 0),
@@ -113,8 +132,8 @@ def run_exercise(ex_dir, run_dir, cfg_base=None, verbose=False, llm=None):
                 regenerated=bool(g.get("regenerated")), kept=g.get("kept"), badge=bool(f_after),
                 findings_before=cls(f_before, g.get("first_answer") if g.get("regenerated") else answer), findings_after=cls(f_after, answer),
                 first_answer=g.get("first_answer") if g.get("regenerated") else None,
-                tool_calls=tool_records(ag.tool_log[n_log:], meta, csv_text, set(ag.mcp.tools)),
-                memory_calls=mem_calls, score=sc)
+                tool_calls=tool_recs, memory_calls=mem_calls, score=sc)
+            if usage is not None: rec["compare_tool"] = usage
             turns.append(rec)
             ag.wait_bg()                                             # compaction does not leak into the next turn's time
         tool_texts, users = apothicaire.gate_context(ag.store.log, ag.mcp.tools)
@@ -201,6 +220,7 @@ def build_report(records, meta=None):
     out["time"] = {"mean_wall_s_per_turn": sum(walls) / len(walls) if walls else None,
                    "mean_prompt_tokens_first_call": (sum(t["prompt_tokens"] for t in ok_turns) / len(ok_turns)) if ok_turns else None,
                    "total_wall_s": sum(r["wall_s"] for r in records)}
+    out["compare_tool"] = compare_section(records)
     out["oracle"] = oracle_section(records)
     out["tool_arg_audit"] = audit_section(records)
     out["per_exercise"] = []
@@ -216,6 +236,18 @@ def build_report(records, meta=None):
             "calls_total": sum(len(t["tool_calls"]) for t in ts),
             "mean_wall_s": (sum(t["wall_s"] for t in ts) / len(ts)) if ts else None})
     return out
+
+def compare_section(records):
+    """What the model did on the compare turn with `analysis_compare`: turns that called it, calls (valid / invalid), turns where the call
+    was usable (linear vs lin-up/log-down, the auclast row with its difference and percentage, equal to the ground-truth arithmetic;
+    then the engine's numbers are the expected answer), turns where the row disagreed with the ground truth."""
+    rows = [(r["id"], t) for r in records for t in r["turns"] if "error" not in t and t["kind"] == "compare"]
+    cu = [(ex, t.get("compare_tool") or {"calls": 0, "valid": 0, "usable": False}) for ex, t in rows]
+    return {"turns": len(rows), "turns_with_call": sum(1 for _, u in cu if u["calls"]), "calls": sum(u["calls"] for _, u in cu),
+            "valid_calls": sum(u["valid"] for _, u in cu), "turns_usable": sum(1 for _, u in cu if u["usable"]),
+            "turns_row_disagrees_with_truth": [ex for ex, u in cu if u.get("mismatch")],
+            "turns_without_call": [ex for ex, u in cu if not u["calls"]],
+            "analysis_compare_calls_all_turns": sum(1 for r in records for t in r["turns"] if "error" not in t for c in t["tool_calls"] if c["name"] == "analysis_compare")}
 
 # ---------------------------------------------------------------- oracle section of the report
 def oracle_section(records):
@@ -346,6 +378,13 @@ def render_md(rep):
     for k, v in rep["by_question_type"].items():
         L.append(f"| {k} | {v['turns']} | {v['correct']} ({_pct(v['correct_rate'])}) | {v['found']} / {v['must']} | "
                  f"{v['unverified_before']} / {v['total_before']} | {v['unverified_after']} / {v['total_after']} |")
+    ct = rep.get("compare_tool")
+    if ct and ct["turns"]:
+        L += ["", f"## Compare turn and `analysis_compare`: called in {ct['turns_with_call']} of {ct['turns']} compare turns ({ct['calls']} calls, {ct['valid_calls']} valid; "
+              f"{ct['analysis_compare_calls_all_turns']} calls in all turns); usable in {ct['turns_usable']} (the two analyses of the exercise, the auclast row with "
+              f"difference and percentage, equal to the ground-truth arithmetic: then the engine's difference and percentage are expected and allowed, other computed values stay forbidden); "
+              f"row disagreeing with the ground truth: {len(ct['turns_row_disagrees_with_truth'])}; no call: {len(ct['turns_without_call'])}" +
+              (f" ({', '.join(ct['turns_without_call'])})" if ct["turns_without_call"] else ""), ""]
     L += [""] + render_oracle_md(rep.get("oracle") or oracle_section([]))
     L += [f"## Tool calls: {t['valid']} valid, {t['invalid']} invalid, {t['failed']} failed of {t['total']} (validity {_pct(t['validity_rate'])})", "",
           f"`nca_run` calls: {t['nca_run_calls']}, with the right dose {t['nca_run_right_dose']}, with the right route {t['nca_run_right_route']}; "
@@ -373,9 +412,11 @@ def rescore(run_dir, ids):
         with open(p, encoding="utf-8") as f: rec = json.load(f)
         meta, csv_text = mk.load(os.path.join(mk.OUT, i))
         script = scripts.build_script(meta, csv_text)
-        for t, st in zip(rec["turns"], script):
+        for k, (t, st) in enumerate(zip(rec["turns"], script)):
             if "error" in t: continue
             ans = t["answer"].split(BADGE_MARK)[0]
+            st, usage = resolve_turn(meta, st, rec["turns"][:k], t.get("tool_calls", []))
+            if usage is not None: t["compare_tool"] = usage
             new = score.score_turn(ans, st["expect"], t["numbers_unverified_after"])
             if new != t["score"]: changed.append((i, t["turn"], t["kind"], t["score"]["correct"], new["correct"]))
             t["score"] = new
