@@ -111,6 +111,43 @@ class TestConversion(unittest.TestCase):
         self.assertEqual(json.loads(it["row"]["gold"])["compare_pair"]["label"], "2+3")
 
 
+class TestExerciseWithoutOracle(unittest.TestCase):
+    """Exercises written blind (decision/ood/exercises/oodx*) have no ground_truth.nca: converting a request must not need it."""
+    def test_first_message_is_the_one_of_the_script(self):
+        self.assertEqual(scripts.first_message(META, CSV), scripts.build_script(META, CSV)[0]["question"])
+
+    def test_line_on_an_exercise_without_nca_oracle_is_converted(self):
+        meta = json.loads(json.dumps(META)); meta["ground_truth"] = {"data_import_columns": [], "oracle_note": "blind"}
+        find = lambda ex: (meta, CSV, mk.OUT)
+        with self.assertRaises(Exception): scripts.build_script(meta, CSV)       # the old path: KeyError 'nca'
+        item = E.convert_line(json.loads(json.dumps(LINE_NCA)), find=find)
+        ref = E.convert_line(json.loads(json.dumps(LINE_NCA)))
+        self.assertEqual(item["row"]["state"], ref["row"]["state"])
+        turn2 = json.loads(json.dumps(LINE_NA))
+        self.assertEqual(E.convert_line(turn2, find=find)["row"]["state"], E.convert_line(json.loads(json.dumps(LINE_NA)))["row"]["state"])
+
+    def test_nca_arguments_from_the_oracle_or_from_meta(self):
+        self.assertEqual(E.nca_arguments(META), META["ground_truth"]["nca"]["linear"]["nca_run_arguments"] | {})
+        for ex in sorted(os.listdir(mk.OUT)):                      # every benchmark exercise: meta.json and its oracle agree
+            m, _ = mk.load(os.path.join(mk.OUT, ex)); ref = E.nca_arguments(m)
+            blind = json.loads(json.dumps(m)); blind["ground_truth"] = {}
+            got = E.nca_arguments(blind)
+            self.assertEqual((got["dose"], got["route"]), (ref["dose"], ref["route"]), ex)
+        root = os.path.join(E.OOD, "exercises")
+        if os.path.isdir(root):
+            for name in sorted(os.listdir(root)):
+                m = E.find_exercise(name)[0]
+                self.assertEqual(E.nca_arguments(m)["dose"], m["dose"]["amount"])
+
+    def test_the_real_blind_exercises_are_all_found_and_scripted(self):
+        root = os.path.join(E.OOD, "exercises")
+        if not os.path.isdir(root): self.skipTest("no decision/ood/exercises")
+        for name in sorted(os.listdir(root)):
+            meta, csv, _ = E.find_exercise(name)
+            first = E.scripted_first(meta, csv)
+            self.assertTrue(first["intro"].startswith("Voici les donn") and first["csv"], name)
+
+
 class TestRejection(unittest.TestCase):
     def reason(self, **changes):
         line = json.loads(json.dumps(LINE_NCA)); line.update(changes)
@@ -330,6 +367,20 @@ class TestRealEngine(unittest.TestCase):
             self.assertEqual([l["id"] for l in lines], ["ood-001", "ood-002", "ood-003", "ood-004"])
             report = read(os.path.join(folder, "report.md"))
             self.assertIn("## What a human must read", report); self.assertIn("2 refusals or questions back", report)
+
+    def test_prior_analyses_replayed_on_an_exercise_without_oracle(self):
+        if not os.path.isfile(E.REQUESTS): self.skipTest("no decision/ood/requests.jsonl")
+        items, rejected = E.read_requests()
+        item = next((it for it in items if it["row"]["id"] == "ood-072"), None)           # compare of two prior analyses on oodx09_oral_min_ng (turn 2, no nca oracle)
+        if item is None: self.skipTest("ood-072 not in requests.jsonl")
+        self.assertFalse([r for r in rejected if r["id"] == "ood-072"])
+        with tempfile.TemporaryDirectory() as tmp:
+            train = os.path.join(tmp, "train.jsonl"); md.write([item["row"]], train)
+            _, scores, records = E.evaluate([item], "gold", "2026-10-09", run=True, out_root=tmp, train_path=train)
+        self.assertEqual(scores["correct"], scores["decisions"])
+        self.assertEqual(records[0]["answer_kind"], "answer", records[0].get("error"))
+        self.assertIn("Comparaison calculée par Caladrius", records[0]["answer"])
+        self.assertEqual(records[0]["harness_notes"], [])
 
 
 if __name__ == "__main__":

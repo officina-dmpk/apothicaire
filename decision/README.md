@@ -445,3 +445,320 @@ python decision/eval_ood.py --decider decider_unsloth:decide    # the trained mo
 ```
 
 Outputs: `decision/ood/runs/<date>-<decider>/{report.md, answers.jsonl, scores.json}`. Tests: `python -m unittest tests.test_eval_ood`.
+
+## Step 6: the trained model on the reviewer's 74 requests
+
+The measurement the project lacked: the trained Qwen3.5-0.8B (`models/qwen35-0.8b-d01/merged`, Step 3) run on the 74 hard French requests that an independent
+reviewer (DeepSeek, blind) wrote with its own gold decisions (`ood/requests.jsonl`; its predictions are in `ood/REVIEW.md`, written before any run). Run of
+2026-10-10 on the RTX 3060, `python decision/eval_ood.py --decider decider_unsloth:decide`; folder
+[`ood/runs/2026-10-10-qwen35-0.8b/`](ood/runs/2026-10-10-qwen35-0.8b/report.md) (`report.md`, `answers.jsonl`, `scores.json`). Reference runs next to it:
+`2026-10-10-gold` (the gold decisions), `2026-10-10-majority` (the label most frequent in train.jsonl) and `2026-10-10-rules-reviewer` (the reviewer's
+deterministic rules of `ood/analyze_dataset.py`, wrapped by `ood/rules_decider.py`, applied to the same 74 rows).
+
+Practical note: with the default Hugging Face cache, `import unsloth` did not return in 20 minutes of CPU time (the reviewer saw the same); pointing `HF_HOME`,
+`HF_HUB_CACHE` and `HF_XET_CACHE` at a fresh folder makes it 18 s. The runs above were made that way.
+
+**Conversion.** 74 of 74 lines converted. The first conversion accepted only 58: the 16 lines on the reviewer's 12 invented exercises were rejected with
+`KeyError: 'nca'`. That was a defect of our converter, not of the requests: `bench/scripts.build_script` and the replay of prior analyses read the NCA oracle
+(`ground_truth.nca`) of `meta.json`, which exercises written blind of the engine do not have, although the first message and the `nca_run` arguments need only
+the route, the dose, the units and the table. Fixed with `bench/scripts.first_message` (the first message, now shared by `build_script`) and
+`eval_ood.nca_arguments` (oracle arguments when present, else dose and route of `meta.json`; tested equal on the 25 benchmark exercises), with tests in
+`tests/test_eval_ood.py`. `gold` gives 1480/1480 decisions and 74/74 requests all right. The converter warnings (ids renumbered 2, 3; three compare requests where
+the analysis and the pair disagree; four refusals with an empty `asked`) are in `ood/schema_report.md`.
+
+**Two scorers.** The tool scores the stored rows (questions in the sorted-key order of `train.jsonl`). The harness and the reviewer's own script
+(`ood/eval_ood_model.py`, which runs with our model; output `ood/runs/eval_ood_model.json`) pass the questions in `questions_for` order, and the 0.8B model
+answers 10 cells of 1480 differently (borderline cells). The reviewer's script gives 1335/1480 and 4/74 requests all right against our
+1337/1480 and 4/74. Its second gold (`auc_method` replaced by the project convention: `not_applicable` unless the first NCA or a compare) gives `auc_method`
+26/74, 1345/1480 and 8/74 requests all right. The verdict is the same under both golds; the tables below are the tool's.
+
+### Per question
+
+| question | trained model | reviewer's prediction | always-majority (these 74 rows) | majority learned on train.jsonl | reviewer's rules (these 74 rows) | reviewer's rules (held-out, in distribution) |
+|---|---|---|---|---|---|---|
+| `analysis` | **37.8 %** (28/74) | 82 % | 60.8 % | 21.6 % | 77.0 % | 95.3 % |
+| `route` | **82.4 %** (61/74) | 90 % | 54.1 % | 54.1 % | 87.8 % | 100.0 % |
+| `auc_method` | **21.6 %** (16/74) | 72 % | 77.0 % | 12.2 % | 74.3 % | 97.2 % |
+| `dose_has_unit` | **98.6 %** (73/74) | 78 % | 93.2 % | 93.2 % | 100.0 % | 100.0 % |
+| `is_not_available` | **85.1 %** (63/74) | 55 % | 85.1 % | 85.1 % | 91.9 % | 99.7 % |
+| `compare_pair` | **100.0 %** (74/74) | 80 % | 94.6 % | 94.6 % | 100.0 % | 97.2 % |
+| `asked_<parameter>` (mean of 14) | **98.6 %** | 88 % | 90.4 % | 90.4 % | 90.4 % (always false: the rules have no wording table) | not given |
+| macro-average of the seven | **74.9 %** | ~80 % | 79.3 % | 64.5 % | 88.8 % | |
+| all 20 questions, per decision | **90.3 %** (1337/1480) | | 86.6 % | 81.4 % | 89.9 % | 91.5 % |
+| **all 20 questions right on a request** | **4/74 = 5.4 %** | 30 % | 0/74 | 0/74 | 1/74 | |
+
+"Always-majority (these 74 rows)" is the best constant per question chosen with the gold of these rows (an upper bound for any constant); "majority learned on
+train.jsonl" is the constant fit on the training data. The reviewer's rules were written from the generator's regexes; their held-out column is copied from
+`ood/REVIEW.md` (in distribution), the other column is the same rules applied to these 74 rows (`asked_<parameter>` is always false for them).
+
+The model is below the best constant on `analysis` (37.8 % against 60.8 %), on `auc_method` (21.6 % against 77.0 %) and on the macro-average (74.9 % against
+79.3 %), and equal to it on `is_not_available`. Its 90.3 % per decision is above the constant (86.6 %) only because 14 of the 20 questions are mostly-false
+`asked_<parameter>` booleans, which it gets right (98.6 %).
+
+- `analysis`: the 45 requests whose gold is `nca` (all of them first requests) were all answered `none_needed`: the model never says `nca` on these 74 requests.
+  It answers right the 8 compares, the 4 fits and 16 `none_needed` (11 of them first requests, right only because it says `none_needed` on every first request that
+  it does not recognise). On the 12 follow-up turns: `analysis` 12/12, `route` 12/12, `is_not_available` 12/12, `auc_method` 3/12. On the 62 first requests:
+  `analysis` 16/62, `route` 49/62, `auc_method` 13/62, `is_not_available` 51/62.
+- `auc_method`: gold `linear` predicted `not_applicable` 56 times, `lin_up_log_down` predicted `not_applicable` twice: a consequence of the `analysis` collapse
+  (in `train.jsonl` the method follows the action).
+- `is_not_available`: 0 of the 11 true cases found (C0 after oral, Tlag after IV, Vss and ka, bioequivalence, population, steady state, urine); the model never
+  answers `true`, so its score (85.1 %) is the constant.
+- `route`: 7 of the 10 infusions ("Perfusion de ... sur/pendant ...", no word "intraveineuse") and 6 orals ("j'ai avalé", the short forms) came back `unknown`.
+- `dose_has_unit` 98.6 % and `compare_pair` 100 % hold (the one miss: `0,25 g`, `true` predicted for `false`). `asked_<parameter>` misses: `auclast` asked and
+  not found 6 times, `aucinf` found while not asked 5 times, `cmax`, `cl`, `vz` once each.
+
+### Per tag (which kinds of hard requests break)
+
+Sorted by the share of decisions right; the columns on the right are the questions that carry the failure. A request carries several tags.
+
+| tag | requests | decisions right | `analysis` right | `auc_method` right | `route` right | `is_not_available` right | requests with all 20 right |
+|---|---|---|---|---|---|---|---|
+| dose-unit-g | 1 | 80.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| duration-unit-mismatch | 2 | 85.0 % | 0/2 | 0/2 | 0/2 | 2/2 | 0/2 |
+| duration-word | 1 | 85.0 % | 0/1 | 0/1 | 0/1 | 1/1 | 0/1 |
+| multi-subject | 1 | 85.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| multiple-dose | 1 | 85.0 % | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 |
+| steady-state | 1 | 85.0 % | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 |
+| dose-unit-micro | 9 | 85.6 % | 0/9 | 0/9 | 2/9 | 9/9 | 0/9 |
+| infusion | 7 | 85.7 % | 1/7 | 0/7 | 2/7 | 6/7 | 0/7 |
+| route-implied | 5 | 87.0 % | 0/5 | 0/5 | 3/5 | 5/5 | 0/5 |
+| unit-in-text | 5 | 87.0 % | 0/5 | 0/5 | 4/5 | 5/5 | 0/5 |
+| parameter-not-in-schema | 2 | 87.5 % | 2/2 | 0/2 | 2/2 | 0/2 | 0/2 |
+| plain | 2 | 87.5 % | 0/2 | 0/2 | 2/2 | 2/2 | 0/2 |
+| route-stated | 8 | 88.1 % | 0/8 | 0/8 | 6/8 | 8/8 | 0/8 |
+| colloquial | 6 | 88.3 % | 0/6 | 0/6 | 4/6 | 6/6 | 0/6 |
+| invented | 16 | 88.8 % | 7/16 | 4/16 | 13/16 | 12/16 | 1/16 |
+| out-of-scope | 4 | 88.8 % | 4/4 | 4/4 | 1/4 | 0/4 | 0/4 |
+| parameter-not-for-route | 5 | 90.0 % | 5/5 | 0/5 | 5/5 | 0/5 | 0/5 |
+| latin-route | 3 | 90.0 % | 0/3 | 0/3 | 3/3 | 3/3 | 0/3 |
+| terminology-mismatch | 2 | 90.0 % | 0/2 | 0/2 | 2/2 | 2/2 | 0/2 |
+| bioequivalence | 1 | 90.0 % | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 |
+| c0 | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| dose-unit-mcg | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| dose-unit-mg | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| dose-without-unit | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| iv-explicit | 1 | 90.0 % | 1/1 | 0/1 | 1/1 | 0/1 | 0/1 |
+| no-dose | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| population | 1 | 90.0 % | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 |
+| route-missing | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| tlag | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| unicode | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| unit-conversion-in-text | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| unit-variety | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| unrecognized-unit | 1 | 90.0 % | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| urine | 1 | 90.0 % | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 |
+| abbreviation | 17 | 90.6 % | 5/17 | 1/17 | 16/17 | 16/17 | 0/17 |
+| blq | 4 | 91.2 % | 0/4 | 1/4 | 4/4 | 4/4 | 0/4 |
+| by-id | 2 | 92.5 % | 2/2 | 0/2 | 2/2 | 2/2 | 0/2 |
+| two-requests-in-one-sentence | 2 | 92.5 % | 0/2 | 1/2 | 2/2 | 2/2 | 0/2 |
+| typo | 2 | 92.5 % | 1/2 | 0/2 | 2/2 | 2/2 | 0/2 |
+| compare | 8 | 93.8 % | 8/8 | 4/8 | 8/8 | 8/8 | 0/8 |
+| follow-up | 4 | 95.0 % | 4/4 | 0/4 | 4/4 | 4/4 | 0/4 |
+| rerun | 4 | 95.0 % | 3/4 | 4/4 | 4/4 | 4/4 | 0/4 |
+| language-mix | 2 | 95.0 % | 1/2 | 1/2 | 2/2 | 2/2 | 1/2 |
+| method-explicit | 2 | 95.0 % | 0/2 | 2/2 | 2/2 | 2/2 | 0/2 |
+| english-term | 1 | 95.0 % | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 |
+| no-parameter | 1 | 95.0 % | 1/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| no-prior-analysis | 1 | 95.0 % | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 |
+| non-auc-parameter | 1 | 95.0 % | 1/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| recall | 1 | 95.0 % | 1/1 | 0/1 | 1/1 | 1/1 | 0/1 |
+| simulate | 1 | 95.0 % | 0/1 | 1/1 | 1/1 | 1/1 | 0/1 |
+| fit | 4 | 100.0 % | 4/4 | 4/4 | 4/4 | 4/4 | 4/4 |
+| two-compartments | 2 | 100.0 % | 2/2 | 2/2 | 2/2 | 2/2 | 2/2 |
+| oral | 1 | 100.0 % | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+
+The tags do not separate the failures, the turn does: `analysis` is 0 for every tag made of first requests only (`dose-unit-micro` 0/9, `route-stated` 0/8,
+`colloquial` 0/6, `route-implied` 0/5, `unit-in-text` 0/5, `abbreviation`, `typo`, ...) and right, by accident, on first requests whose gold is `none_needed`
+(`out-of-scope`, `parameter-not-for-route`). What works is the follow-up (`follow-up`, `rerun`, `compare`) and the registered actions `fit` and `two-compartments`
+(4 and 2 requests, every decision right). The worst tags by decisions (`dose-unit-g`, `duration-*`, `multi-subject`, `steady-state`) carry one more wrong cell (`route`,
+`is_not_available`, `dose_has_unit`) on top of the `analysis` and `auc_method` collapse. The only 4 requests with no wrong decision are the 4 explicit fit
+requests (ood-006, ood-007, ood-042, ood-066): no first NCA request is among them.
+
+### Every wrong decision
+
+143 wrong decisions on 70 of the 74 requests. 135 of the 143 have a probability of the predicted label of at least 0.90 (mean 0.98): the model is confidently
+wrong. In the calibration table of the report, the 15 decisions below 0.9 are right 7 times, the 1465 above are right 90.8 %; ECE 0.093.
+
+| request | text | wrong decisions: question gold -> predicted (probability of the predicted label) |
+|---|---|---|
+| ood-001 (turn 1) | J'ai pris un comprimé de 400 mg ce matin, voici mes concentrations. C'est quoi le Cmax et le Tmax ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-002 (turn 2) | et la t1/2 stp ? | `auc_method` linear -> not_applicable (1.00) |
+| ood-003 (turn 2) | AUC0-t et AUC0-inf svp | `auc_method` linear -> not_applicable (1.00) |
+| ood-004 (turn 1) | bolus IV de 200 mg ; quel est le Vd ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-005 (turn 1) | bolus de 200 mg : Cl/F ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-008 (turn 1) | Perfusion de 150 mg sur 2 h. Donne-moi le Cmax et l'AUC(0-t). | `analysis` nca -> none_needed (1.00); `asked_aucinf` false -> true (0.60); `auc_method` linear -> not_applicable (0.98); `route` iv_infusion -> unknown (1.00) |
+| ood-009 (turn 2) | Et la MRT ? | `auc_method` linear -> not_applicable (1.00) |
+| ood-010 (turn 1) | Perfusion de 500 µg pendant 1,5 h, Cmax et AUC0-inf. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-011 (turn 1) | Perfusion de 500 µg pendant 90 minutes : que vaut l'AUC(0-t) ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-012 (turn 1) | J'ai avalé 800 µg, les temps sont en minutes ; Cmax et AUC0-t. | `analysis` nca -> none_needed (1.00); `asked_aucinf` false -> true (0.59); `auc_method` linear -> not_applicable (1.00); `route` oral -> unknown (1.00) |
+| ood-013 (turn 2) | Compare l'AUC linéaire et la lin-up/log-down. | `asked_auclast` true -> false (1.00) |
+| ood-014 (turn 2) | Compare les deux AUC (valeur et %). | `asked_auclast` true -> false (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-015 (turn 2) | Compare l'analyse 2 à l'analyse 1. | `auc_method` lin_up_log_down -> not_applicable (1.00) |
+| ood-016 (turn 1) | Voie orale, 300 mg : y a-t-il un Tlag ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-017 (turn 1) | Quel est le Tlag de ce bolus de 200 mg ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-018 (turn 1) | Quelle est la C0 après cette prise orale de 400 mg ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-019 (turn 1) | Ce produit de 400 mg est-il bioéquivalent au princeps ? | `is_not_available` true -> false (1.00); `route` oral -> unknown (1.00) |
+| ood-020 (turn 1) | Estime un modèle de population à effets mixtes (NONMEM) sur ces données, dose 400 mg. | `is_not_available` true -> false (1.00); `route` oral -> unknown (1.00) |
+| ood-021 (turn 1) | Après une prise orale, voici mes concentrations : quelle est la demi-vie ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-022 (turn 1) | Prise orale de 100, voici les données. Cmax ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-023 (turn 1) | Bolus IV de 2 mg : donne-moi la clairance et le Vz. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-024 (turn 1) | Bolus de 2000 mcg : CL et Vz. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-025 (turn 2) | Et le pourcentage d'AUC extrapolée ? | `auc_method` linear -> not_applicable (1.00) |
+| ood-026 (turn 1) | Il y a un zéro sous la LLOQ dans le tableau, on le garde ? Donne l'AUC(0-t) et la Cmax, dose orale 50 mg. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (0.88) |
+| ood-027 (turn 1) | Simule les concentrations après une dose orale de 300 mg. | `analysis` simulate -> none_needed (0.55) |
+| ood-028 (turn 1) | Donne-moi d'abord la demi-vie, ensuite la clairance et le Vz, pour cette dose orale de 300 mg. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-029 (turn 1) | Donne-moi le Cmax puis refais l'analyse en lin-up/log-down, bolus de 300 mg. | `analysis` nca -> none_needed (0.92) |
+| ood-030 (turn 2) | Refais l'analyse en lin-up/log-down et compare les deux AUC en valeur et en %. | `asked_auclast` true -> false (1.00) |
+| ood-031 (turn 1) | Peux-tu me donner le Cmax, le Tmax et le t1/2 after a single oral dose of 100 mg ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-032 (turn 1) | kel est le Cmax é le Tmax de ce tablo ? dose 400 mg per os | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-033 (turn 1) | Dose orale de 500 mg : AUC0-∞ et AUC0-t. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-034 (turn 1) | Bolus de 150 mg : quel est le Vdss ? | `asked_vz` false -> true (1.00); `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-035 (turn 1) | Bolus de 150 mg : le R² ajusté et le nombre de points de la régression terminale. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-036 (turn 1) | Prise unique de 100 mg par voie orale : je veux le MRT et la demi-vie. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-037 (turn 1) | Perfusion de 150 mg sur 2 h : clairance et volume de distribution. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-038 (turn 1) | Quel est le Tlag de cette perfusion de 150 mg ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-039 (turn 1) | Dose IV de 1000 µg : AUC(0-inf) et pourcentage extrapolé. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-040 (turn 1) | J'ai ingéré 2000 µg : au bout de combien de temps la concentration est-elle divisée par deux ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` oral -> unknown (1.00) |
+| ood-041 (turn 1) | Bolus de 200 mg à t=0, temps en minutes : Cmax et Tmax. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-043 (turn 1) | Perfusion IV de 150 mg sur 2 h, CL et Vz svp. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-044 (turn 1) | Comprimé à libération prolongée de 5000 µg : Cmax, Tmax et demi-vie. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` oral -> unknown (1.00) |
+| ood-045 (turn 1) | Bolus de 300 mg, temps en minutes : AUC(0-t) et clairance. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (0.97) |
+| ood-046 (turn 1) | Bolus de 150 mg : le Cl/F et le Vz/F ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-047 (turn 1) | Voie orale, 100 mg : λz et t½. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-048 (turn 1) | Voie orale, 300 mg : quelle est la constante d'absorption ka ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-049 (turn 1) | Cmax et nombre de points de la régression terminale, dose orale de 100 mg. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-050 (turn 1) | AUC(0-t) par la méthode lin-up/log-down, dose orale de 50 mg. | `analysis` nca -> none_needed (1.00) |
+| ood-051 (turn 1) | Bolus de 2000 µg : l'AUC(0-t) tient-elle compte du point sous la LLOQ ? et le % extrapolé ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-052 (turn 1) | Dose orale de 500 mg, méthode des trapèzes linéaires : AUC0-t. | `analysis` nca -> none_needed (1.00) |
+| ood-053 (turn 1) | Voici mes concentrations après 400 mg ; quel est le Cmax ? | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-054 (turn 1) | Après une injection intraveineuse directe de 200 mg : C0 et Vz. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-055 (turn 1) | Perfusion de 500 µg sur 90 min : Cmax. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-056 (turn 2) | Rappelle-moi la dose et la méthode d'AUC utilisées. | `auc_method` linear -> not_applicable (1.00) |
+| ood-057 (turn 2) | Compare le Cmax entre les deux méthodes. | `auc_method` linear -> not_applicable (1.00) |
+| ood-058 (turn 1) | Compare les AUC linéaire et lin-up/log-down, dose orale de 400 mg. | `asked_auclast` true -> false (0.99) |
+| ood-059 (turn 1) | 250 mg per os, voici les concentrations en µg/mL : Cmax, Tmax et AUC0-inf. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (0.98) |
+| ood-060 (turn 1) | Bolus IV de 120 mg : quel est le Tlag ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-061 (turn 1) | Quelle est la C0 après cette prise orale de 200 mg ? | `auc_method` linear -> not_applicable (1.00); `is_not_available` true -> false (1.00) |
+| ood-062 (turn 1) | Perfusion de 75 mg sur 1,5 h, les temps sont en minutes : Cmax. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-063 (turn 1) | Étude à deux sujets, 300 mg par voie orale : Cmax et AUC0-t par sujet. | `analysis` nca -> none_needed (1.00); `asked_aucinf` false -> true (0.67); `auc_method` linear -> not_applicable (0.97) |
+| ood-064 (turn 1) | Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin. | `asked_cmax` false -> true (1.00); `is_not_available` true -> false (1.00); `route` oral -> unknown (1.00) |
+| ood-065 (turn 1) | Recueil urinaire : quantité excrétée et clairance rénale. | `asked_cl` false -> true (1.00); `is_not_available` true -> false (1.00) |
+| ood-067 (turn 1) | Voie orale 1200 mg, temps en minutes : t1/2 et MRT. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+| ood-068 (turn 1) | 80 mg per os, il y a des zéros sous la LLOQ : AUC(0-t) et Cmax. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (0.99) |
+| ood-069 (turn 1) | J'ai pris 0,25 g par voie orale : Cmax et AUC0-t. | `analysis` nca -> none_needed (1.00); `asked_aucinf` false -> true (0.56); `auc_method` linear -> not_applicable (0.97); `dose_has_unit` false -> true (1.00) |
+| ood-070 (turn 1) | Perfusion de 750 µg sur 1 h : Vz et CL. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00); `route` iv_infusion -> unknown (1.00) |
+| ood-071 (turn 2) | Compare l'AUC linéaire et la lin-up/log-down. | `asked_auclast` true -> false (1.00) |
+| ood-072 (turn 2) | Compare l'analyse 2 et l'analyse 1 pour l'AUC. | `asked_auclast` true -> false (1.00); `auc_method` lin_up_log_down -> not_applicable (0.65) |
+| ood-073 (turn 1) | Prise orale de 200 mg : Cmax, Tmax et AUC0-t. | `analysis` nca -> none_needed (1.00); `asked_aucinf` false -> true (0.84); `auc_method` linear -> not_applicable (0.97) |
+| ood-074 (turn 1) | Bolus de 120 mg : Cmax et AUC0-inf. | `analysis` nca -> none_needed (1.00); `auc_method` linear -> not_applicable (1.00) |
+
+### Harness answers (one fresh Caladrius session per request, prior analyses replayed first)
+
+| | trained model | gold decisions |
+|---|---|---|
+| answers with values | 12 | 41 |
+| "Aucune analyse n'est encore faite" (`refusal:no-analysis`) | 58 | 1 |
+| asked back (dose unit, route, duration: `refusal:ask`) | 0 | 13 |
+| parameter not available (`refusal:not-available`) | 0 | 11 |
+| not wired (fit, simulate) | 4 | 5 |
+| which pair (`refusal:which-pair`) | 0 | 3 |
+| errors | 0 | 0 |
+
+All 12 answers of the model are follow-ups (turn 2): not one of the 62 first requests got a value, and 58 of them were told that no analysis exists. Nothing that
+should have been refused or asked back was answered ("the dangerous direction": 0), no decision came back outside the offered options, and the state rebuilt by the
+harness equals the scored row on the 74 requests. The harness is not at 74/74 even with the right decisions: with the gold decisions it refuses or asks 12
+requests whose gold expects values (ood-008, 010, 011, 037, 043, 055, 062, 070: infusion duration not parsed; ood-013, 030, 071: a compare with a single prior
+analysis asks the pair again; ood-058: compare with no prior analysis; the reviewer's Part 2 explains these), so 41 answers is the ceiling on this set. One answer
+to read: ood-003 asked "AUC0-t et AUC0-inf" and got AUC(0-inf) only (`asked_auclast` wrong), a silent omission rather than a wrong number.
+
+**What a human must read** (70 of 74 requests)
+
+Wrong decisions in the run, answers that contradict the gold decisions, errors, and the requests of the tags that broke (at most 6 per tag). Every other answer is in `answers.jsonl`; a correct decision does not make a correct answer, so read at least a few of them.
+
+
+- ood-001 (ex02_oral_1, turn 1; tags: colloquial, route-implied): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: colloquial; tag that broke: route-implied
+- ood-002 (ex02_oral_1, turn 2; tags: abbreviation, typo, follow-up): wrong decision: auc_method; tag that broke: abbreviation; tag that broke: typo; tag that broke: follow-up
+- ood-003 (ex02_oral_1, turn 2; tags: abbreviation, follow-up): wrong decision: asked_auclast, auc_method; tag that broke: abbreviation; tag that broke: follow-up
+- ood-004 (ex01_iv_bolus, turn 1; tags: abbreviation, route-stated): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: abbreviation; tag that broke: route-stated
+- ood-005 (ex01_iv_bolus, turn 1; tags: abbreviation, terminology-mismatch): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: abbreviation; tag that broke: terminology-mismatch
+- ood-008 (ex05_iv_infusion, turn 1; tags: infusion, route-stated): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: infusion; tag that broke: route-stated
+- ood-009 (ex05_iv_infusion, turn 2; tags: abbreviation, follow-up): wrong decision: auc_method; tag that broke: abbreviation; tag that broke: follow-up
+- ood-010 (ex12_iv_infusion, turn 1; tags: dose-unit-micro, duration-unit-mismatch, unit-in-text): wrong decision: analysis, asked_auclast, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: dose-unit-micro; tag that broke: duration-unit-mismatch; tag that broke: unit-in-text
+- ood-011 (ex12_iv_infusion, turn 1; tags: duration-word, colloquial, dose-unit-micro): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: duration-word; tag that broke: colloquial; tag that broke: dose-unit-micro
+- ood-012 (ex08_oral_1, turn 1; tags: abbreviation, route-implied, dose-unit-micro): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: abbreviation; tag that broke: route-implied; tag that broke: dose-unit-micro
+- ood-013 (ex08_oral_1, turn 2; tags: compare, english-term, rerun): wrong decision: asked_auclast; tag that broke: compare; tag that broke: english-term; tag that broke: rerun
+- ood-014 (ex08_oral_1, turn 2; tags: compare): wrong decision: asked_auclast, auc_method; tag that broke: compare
+- ood-015 (ex08_oral_1, turn 2; tags: compare, by-id, no-parameter): wrong decision: auc_method; tag that broke: compare; tag that broke: by-id; tag that broke: no-parameter
+- ood-016 (ex04_oral_1_lag, turn 1; tags: route-stated, tlag): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: route-stated; tag that broke: tlag
+- ood-017 (ex01_iv_bolus, turn 1; tags: parameter-not-for-route, iv-explicit): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-for-route; tag that broke: iv-explicit
+- ood-018 (ex02_oral_1, turn 1; tags: parameter-not-for-route): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-for-route
+- ood-019 (ex02_oral_1, turn 1; tags: out-of-scope, bioequivalence): wrong decision: is_not_available, route; tag that broke: out-of-scope; tag that broke: bioequivalence
+- ood-020 (ex02_oral_1, turn 1; tags: out-of-scope, population): wrong decision: is_not_available, route; tag that broke: out-of-scope; tag that broke: population
+- ood-021 (ex06_oral_0, turn 1; tags: no-dose, route-implied): wrong decision: analysis, auc_method; tag that broke: no-dose; tag that broke: route-implied
+- ood-022 (ex06_oral_0, turn 1; tags: dose-without-unit): wrong decision: analysis, auc_method; tag that broke: dose-without-unit
+- ood-023 (ex07_iv_bolus, turn 1; tags: unit-conversion-in-text, dose-unit-mg): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: unit-conversion-in-text; tag that broke: dose-unit-mg
+- ood-024 (ex07_iv_bolus, turn 1; tags: dose-unit-mcg, unrecognized-unit): wrong decision: analysis, auc_method; tag that broke: dose-unit-mcg; tag that broke: unrecognized-unit
+- ood-025 (ex07_iv_bolus, turn 2; tags: follow-up, abbreviation): wrong decision: auc_method; tag that broke: follow-up
+- ood-026 (ex13_oral_1, turn 1; tags: blq, colloquial): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: blq; tag that broke: colloquial
+- ood-027 (ex09_pk2_oral_1, turn 1; tags: simulate): wrong decision: analysis; tag that broke: simulate
+- ood-028 (ex09_pk2_oral_1, turn 1; tags: two-requests-in-one-sentence): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: two-requests-in-one-sentence
+- ood-029 (ex03_pk2_iv_bolus, turn 1; tags: two-requests-in-one-sentence, rerun): wrong decision: analysis; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: two-requests-in-one-sentence; tag that broke: rerun
+- ood-030 (ex03_pk2_iv_bolus, turn 2; tags: compare, rerun): wrong decision: asked_auclast; tag that broke: compare; tag that broke: rerun
+- ood-031 (ex10_oral_1_lag, turn 1; tags: language-mix, abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-032 (ex02_oral_1, turn 1; tags: typo, colloquial, latin-route): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: typo; tag that broke: colloquial; tag that broke: latin-route
+- ood-033 (ex17_oral_1, turn 1; tags: abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-034 (ex14_iv_bolus, turn 1; tags: parameter-not-in-schema, abbreviation): wrong decision: asked_vz, auc_method, is_not_available; tag that broke: parameter-not-in-schema
+- ood-035 (ex14_iv_bolus, turn 1; tags: abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-036 (ex25_oral_1, turn 1; tags: abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-037 (ex05_iv_infusion, turn 1; tags: infusion, route-stated): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: infusion; tag that broke: route-stated
+- ood-038 (ex05_iv_infusion, turn 1; tags: parameter-not-for-route, infusion): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-for-route; tag that broke: infusion
+- ood-039 (ex11_pk2_iv_bolus, turn 1; tags: dose-unit-micro, route-stated): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: dose-unit-micro; tag that broke: route-stated
+- ood-040 (ex16_pk2_oral_1, turn 1; tags: colloquial, dose-unit-micro): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: colloquial; tag that broke: dose-unit-micro
+- ood-041 (ex18_pk2_iv_bolus, turn 1; tags: route-stated, unit-in-text): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: route-stated; tag that broke: unit-in-text
+- ood-043 (ex20_iv_infusion, turn 1; tags: infusion, abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: infusion
+- ood-044 (ex21_oral_0, turn 1; tags: dose-unit-micro, route-implied): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: dose-unit-micro; tag that broke: route-implied
+- ood-045 (ex23_iv_bolus, turn 1; tags: route-stated, unit-in-text): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: unit-in-text
+- ood-046 (ex24_pk2_iv_bolus, turn 1; tags: terminology-mismatch, abbreviation): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: terminology-mismatch
+- ood-047 (ex25_oral_1, turn 1; tags: abbreviation, unicode): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: unicode
+- ood-048 (ex04_oral_1_lag, turn 1; tags: parameter-not-in-schema): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-in-schema
+- ood-049 (ex06_oral_0, turn 1; tags: route-stated): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-050 (ex13_oral_1, turn 1; tags: method-explicit, blq): wrong decision: analysis; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: method-explicit; tag that broke: blq
+- ood-051 (ex07_iv_bolus, turn 1; tags: blq, colloquial, dose-unit-micro): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: blq; tag that broke: colloquial
+- ood-052 (ex22_pk2_oral_1, turn 1; tags: method-explicit, abbreviation): wrong decision: analysis; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: method-explicit
+- ood-053 (ex02_oral_1, turn 1; tags: route-missing): wrong decision: analysis, auc_method; tag that broke: route-missing
+- ood-054 (ex01_iv_bolus, turn 1; tags: route-implied, c0): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: route-implied; tag that broke: c0
+- ood-055 (ex12_iv_infusion, turn 1; tags: infusion, dose-unit-micro): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: infusion
+- ood-056 (ex02_oral_1, turn 2; tags: recall): wrong decision: auc_method; tag that broke: recall
+- ood-057 (ex03_pk2_iv_bolus, turn 2; tags: compare, non-auc-parameter): wrong decision: auc_method; tag that broke: compare; tag that broke: non-auc-parameter
+- ood-058 (ex02_oral_1, turn 1; tags: compare, no-prior-analysis): wrong decision: asked_auclast; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: compare; tag that broke: no-prior-analysis
+- ood-059 (oodx01_oral_mg_ugml, turn 1; tags: invented, unit-variety, latin-route): wrong decision: analysis, asked_auclast, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: unit-variety; tag that broke: latin-route
+- ood-060 (oodx02_iv_bolus_tlag, turn 1; tags: invented, parameter-not-for-route): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-for-route
+- ood-061 (oodx03_oral_c0, turn 1; tags: invented, parameter-not-for-route): wrong decision: auc_method, is_not_available; tag that broke: parameter-not-for-route
+- ood-062 (oodx04_infusion_dur_h, turn 1; tags: invented, duration-unit-mismatch, infusion): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: duration-unit-mismatch; tag that broke: infusion
+- ood-063 (oodx05_two_subjects, turn 1; tags: invented, multi-subject): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: multi-subject
+- ood-064 (oodx06_steady_state, turn 1; tags: invented, out-of-scope, steady-state, multiple-dose): wrong decision: asked_cmax, is_not_available, route; tag that broke: out-of-scope; tag that broke: steady-state; tag that broke: multiple-dose
+- ood-065 (oodx07_urine, turn 1; tags: invented, out-of-scope, urine): wrong decision: asked_cl, is_not_available; tag that broke: out-of-scope; tag that broke: urine
+- ood-067 (oodx09_oral_min_ng, turn 1; tags: invented, abbreviation, unit-in-text): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: unit-in-text
+- ood-068 (oodx10_oral_blq, turn 1; tags: invented, blq, latin-route): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: blq; tag that broke: latin-route
+- ood-069 (oodx11_oral_dose_g, turn 1; tags: invented, dose-unit-g, unit-in-text): wrong decision: analysis, auc_method, dose_has_unit; tag that broke: dose-unit-g; tag that broke: unit-in-text
+- ood-070 (oodx12_iv_infusion_mcg, turn 1; tags: invented, dose-unit-micro, infusion): wrong decision: analysis, auc_method, route; refused / asked (no-analysis) where the gold decisions expect an answer
+- ood-071 (oodx01_oral_mg_ugml, turn 2; tags: invented, compare, rerun): wrong decision: asked_auclast; tag that broke: rerun
+- ood-072 (oodx09_oral_min_ng, turn 2; tags: invented, compare, by-id): wrong decision: asked_auclast, auc_method; tag that broke: by-id
+- ood-073 (oodx03_oral_c0, turn 1; tags: invented, plain): wrong decision: analysis, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: plain
+- ood-074 (oodx02_iv_bolus_tlag, turn 1; tags: invented, plain): wrong decision: analysis, asked_auclast, auc_method; refused / asked (no-analysis) where the gold decisions expect an answer; tag that broke: plain
+
+(Every request with its answer, its decisions and the reason is in `ood/runs/2026-10-10-qwen35-0.8b/report.md`; the 70 requests above are the tool's list.)
+
+### Reading
+
+1. The model does not transfer to unfamiliar wording. On first requests it never says `nca` (0 of 45), so 58 of 62 first requests end in "no analysis yet" and
+   nothing is computed; only follow-ups (`analysis` 12/12) and fit and compare wordings, which resemble the 83 training sentences, work.
+2. Collapsed: `analysis` (37.8 %), `auc_method` (21.6 %, a consequence), `is_not_available` (recall 0/11, score equal to the constant), `route` on infusions (3/10).
+   Held: `compare_pair`, `dose_has_unit` and the 14 `asked_<parameter>` booleans (98.6 %).
+3. The reviewer's predictions were wrong in size and in order. About 80 % per question was expected: the model has 74.9 % macro, below the best constant (79.3 %) and
+   below the reviewer's own rules (88.8 %); whole request 5.4 % (4/74) against 30 %. `is_not_available` (predicted first to break, 55 %) did break, every positive is
+   missed, but its score equals the constant (85.1 %); the first real break is `analysis` on first requests (82 % predicted, 37.8 %), then `auc_method` (72 %, 21.6 %).
+   `dose_has_unit` (78 % predicted, 98.6 %) and `compare_pair` (80 %, 100 %) did better than expected.
+4. The 99.9 % held-out and the 175/175 are memorisation figures, as the reviewer argued (720/720 held-out requests are verbatim in train): what they measure is the
+   83 sentences of the generator.
+5. The 0.8B model's confidence does not warn about any of this (135 of 143 wrong decisions at 0.90 or more), so a threshold on that probability cannot be the gate.

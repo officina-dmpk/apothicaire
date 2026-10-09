@@ -1,0 +1,471 @@
+{
+ "rows": 74,
+ "decisions": 1480,
+ "correct": 1480,
+ "accuracy": 1.0,
+ "exact_rows": 74,
+ "has_probs": false,
+ "per_question": {
+  "analysis": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.6081081081081081,
+   "train_majority": 0.21621621621621623
+  },
+  "asked_adj_r2": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9864864864864865,
+   "train_majority": 0.9864864864864865
+  },
+  "asked_aucinf": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.918918918918919,
+   "train_majority": 0.918918918918919
+  },
+  "asked_auclast": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.7297297297297297,
+   "train_majority": 0.7297297297297297
+  },
+  "asked_aucpext": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_c0": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_cl": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "asked_cmax": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.7027027027027027,
+   "train_majority": 0.7027027027027027
+  },
+  "asked_half_life": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "asked_lambda_z": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9864864864864865,
+   "train_majority": 0.9864864864864865
+  },
+  "asked_lambda_z_points": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.972972972972973,
+   "train_majority": 0.972972972972973
+  },
+  "asked_mrt": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_tlag": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9459459459459459,
+   "train_majority": 0.9459459459459459
+  },
+  "asked_tmax": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9054054054054054,
+   "train_majority": 0.9054054054054054
+  },
+  "asked_vz": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "auc_method": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.7702702702702703,
+   "train_majority": 0.12162162162162163
+  },
+  "compare_pair": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9459459459459459,
+   "train_majority": 0.9459459459459459
+  },
+  "dose_has_unit": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9324324324324325,
+   "train_majority": 0.9324324324324325
+  },
+  "is_not_available": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.8513513513513513,
+   "train_majority": 0.8513513513513513
+  },
+  "route": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.5405405405405406,
+   "train_majority": 0.5405405405405406
+  }
+ },
+ "per_tag": {
+  "colloquial": {
+   "rows": 6,
+   "correct": 120,
+   "total": 120,
+   "exact_rows": 6
+  },
+  "route-implied": {
+   "rows": 5,
+   "correct": 100,
+   "total": 100,
+   "exact_rows": 5
+  },
+  "abbreviation": {
+   "rows": 17,
+   "correct": 340,
+   "total": 340,
+   "exact_rows": 17
+  },
+  "typo": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "follow-up": {
+   "rows": 4,
+   "correct": 80,
+   "total": 80,
+   "exact_rows": 4
+  },
+  "route-stated": {
+   "rows": 8,
+   "correct": 160,
+   "total": 160,
+   "exact_rows": 8
+  },
+  "terminology-mismatch": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "fit": {
+   "rows": 4,
+   "correct": 80,
+   "total": 80,
+   "exact_rows": 4
+  },
+  "two-compartments": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "language-mix": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "infusion": {
+   "rows": 7,
+   "correct": 140,
+   "total": 140,
+   "exact_rows": 7
+  },
+  "dose-unit-micro": {
+   "rows": 9,
+   "correct": 180,
+   "total": 180,
+   "exact_rows": 9
+  },
+  "duration-unit-mismatch": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "unit-in-text": {
+   "rows": 5,
+   "correct": 100,
+   "total": 100,
+   "exact_rows": 5
+  },
+  "duration-word": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "compare": {
+   "rows": 8,
+   "correct": 160,
+   "total": 160,
+   "exact_rows": 8
+  },
+  "english-term": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "rerun": {
+   "rows": 4,
+   "correct": 80,
+   "total": 80,
+   "exact_rows": 4
+  },
+  "by-id": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "no-parameter": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "tlag": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "parameter-not-for-route": {
+   "rows": 5,
+   "correct": 100,
+   "total": 100,
+   "exact_rows": 5
+  },
+  "iv-explicit": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "out-of-scope": {
+   "rows": 4,
+   "correct": 80,
+   "total": 80,
+   "exact_rows": 4
+  },
+  "bioequivalence": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "population": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "no-dose": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-without-unit": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "unit-conversion-in-text": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-mg": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-mcg": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "unrecognized-unit": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "blq": {
+   "rows": 4,
+   "correct": 80,
+   "total": 80,
+   "exact_rows": 4
+  },
+  "simulate": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "two-requests-in-one-sentence": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "latin-route": {
+   "rows": 3,
+   "correct": 60,
+   "total": 60,
+   "exact_rows": 3
+  },
+  "parameter-not-in-schema": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "unicode": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "method-explicit": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "route-missing": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "c0": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "recall": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "non-auc-parameter": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "no-prior-analysis": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "invented": {
+   "rows": 16,
+   "correct": 320,
+   "total": 320,
+   "exact_rows": 16
+  },
+  "unit-variety": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "multi-subject": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "steady-state": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "multiple-dose": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "urine": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "oral": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-g": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "plain": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  }
+ },
+ "wrong_decisions": []
+}

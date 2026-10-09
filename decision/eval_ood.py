@@ -69,10 +69,10 @@ def find_exercise(ex_id, roots=EXERCISE_ROOTS):
 
 def scripted_first(meta, csv):
     """The scripted first message of an exercise split in its parts (intro, csv, notes, request), or Reject when the exercise folder
-    lacks what bench/scripts.py needs."""
-    try: script = scripts.build_script(meta, csv)
+    lacks what bench/scripts.first_message needs (route, dose, units, table; not the NCA oracle, which exercises written blind do not have)."""
+    try: message = scripts.first_message(meta, csv)
     except Exception as e: raise Reject(f"exercise {meta.get('id')} cannot be scripted by bench/scripts.py ({type(e).__name__}: {e})")
-    return md.split_first_message(script[0]["question"])
+    return md.split_first_message(message)
 
 
 # ---------------------------------------------------------------- one line -> one row
@@ -455,6 +455,13 @@ def expects_refusal(gold):
 class NotReplayable(Exception): pass
 
 
+def nca_arguments(meta):
+    """{"dose", "route"} of the nca_run calls of an exercise: those of its oracle (ground_truth.nca.linear.nca_run_arguments) when it has
+    one, else the dose amount and the route of meta.json (exercises written blind have no oracle; the benchmark ones agree with it)."""
+    try: return meta["ground_truth"]["nca"]["linear"]["nca_run_arguments"]
+    except KeyError: return {"dose": meta["dose"]["amount"], "route": meta["route"]}
+
+
 def replay_prior(h, item):
     """Replays the prior analyses of a line on the engine of Harness `h`: the data are imported and nca_run is called with the arguments
     of the exercise's own truth (meta.json) and the AUC method of each analysis. Returns the notes (id mismatches)."""
@@ -463,7 +470,7 @@ def replay_prior(h, item):
     h.data = dict(item["first"])
     if any(p["kind"] != "nca" for p in prior): raise NotReplayable("a prior analysis is not an NCA (fits cannot be replayed)")
     if h._import() is None: raise NotReplayable("data_import failed: " + h.tool_log[-1]["text"][:200])
-    base = item["meta"]["ground_truth"]["nca"]["linear"]["nca_run_arguments"]
+    base = nca_arguments(item["meta"])
     notes = []
     for p in prior:
         d = h._run_nca(base["dose"], base["route"], p["auc_method"])

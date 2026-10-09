@@ -94,6 +94,21 @@ def must(meta, key, label, method="linear"):
     return {"label": label, "key": key, "value": truth_value(meta, key, method), "method": method,
             "unit": truth_unit(meta, key, method)}
 
+def first_message(meta, csv_text):
+    """The first user message of the script (dose / route / units sentence, table, BLQ note, request of the NCA). It needs only the
+    route, dose, units, blq and the table of the exercise, not the NCA oracle (decision/eval_ood.py uses it for exercises written blind)."""
+    kind = kind_of(meta); u = meta["units"]; du = UNIT_FR[meta["dose"]["unit"]]
+    cl_name, vz_name = ("CL/F", "Vz/F") if kind == "oral" else ("CL", "Vz")
+    dose_txt = f"{fr(meta['dose']['amount'])} {du}"
+    blq = meta.get("blq")
+    lines = [f"Voici les données d'un exercice ({dose_txt} {route_fr(meta)} ; temps en {u['time']}, concentration en {u['conc']}) :",
+             csv_text.strip()]
+    if blq:
+        lines.append(f"Les valeurs égales à 0 sont sous la limite de quantification (LLOQ = {fr(blq['lloq'])} {u['conc']}).")
+    lines.append(f"Fais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, "
+                 f"AUC(0-tlast), AUC(0-inf), λz, t½, {cl_name}, {vz_name} et MRT, avec les unités.")
+    return chr(10).join(lines)
+
 def build_script(meta, csv_text):
     """The 8 turns for an exercise: [{"id", "kind", "question", "expect"}]."""
     kind = kind_of(meta); u = meta["units"]; du = UNIT_FR[meta["dose"]["unit"]]
@@ -103,13 +118,7 @@ def build_script(meta, csv_text):
     pool = pool_of(meta, csv_text)
     dose_txt = f"{fr(meta['dose']['amount'])} {du}"
     blq = meta.get("blq")
-    lines = [f"Voici les données d'un exercice ({dose_txt} {route_fr(meta)} ; temps en {u['time']}, concentration en {u['conc']}) :",
-             csv_text.strip()]
-    if blq:
-        lines.append(f"Les valeurs égales à 0 sont sous la limite de quantification (LLOQ = {fr(blq['lloq'])} {u['conc']}).")
-    lines.append(f"Fais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi Cmax, Tmax, "
-                 f"AUC(0-tlast), AUC(0-inf), λz, t½, {cl_name}, {vz_name} et MRT, avec les unités.")
-    t1 = chr(10).join(lines)
+    t1 = first_message(meta, csv_text)
     turns = []
     # 1
     m1 = [must(meta, "cmax", "Cmax"), must(meta, "tmax", "Tmax"), must(meta, "auclast", "AUC(0-tlast)"),
