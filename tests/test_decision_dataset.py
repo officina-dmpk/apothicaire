@@ -78,7 +78,7 @@ class TestDecisionDataset(unittest.TestCase):
                     assert gold[name]["label"] in options_of(q), (r["id"], name, gold[name]["label"])
                     assert gold[name]["probabilities"][gold[name]["label"]] == 1.0
                 ids = sorted(a["id"] for a in state["analyses"])
-                pairs = {f"{a}+{b}" for i, a in enumerate(ids) for b in ids[i + 1:]}
+                pairs = {f"{a}+{b}" for a in ids for b in ids if a != b}                 # directed: both orders are offered
                 assert set(qs["compare_pair"]["criteria"]) == {"not_applicable"} | (pairs or {"none_available"})
 
     def test_is_not_available_exactly_for_the_not_available_kind(self):
@@ -131,6 +131,20 @@ class TestDecisionDataset(unittest.TestCase):
             assert state["request"] == (t1[-1] if factors["kind"] == "import_nca" else turns[factors["kind"]]["question"])
             n += 1
         assert n == 8 * 100
+
+    def test_compare_pairs_are_directed(self):
+        """2026-10-10 (review, defect 2): "compare analysis 3 to analysis 2" must be representable, so a pair is ordered (a = reference)."""
+        crit = md.questions_for([2, 3])["compare_pair"]["criteria"]
+        assert set(crit) == {"not_applicable", "2+3", "3+2"}
+        assert "analysis 2 as the reference" in crit["2+3"] and "analysis 3 as the reference" in crit["3+2"]
+        assert set(md.questions_for([2])["compare_pair"]["criteria"]) == {"not_applicable", "none_available"}
+        assert len(md.questions_for([2, 3, 4])["compare_pair"]["criteria"]) == 1 + 6
+
+    def test_not_supported_is_an_analysis_option_without_generated_rows(self):
+        """2026-10-10 (review, defect 5): out-of-scope asks have their own answer; the generator writes no such request, so no row is
+        relabelled (the labels are those of the dataset before the option existed)."""
+        assert "not_supported" in md.questions_for([2])["analysis"]["criteria"]
+        assert not any(json.loads(r["gold"])["analysis"]["label"] == "not_supported" for r in sum(data(), []))
 
     def test_one_noul_question_per_parameter(self):
         """`asked_<key>` replaces the single parameter_asked choice: one noul per parameter, a boolean gold, no several / none."""
@@ -227,9 +241,12 @@ class TestDecisionDataset(unittest.TestCase):
         for q in ("analysis", "route", "auc_method", *(f"asked_{k}" for k in md.PARAMETERS), "dose_has_unit", "is_not_available", "compare_pair"):
             assert f"`{q}`" in block
         assert sum(st[n]["rows"] for n in md.FILES) >= 3000
-        # every declared option of the closed set has examples in train, except the placeholder of a pair-less state
+        # every declared option of the closed set has examples in train, except the placeholder of a pair-less state and the two
+        # options the generator has no request for (2026-10-10, after the review): `not_supported` (out-of-scope asks) and the reversed
+        # pair 3+2 (the generator's compare turn always takes the linear analysis as the reference)
+        no_rows = {"analysis": {"not_supported"}, "compare_pair": {"3+2"}}
         for q, hist in st["train"]["hist"].items():
-            declared = set(md.questions_for([2, 3])[q]["criteria"])
+            declared = set(md.questions_for([2, 3])[q]["criteria"]) - no_rows.get(q, set())
             assert set(hist) == declared, (q, declared ^ set(hist))
 
 

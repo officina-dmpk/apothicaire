@@ -96,7 +96,7 @@ def run(*turns, msg=None):
     for text, _ in turns: out.append(h.turn(text or msg or message()))
     return h, out, dec
 
-HEADER = "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400, voie orale (extravasculaire)) :"
+HEADER = "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400 mg, voie orale (extravasculaire)) :"
 WARN = "Avertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named »."
 TABLE = "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- Tmax : 1.5 h", "- AUC(0-tlast) : 4012.25 h*mg/L",
                    "- λz (constante d'élimination terminale) : 0.1155 1/h", "- t½ (demi-vie terminale) : 6.0012 h",
@@ -114,7 +114,8 @@ TABLE_ALL = "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- Tmax : 1.5 h", "- AUC(0
 RECALL = "\n".join(["Réglages de l'analyse 2 tels que Caladrius les a enregistrés :",
                     "- Dose : 400 mg (unité de votre premier message ; Caladrius a reçu la dose sans unité)",
                     "- Voie d'administration : voie orale (extravasculaire)", "- Méthode d'AUC : trapèzes linéaires (linear)"])
-COMPARE = "\n".join(["Comparaison calculée par Caladrius entre l'analyse 2 et l'analyse 3 (b - a) :",
+COMPARE = "\n".join(["Comparaison calculée par Caladrius entre l'analyse 2 et l'analyse 3 (b - a ; a = analyse 2, la référence ; "
+                     "b = analyse 3, comparée à la référence) :",
                      "- AUC(0-tlast), méthode linéaire (analyse 2) : 4012.25 h*mg/L",
                      "- AUC(0-tlast), méthode linear-up/log-down (analyse 3) : 3950.75 h*mg/L",
                      "- Différence (b - a) : -61.5 h*mg/L", "- Différence relative : -1.5328 %", "- Rapport b/a : 0.984672"])
@@ -299,6 +300,168 @@ class TestRefusals(unittest.TestCase):
         self.assertEqual((got["analysis"], got["dose_has_unit"], got["route"]), ("nca", "true", None))
         self.assertEqual(sorted(outside), sorted(["auc_method", "compare_pair", "is_not_available", "route"] + [f"asked_{k}" for k in md.PARAMETERS]))
 
+def ood_message(first_line, request=None, conc="mg/L", time_unit="h"):
+    """A first message written like the reviewer's natural requests (decision/ood/requests.jsonl): the user's own sentence first, then
+    the table, then the request (the sentence again when it holds the request)."""
+    return (f"{first_line}\ntime ({time_unit}),conc ({conc})\n0,0\n0.5,310.2\n1.5,812.5\n4,520.1\n8,250.3\n12,120.7\n"
+            + (request or first_line))
+
+class FakeMCPng(FakeMCP):
+    """The fake engine with a worksheet in ng/mL; with the `units` option, nca_run reports a unit per parameter and CL / V in L/h and L
+    (synthetic values: the conversion factor of mg against ng/mL, 1000, applied by this fake engine, not by the harness)."""
+    def call(self, name, args):
+        ok, text = super().call(name, args)
+        d = json.loads(text) if ok else None
+        if name == "data_import":
+            d["worksheet"]["columns"][1]["unit"] = "ng/mL"
+            d["worksheet"]["derived_units"] = {"auc": "h*ng/mL", "aumc": "h^2*ng/mL", "half_life": "h", "lambda_z": "1/h", "mrt": "h"}
+            return ok, json.dumps(d)
+        units = ((args.get("options") or {}).get("units") or {}) if name == "nca_run" else {}
+        if units:
+            for p in d["result"]["subjects"][0]["outcome"]["ok"]["parameters"]:
+                if p["name"] == "cl.obs": p.update(unit="L/h", value={"value": 47.5})
+                elif p["name"] == "vz.obs": p.update(unit="L", value={"value": 411.3})
+                elif "value" in p["value"]: p["unit"] = "ng/mL"
+            return ok, json.dumps(d)
+        return ok, text
+
+class TestReviewDefects(unittest.TestCase):
+    """The six harness defects found by the independent review (decision/ood/REVIEW.md, 2026-10-09), each from a failing request of
+    decision/ood/requests.jsonl run through the gold path."""
+    # 1. infusion duration: 0 of 8 natural wordings were read (ood-008, 010, 011, 037, 043, 055, 062, 070)
+    def test_duration_read_anywhere_in_the_message(self):
+        cases = {"Perfusion de 150 mg sur 2 h. Donne-moi le Cmax et l'AUC(0-t).": (2, "h"),                         # ood-008
+                 "Perfusion de 500 µg pendant 1,5 h, Cmax et AUC0-inf.": (1.5, "h"),                                 # ood-010
+                 "Perfusion de 500 µg pendant 90 minutes : que vaut l'AUC(0-t) ?": (90, "min"),                    # ood-011
+                 "Perfusion de 150 mg sur 2 h : clairance et volume de distribution.": (2, "h"),                    # ood-037
+                 "Perfusion IV de 150 mg sur 2 h, CL et Vz svp.": (2, "h"),                                         # ood-043
+                 "Perfusion de 500 µg sur 90 min : Cmax.": (90, "min"),                                             # ood-055
+                 "Perfusion de 75 mg sur 1,5 h, les temps sont en minutes : Cmax.": (1.5, "h"),                     # ood-062
+                 "Perfusion de 750 µg sur 1 h : Vz et CL.": (1, "h"),                                               # ood-070
+                 "perfusion de 30 min": (30, "min"), "perfusée sur 1 h": (1, "h"), "en 2 heures": (2, "h"),
+                 "150 mg en perfusion intraveineuse de 2 h": (2, "h"),                                              # the benchmark's wording
+                 "Quel est le Tlag de cette perfusion de 150 mg ?": (None, None)}
+        for text, want in cases.items(): self.assertEqual(H.parse_duration(text), want, text)
+
+    def test_infusion_runs_with_the_duration_of_a_natural_sentence(self):
+        msg = ood_message("Perfusion de 150 mg sur 2 h. Donne-moi le Cmax et l'AUC(0-t).")                                  # ood-008
+        h, out, _ = run((None, [dict(NCA, route="iv_infusion", **asking("cmax", "auclast"))]), msg=msg)
+        self.assertEqual(h.mcp.calls[1], ("nca_run", {"worksheet": 1, "dose": 150, "route": {"iv_infusion": {"duration": 2}},
+                                                      "options": {"auc_method": "linear"}}))
+        self.assertIn("- Cmax : 812.5 mg/L", out[0][0])
+
+    def test_minutes_in_words_match_data_in_min(self):
+        msg = ood_message("Perfusion de 500 µg pendant 90 minutes : que vaut l'AUC(0-t) ?", time_unit="min")             # ood-011
+        h, _, _ = run((None, [dict(NCA, route="iv_infusion", **asking("auclast"))]), msg=msg)
+        self.assertEqual(h.mcp.calls[1][1]["route"], {"iv_infusion": {"duration": 90}})
+
+    def test_duration_absent_is_asked_not_guessed(self):
+        msg = ood_message("Perfusion intraveineuse de 150 mg : Cmax.")
+        h, out, _ = run((None, [dict(NCA, route="iv_infusion", **asking("cmax"))]), msg=msg)
+        self.assertEqual(out[0][0], H.T_ASK_DURATION.format(t="h")); self.assertEqual(h.mcp.calls, [])
+
+    # 2. compare direction: "2+1" was outside the options (ood-015, ood-072)
+    def test_reversed_pair_is_offered_and_kept_in_order(self):
+        rev = dict(BASE, analysis="compare", auc_method="lin_up_log_down", compare_pair="3+2")
+        lud = dict(NCA, auc_method="lin_up_log_down")
+        h, out, dec = run((None, [NCA]), ("Refais en lin-up/log-down.", [lud]), ("Compare l'analyse 2 à l'analyse 1.", [rev]))
+        self.assertEqual(out[2][1]["decisions"][0]["outside_options"], [])
+        self.assertEqual(h.mcp.calls[-1], ("analysis_compare", {"a": 3, "b": 2}))
+        self.assertTrue(out[2][0].startswith("Comparaison calculée par Caladrius entre l'analyse 3 et l'analyse 2 (b - a ; "
+                                             "a = analyse 3, la référence ; b = analyse 2, comparée à la référence) :"), out[2][0])
+
+    # 3. the refusal named the first parameter in table order ("Cmax n'est pas calculé" when C0 is the missing one)
+    def test_mixed_request_names_only_the_unavailable_parameter(self):
+        mixed = dict(BASE, is_not_available="true", **asking("cmax", "c0"))
+        h, out, _ = run((None, [NCA]), ("Donne-moi la Cmax et la C0.", [mixed]))
+        ans = out[1][0]
+        self.assertIn("- Cmax : 812.5 mg/L", ans)
+        self.assertIn("C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius (« not defined for this route of administration »).", ans)
+        self.assertNotIn("Cmax n'est pas calculé", ans); self.assertEqual(out[1][1]["notes"], [])
+
+    def test_several_unavailable_are_each_refused_by_name(self):
+        both = dict(BASE, is_not_available="true", auc_method="linear", **asking("c0", "tlag"))
+        eng = FakeMCP()
+        h = H.Harness(Scripted(NCA, both), mcp=eng)
+        h.turn(message())
+        eng.analyses[2]["result"]["subjects"][0]["outcome"]["ok"]["parameters"] = [
+            p for p in eng.analyses[2]["result"]["subjects"][0]["outcome"]["ok"]["parameters"] if p["name"] != "tlag"]
+        ans = h.turn("C0 et Tlag ?")[0]
+        self.assertEqual(ans.split("\n")[0].split(" n'est pas")[0], "C0 (concentration initiale extrapolée)")
+        self.assertTrue(ans.split("\n")[1].startswith("Tlag (temps de latence) n'est pas calculé par Caladrius pour cette voie"), ans)
+
+    def test_several_parameters_before_any_analysis_are_not_guessed(self):
+        h, out, _ = run((None, [dict(BASE, is_not_available="true", **asking("cmax", "c0"))]))
+        self.assertEqual(out[0][0], H.T_NOT_AVAILABLE_UNCHECKED.format(labels="Cmax, C0")); self.assertEqual(h.mcp.calls, [])
+
+    def test_nca_turn_with_an_unavailable_parameter_runs_and_lets_the_engine_say_which(self):
+        h, out, _ = run((None, [dict(NCA, is_not_available="true", **asking("cmax", "c0"))]),
+                        msg=ood_message("Prise orale de 400 mg : la Cmax et la C0."))
+        self.assertEqual([c[0] for c in h.mcp.calls], ["data_import", "nca_run"])
+        self.assertIn("- Cmax : 812.5 mg/L", out[0][0]); self.assertIn("C0 (concentration initiale extrapolée) n'est pas calculé", out[0][0])
+
+    # 4. "no dose" was answered "the dose has no unit" (ood-021); a dose without unit stays a unit question (ood-022)
+    def test_no_dose_at_all_asks_for_the_dose(self):
+        msg = ood_message("Après une prise orale, voici mes concentrations : quelle est la demi-vie ?")                   # ood-021
+        h, out, _ = run((None, [dict(NCA, dose_has_unit="false", **asking("half_life"))]), msg=msg)
+        self.assertEqual(out[0][0], H.T_ASK_DOSE); self.assertEqual(h.mcp.calls, [])
+
+    def test_dose_without_unit_asks_for_the_unit(self):
+        msg = ood_message("Prise orale de 100, voici les données. Cmax ?")                                                 # ood-022
+        for unit_answer in ("false", "true"):                                  # even when the decision says the unit is there
+            h, out, _ = run((None, [dict(NCA, dose_has_unit=unit_answer, **asking("cmax"))]), msg=msg)
+            self.assertEqual(out[0][0], H.T_ASK_DOSE_UNIT, unit_answer); self.assertEqual(h.mcp.calls, [])
+
+    def test_dose_units_read(self):
+        self.assertEqual(H.parse_dose("J'ai pris 0,25 g par voie orale"), (0.25, "g"))                                   # ood-069
+        self.assertEqual(H.parse_dose("Bolus de 2000 mcg : CL et Vz."), (2000, "mcg"))                                   # ood-024
+        self.assertEqual(H.parse_dose("2 gélules de 100 mg"), (100, "mg"))
+
+    # 5. out-of-scope asks got "not calculated for this route" (ood-019, 020, 064, 065)
+    def test_out_of_scope_gets_the_not_supported_answer(self):
+        msg = ood_message("Ce produit de 400 mg est-il bioéquivalent au princeps ?")                                       # ood-019
+        for answers in (dict(BASE, analysis="not_supported"), dict(BASE, is_not_available="true")):
+            h, out, _ = run((None, [answers]), msg=msg)
+            self.assertEqual(out[0][0], H.T_NOT_SUPPORTED); self.assertEqual(h.mcp.calls, [])
+            self.assertNotIn("pour cette voie", out[0][0])
+        self.assertIn("not_supported", md.questions_for([])["analysis"]["criteria"])
+
+    # 6. "2 mg" on a 2000 µg exercise ran dose = 2 silently (ood-023)
+    def test_dose_unit_in_the_header_and_conversion_by_the_engine(self):
+        msg = ood_message("Bolus IV de 2 mg : donne-moi la clairance et le Vz.", conc="ng/mL")                           # ood-023
+        dec = Scripted(dict(NCA, route="iv_bolus", **asking("cl", "vz")), dict(BASE, route="iv_bolus", **asking("cl")),
+                       dict(BASE, route="iv_bolus"))
+        units = FakeMCPng()
+        h = H.Harness(dec, mcp=FakeMCPng(), units_mcp=units)
+        ans = h.turn(msg)[0]
+        self.assertTrue(ans.startswith("Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 2 mg, bolus intraveineux) :"), ans)
+        self.assertIn("- CL (clairance) : 0.0475 dose unit/(h*ng/mL), soit 47.5 L/h (conversion faite par Caladrius avec la dose en mg)", ans)
+        self.assertIn("- Vz (volume de distribution) : 0.4113 dose unit/(ng/mL), soit 411.3 L (conversion faite par Caladrius avec la dose en mg)", ans)
+        # the conversation's session is unchanged (no unit: the benchmark's convention); the units session got the unit
+        self.assertEqual(h.mcp.calls[1], ("nca_run", {"worksheet": 1, "dose": 2, "route": "iv_bolus", "options": {"auc_method": "linear"}}))
+        self.assertEqual(units.calls[1], ("nca_run", {"worksheet": 1, "dose": 2, "route": "iv_bolus",
+                                                      "options": {"auc_method": "linear", "units": {"time": "h", "concentration": "ng/mL", "dose": "mg"}}}))
+        allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log + h.unit_log], h.user_texts)
+        self.assertEqual(gate.check(ans, allowed=allowed)["numbers_unverified"], 0)
+        # a later reading reuses the conversion (no new call); the recall says what each session received
+        self.assertIn("soit 47.5 L/h", h.turn("Et la clairance ?")[0]); self.assertEqual(len(units.calls), 2)
+        self.assertIn("Caladrius l'a reçue avec son unité pour convertir la clairance et le volume", h.turn("Rappelle-moi la dose.")[0])
+
+    def test_no_conversion_when_the_dose_unit_is_the_concentrations_mass_unit(self):
+        units = FakeMCPng()
+        h = H.Harness(Scripted(NCA), mcp=FakeMCP(), units_mcp=units)
+        ans = h.turn(message())[0]                                             # 400 mg against mg/L
+        self.assertEqual(ans, TABLE); self.assertEqual(units.calls, []); self.assertEqual(h.unit_log, [])
+
+    def test_needs_conversion(self):
+        self.assertTrue(H.needs_conversion("mg", "ng/mL")); self.assertTrue(H.needs_conversion("µg", "ng/mL"))
+        self.assertTrue(H.needs_conversion("mg", "µg/mL")); self.assertFalse(H.needs_conversion("mg", "mg/L"))
+        self.assertFalse(H.needs_conversion("mcg", "µg/L")); self.assertFalse(H.needs_conversion(None, "ng/mL"))
+
+    def test_gold_asked_is_accepted_as_the_gold_decider(self):
+        if not os.path.exists(rh.BENCH_JSONL): self.skipTest("decision/data/bench.jsonl is not generated")
+        self.assertEqual(rh.load_decider("gold-asked").name, rh.load_decider("gold").name)
+
 class TestState(unittest.TestCase):
     """The harness's state is the dataset's state: compared with the scripted-wording rows of the 25 benchmark exercises."""
     def test_states_match_the_dataset(self):
@@ -356,7 +519,16 @@ class TestRealEngine(unittest.TestCase):
         turns = rec["turns"]
         self.assertEqual([t.get("error") for t in turns], [None] * 8)
         self.assertTrue(all(t["oracle"]["correct"] for t in turns if t.get("oracle")), [t["answer"] for t in turns])
-        self.assertTrue(all(t["score"]["correct"] for t in turns))
+        # 200 mg against ng/mL: CL and Vz also carry Caladrius's conversion (L/min, L), which the scorer's must_not rule (CL x 10^3,
+        # written against a model converting by itself) reads as a conversion; nothing else may be wrong, and the converted values are
+        # engine values (gate: 0 unverified, the units session is a source)
+        for t in turns:
+            sc = t["score"]
+            self.assertEqual((sc["missing"], sc["words_missing"], sc["new_numbers"]), ([], [], 0), t["kind"])
+            self.assertLessEqual(set(sc["forbidden"]), {"CL x 10^3", "Vz x 10^3"}, t["kind"])
+        self.assertEqual([c["name"] for c in turns[0]["unit_calls"]], ["data_import", "nca_run"])
+        self.assertEqual(turns[0]["unit_calls"][1]["args"]["options"]["units"], {"time": "min", "concentration": "ng/mL", "dose": "mg"})
+        self.assertIn("soit 0.115015 L/min (conversion faite par Caladrius avec la dose en mg)", turns[0]["answer"])
         self.assertEqual(sum(t["numbers_unverified_after"] for t in turns), 0)
         self.assertEqual(rec["tool_arg_audit"]["deviating_calls"], 0)
         self.assertTrue(turns[6]["compare_tool"]["usable"])

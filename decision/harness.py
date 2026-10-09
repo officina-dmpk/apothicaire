@@ -15,9 +15,18 @@ One `Harness` holds one Caladrius MCP session (the client of apothicaire.py, imp
       the recall). The harness computes nothing: no arithmetic on engine values, no unit conversion, no language model.
 
 What the harness reads from the user's text itself, deterministically (not a decision): the dose amount and its unit token (the
-number right before mg / µg / ug), the infusion duration (the number after "perfusion", with its time unit), the column names and
-units of the CSV header. A missing route, dose, dose unit or infusion duration is asked for, never guessed; an infusion duration in
-another time unit than the data is asked again in the data's unit (no conversion).
+number right before mg / µg / ug / mcg / g / ng), the infusion duration (a number followed by a time unit, "2 h", "90 minutes",
+"1,5 h", anywhere in the first message, the first one after the word "perfusion" when there are several), the column names and units
+of the CSV header. A missing route, dose, dose unit or infusion duration is asked for, never guessed ("no dose" and "a dose without a
+unit" are two different questions); an infusion duration in another time unit than the data is asked again in the data's unit (no
+conversion).
+
+Dose unit (2026-10-10, after the review): the analysis of record is run as before (`nca_run` with the dose amount, no unit: CL and V
+are labelled "dose unit/..." by the digest, the convention of the benchmark's oracle), and the header of every reading names the dose
+with the user's unit. When the user's dose unit is not the mass unit of the concentrations (mg against ng/mL, µg against ng/mL...), the
+harness also gives Caladrius the units (`nca_run` option `units`: time, concentration, dose) in a second Caladrius session (so that the
+analysis ids of the conversation do not move) and shows, next to every value labelled "dose unit/...", the value converted by
+Caladrius ("soit 5.02147 L/h"). The calls of that session are in `unit_log`, not in `tool_log`.
 
 Conventions:
   * the reference analysis of a reading turn is the analysis of the decided AUC method when there is one, else the first NCA of the
@@ -28,8 +37,12 @@ Conventions:
   * the parameters shown are the ones whose `asked_<key>` answer is true, in the engine's order, nothing else: an NCA turn where no
     `asked_*` is true runs the analysis, prints no value and says that no parameter was designated; a reading turn where none is true
     is a recall of the settings (dose, route, AUC method);
-  * `is_not_available` = true is checked against the engine: when Caladrius did compute the parameter, its value is given and the
-    turn records the conflict (a false refusal would be a wrong answer).
+  * `is_not_available` = true is checked against the engine, parameter by parameter: the refusal names the parameters asked that
+    Caladrius did not compute, and the ones it computed are given in the same answer (a mixed request); when all were computed the
+    turn records the conflict (a false refusal would be a wrong answer). With no parameter asked, `is_not_available` = true is an
+    out-of-scope request and gets the `not_supported` answer, like `analysis` = `not_supported`;
+  * a compare pair "a+b" is directed: `analysis_compare` gets a and b in that order (b minus a, a is the reference) and the answer
+    says which analysis is the reference.
 """
 import json, os, re, sys
 
@@ -57,7 +70,7 @@ T_NO_DATA = ("Je n'ai pas encore de données : collez le tableau concentration-t
              "mesures), avec la dose, la voie d'administration et la question.")
 T_ASK_ROUTE = ("Je ne lance pas l'analyse : la voie d'administration n'est pas indiquée. Précisez-la (bolus intraveineux, perfusion "
                "intraveineuse avec sa durée, ou voie orale).")
-T_ASK_DOSE_UNIT = "Je ne lance pas l'analyse : la dose n'a pas d'unité. Précisez-la (mg, µg...)."
+T_ASK_DOSE_UNIT = "Je ne lance pas l'analyse : la dose n'a pas d'unité que je reconnaisse. Précisez-la (mg, µg, g...)."
 T_ASK_DOSE = "Je ne lance pas l'analyse : je ne trouve pas la dose dans votre message. Indiquez-la avec son unité (mg, µg...)."
 T_ASK_DURATION = ("Je ne lance pas l'analyse : la durée de la perfusion n'est pas indiquée. Précisez-la, dans l'unité de temps des "
                   "données ({t}).")
@@ -75,12 +88,28 @@ T_WHICH_PAIR = "Quelles analyses faut-il comparer ? Analyses du projet : {analys
 T_NOT_AVAILABLE = "{label} n'est pas calculé par Caladrius pour cette voie d'administration : {route}."
 T_NOT_AVAILABLE_REASON = " Raison donnée par Caladrius : « {reason} »."
 T_NOT_AVAILABLE_NO_ANALYSIS = "{label} n'est pas calculé par Caladrius pour cette voie d'administration ; aucune analyse n'est encore faite."
+T_NOT_AVAILABLE_UNCHECKED = ("Je ne peux pas dire lesquels de ces paramètres Caladrius ne calcule pas pour cette voie ({labels}) : aucune "
+                             "analyse n'est encore faite. Demandez d'abord une analyse non compartimentale.")
+T_NOT_SUPPORTED = ("Cette demande (hors du périmètre du harnais) n'est pas prise en charge : le harnais de décision sait lancer une analyse "
+                   "non compartimentale, en donner les paramètres usuels (Cmax, Tmax, C0, AUC, λz, t½, CL, Vz, MRT, Tlag...), rappeler ses "
+                   "réglages et comparer deux analyses ; il ne fait rien d'autre (ni bioéquivalence, ni modèle de population, ni état "
+                   "d'équilibre, ni excrétion urinaire, ni explication rédigée). Je ne donne aucune valeur.")
+T_CONVERTED = ", soit {value} (conversion faite par Caladrius avec la dose en {unit})"
 
 # ---------------------------------------------------------------- reading the user's text (no arithmetic)
-_NUM = r"(\d+(?:[.,]\d+)?)"
-_DOSE_RE = re.compile(_NUM + r"\s*(mg|µg|μg|ug)(?![\w/])", re.I)
-_DURATION_RE = re.compile(r"perfusion\D{0,40}?" + _NUM + r"\s*(h|min|j|jours?|heures?)\b", re.I)
+_NUM = r"(?<![\w.,])(\d+(?:[.,]\d+)?)"
+_DOSE_RE = re.compile(_NUM + r"\s*(mg|µg|μg|ug|mcg|ng|g)(?![\w/])", re.I)
+# a duration: a number and a time unit (the plural, an abbreviation, a decimal comma); bare "s" and "d" are left out (too ambiguous)
+_DURATION_RE = re.compile(_NUM + r"\s*(minutes?|mins?|heures?|hours?|hrs?|h|jours?|days?|j|secondes?|sec)(?![\w/])", re.I)
+TIME_UNIT = {"minute": "min", "minutes": "min", "min": "min", "mins": "min", "heure": "h", "heures": "h", "hour": "h", "hours": "h",
+             "hr": "h", "hrs": "h", "h": "h", "jour": "d", "jours": "d", "day": "d", "days": "d", "j": "d", "d": "d",
+             "seconde": "s", "secondes": "s", "sec": "s", "s": "s"}
+# a number standing alone (not glued to a letter, a unit or another number): what a dose without its unit looks like ("de 100, voici")
+_BARE_NUM_RE = re.compile(r"(?<![\w.,/=^-])\d+(?:[.,]\d+)?(?![\w/^%°]|[.,]\d)")
 _HEADER_CELL_RE = re.compile(r"^\s*(.*?)\s*\(([^()]*)\)\s*$")
+# mass units as the engine spells them (options.units.dose): the user's token -> engine token
+MASS_UNIT = {"g": "g", "mg": "mg", "µg": "ug", "ug": "ug", "mcg": "ug", "ng": "ng"}
+ENGINE_TIME_UNITS = ("s", "min", "h", "d")
 
 def parse_number(text):
     """A number as the user wrote it (decimal comma or point): int when it has no decimal part, else float."""
@@ -92,10 +121,47 @@ def parse_dose(sentence):
     m = _DOSE_RE.search(sentence or "")
     return (parse_number(m.group(1)), m.group(2)) if m else (None, None)
 
-def parse_duration(sentence):
-    """(duration, time unit as written) of an infusion ("perfusion ... de 2 h"), or (None, None)."""
-    m = _DURATION_RE.search(sentence or "")
-    return (parse_number(m.group(1)), m.group(2)) if m else (None, None)
+def time_unit_of(token):
+    """The time unit of a token ("minutes" -> "min", "heures" -> "h"), or the token itself when it is not one."""
+    return TIME_UNIT.get((token or "").strip().lower(), token)
+
+def parse_duration(text):
+    """(duration, time unit: h / min / d / s) of an infusion, or (None, None). The duration is a number followed by a time unit anywhere in
+    the text ("Perfusion de 150 mg sur 2 h", "pendant 90 minutes", "perfusée sur 1,5 h", "en 2 heures"); when there are several, the
+    first one after the word "perfusion" (or "perfusé...") wins, else the first one."""
+    text = text or ""
+    found = list(_DURATION_RE.finditer(text))
+    if not found: return None, None
+    cue = re.search(r"perfus", text, re.I)
+    after = [m for m in found if cue and m.start() > cue.start()]
+    m = (after or found)[0]
+    return parse_number(m.group(1)), time_unit_of(m.group(2))
+
+def has_bare_number(text):
+    """Whether the text holds a number that is not part of a name (AUC0-t, t1/2, C0), a duration or a dose with its unit: what a dose
+    written without its unit looks like. Used to tell "no dose" from "a dose without a unit"."""
+    text = _DOSE_RE.sub(" ", _DURATION_RE.sub(" ", text or ""))
+    return _BARE_NUM_RE.search(text) is not None
+
+def _mass(token):
+    return MASS_UNIT.get((token or "").strip().lower().replace("\u03bc", "\u00b5"))
+
+def _units_digest(d):
+    """{subject label: {engine key: "value unit"}} of an nca_run answer run with the `units` option: every computed parameter with the
+    unit the engine reports (6 significant digits, as the digest of apothicaire.py shows values)."""
+    out = {}
+    for s in (d.get("result") or {}).get("subjects", []):
+        ok = (s.get("outcome") or {}).get("ok")
+        if not ok: continue
+        out[str(s.get("subject"))] = {p["name"]: f"{apothicaire._shown(p['value']['value'])} {p.get('unit') or ''}".strip()
+                                      for p in ok.get("parameters", []) if "value" in (p.get("value") or {})}
+    return out
+
+def needs_conversion(dose_unit, conc_unit):
+    """True when the dose's mass unit is not the mass unit of the concentrations (mg against ng/mL): CL and V labelled
+    "dose unit/(h*ng/mL)" then need the engine's conversion to be read in L/h and L. False when either unit is unknown."""
+    du, cm = _mass(dose_unit), _mass((conc_unit or "").split("/")[0])
+    return bool(du and cm and du != cm)
 
 def header_columns(csv_text):
     """data_import columns from a header "time (h),conc (ng/mL)": [{"name", "unit"}]; a cell without a unit gives its name only."""
@@ -161,19 +227,29 @@ def _warnings(digest, subject):
     out += [f"Alerte qualité de Caladrius : « {m} »." for m in (subject.get("flag_messages") or [])]
     return out
 
-def render_header(digest, time_unit=None):
-    """First line of a reading: which analysis, method, dose and route the values come from (all from the engine)."""
+def render_header(digest, time_unit=None, dose_unit=None):
+    """First line of a reading: which analysis, method, dose and route the values come from (all from the engine; the dose unit is the
+    token of the user's message, the analysis of record receives the amount only)."""
     s = (digest.get("subjects") or [{}])[0]
     method = (digest.get("options_used") or {}).get("auc_method")
     dose = s.get("dose")
+    dose_txt = (value_text(dose) + (f" {dose_unit}" if dose_unit else "")) if dose is not None else "non indiquée"
     return (f"Résultats de Caladrius (analyse {digest.get('analysis')}, méthode d'AUC {METHOD_FR.get(method, method)}, "
-            f"dose {value_text(dose) if dose is not None else 'non indiquée'}, {route_fr(s.get('route'), time_unit)}) :")
+            f"dose {dose_txt}, {route_fr(s.get('route'), time_unit)}) :")
 
-def render_params(digest, params, time_unit=None, footer=True):
+def _converted_text(value, converted, subject, key, dose_unit):
+    """", soit 5.02147 L/h (conversion faite par Caladrius avec la dose en mg)" after a value labelled "dose unit/..." when the engine
+    converted it (`converted`: {subject label: {engine key: "value unit"}} of the units session), else ""."""
+    if not converted or "dose unit" not in str(value): return ""
+    c = (converted.get(str(subject)) or {}).get(key)
+    return T_CONVERTED.format(value=value_text(c), unit=dose_unit) if c else ""
+
+def render_params(digest, params, time_unit=None, footer=True, dose_unit=None, converted=None):
     """Lines "- label : value unit" for the parameters asked (keys of make_dataset.PARAMETERS), per subject, in the order of the engine's
     parameters; a parameter Caladrius did not compute is listed with the engine's reason. footer=False writes the not-computed ones
-    inline instead of at the end."""
-    lines = [render_header(digest, time_unit)]
+    inline instead of at the end. `dose_unit`: the user's token, written in the header; `converted`: the values of the same analysis
+    run by Caladrius with the units (see Harness._converted), written after the values labelled "dose unit/..."."""
+    lines = [render_header(digest, time_unit, dose_unit)]
     for s, head in _subject_blocks(digest):
         if head: lines.append(head)
         if "parameters" not in s:
@@ -185,21 +261,23 @@ def render_params(digest, params, time_unit=None, footer=True):
             k = engine_key(p, route)
             if k in vals: found.append((order[k], p, k))
             else: missing.append((p, _not_calculated_reason(s, k)))
-        lines += [f"- {label_fr(p, route)} : {value_text(vals[k])}" for _, p, k in sorted(found)]            # the engine's order
+        lines += [f"- {label_fr(p, route)} : {value_text(vals[k])}" + _converted_text(vals[k], converted, s.get("subject"), k, dose_unit)
+                  for _, p, k in sorted(found)]                                                            # the engine's order
         for p, why in missing:
             text = f"{label_fr(p, route)} n'est pas calculé par Caladrius" + (f" (« {why} »)" if why else "") + "."
             lines.append(("- " + text) if not footer else text)
         lines += _warnings(digest, s)
     return "\n".join(lines)
 
-def render_recall(digest, dose_unit=None, time_unit=None):
-    """The settings of an analysis as Caladrius recorded them; the dose unit is the token of the user's sentence (Caladrius never
-    receives the dose unit on this path)."""
+def render_recall(digest, dose_unit=None, time_unit=None, converted=False):
+    """The settings of an analysis as Caladrius recorded them; the dose unit is the token of the user's sentence (the analysis of record
+    receives the amount only; `converted`: Caladrius also received the unit, in the units session, to convert CL and V)."""
     s = (digest.get("subjects") or [{}])[0]
     method = (digest.get("options_used") or {}).get("auc_method")
     dose = value_text(s.get("dose")) if s.get("dose") is not None else "non indiquée"
-    unit = (f" {dose_unit} (unité de votre premier message ; Caladrius a reçu la dose sans unité)" if dose_unit
-            else " (sans unité : vous n'en avez pas indiqué)")
+    unit = (f" {dose_unit} (unité de votre premier message ; " + (f"l'analyse {digest.get('analysis')} a reçu la dose sans unité, Caladrius "
+            "l'a reçue avec son unité pour convertir la clairance et le volume)" if converted else "Caladrius a reçu la dose sans unité)")
+            if dose_unit else " (sans unité : vous n'en avez pas indiqué)")
     return "\n".join([f"Réglages de l'analyse {digest.get('analysis')} tels que Caladrius les a enregistrés :",
                       f"- Dose : {dose}{unit}",
                       f"- Voie d'administration : {route_fr(s.get('route'), time_unit)}",
@@ -216,10 +294,12 @@ def compare_parts(row):
     return out
 
 def render_compare(cdigest, method_a, method_b, route=None):
-    """The analysis_compare result (b minus a, computed by Caladrius). method_a / method_b: the AUC methods of the two analyses."""
+    """The analysis_compare result (b minus a, computed by Caladrius). method_a / method_b: the AUC methods of the two analyses. The first
+    line says which analysis is the reference (a) and which is compared with it (b): the pair is directed."""
     ia, ib = (cdigest.get("a") or {}).get("analysis"), (cdigest.get("b") or {}).get("analysis")
     ma, mb = METHOD_SHORT_FR.get(method_a, method_a), METHOD_SHORT_FR.get(method_b, method_b)
-    lines = [f"Comparaison calculée par Caladrius entre l'analyse {ia} et l'analyse {ib} (b - a) :"]
+    lines = [f"Comparaison calculée par Caladrius entre l'analyse {ia} et l'analyse {ib} (b - a ; a = analyse {ia}, la référence ; "
+             f"b = analyse {ib}, comparée à la référence) :"]
     inv = {v: k for k, v in ENGINE_KEY.items()}; inv.update({"mrt.obs": "mrt", "mrt.iv.obs": "mrt"})
     rows = cdigest.get("parameters") or {}
     for name, row in rows.items():
@@ -252,9 +332,16 @@ def render_refusal(param, digest=None, route=None):
 # ---------------------------------------------------------------- the harness
 class Harness:
     """One conversation: one MCP session, the project's analyses, the tool log. `decide(state, questions)` is the decision model."""
-    def __init__(self, decide, mcp=None, mcp_bin=None):
+    def __init__(self, decide, mcp=None, mcp_bin=None, units_mcp=None):
+        """`units_mcp`: the client of the units session (a second Caladrius session, see the module doc). With the real engine (mcp None)
+        it is started on first use; with an injected `mcp` and no `units_mcp`, no conversion is made."""
         self.decide = decide
         self.mcp = mcp if mcp is not None else apothicaire.MCPClient([mcp_bin or apothicaire.MCP_BIN])
+        self._units_mcp = units_mcp
+        self._units_factory = (lambda: apothicaire.MCPClient([mcp_bin or apothicaire.MCP_BIN])) if mcp is None and units_mcp is None else None
+        self._units_ws = None
+        self.unit_log = []         # the calls of the units session: turn, name, args, ok, text, shown
+        self.converted = {}        # analysis id of record -> {subject label: {engine key: "value unit"}} (Caladrius's conversion)
         self.units = {}            # worksheet id -> units reported by Caladrius (filled by apothicaire.render_tool_result)
         self.tool_log = []         # every MCP call: turn, name, args, ok, text, shown (the digest)
         self.user_texts = []
@@ -264,7 +351,9 @@ class Harness:
         self.turns = 0
         self._info = None
 
-    def close(self): self.mcp.close()
+    def close(self):
+        self.mcp.close()
+        if self._units_mcp is not None: self._units_mcp.close()
 
     # -- engine calls
     def _call(self, name, args):
@@ -298,6 +387,53 @@ class Harness:
         self.analyses.append({"id": d.get("analysis"), "kind": "nca", "auc_method": (d.get("options_used") or {}).get("auc_method"), "args": args})
         return d
 
+    # -- the dose unit: the units session
+    def _dose_text(self):
+        """The text of the first message where the dose, its unit and the infusion duration are read: the dose sentence, then the request."""
+        return "\n".join(t for t in (self.data.get("intro"), self.data.get("request")) if t)
+
+    def dose_unit(self):
+        """The unit token of the user's dose (first message), or None."""
+        return parse_dose(self._dose_text())[1] if self.data else None
+
+    def _conc_unit(self):
+        cols = header_columns(self.data["csv"]) if self.data else []
+        return cols[1].get("unit") if len(cols) > 1 else None
+
+    def _converted(self, ref):
+        """{subject: {engine key: "value unit"}} of analysis `ref` run again by Caladrius with the units (time, concentration, dose) in the
+        units session, when the dose unit is not the concentrations' mass unit; None otherwise or when the engine refuses (logged)."""
+        if ref is None: return None
+        if ref["id"] in self.converted: return self.converted[ref["id"]]
+        unit, conc, time_u = self.dose_unit(), self._conc_unit(), time_unit_of(self._time_unit() or "")
+        if not (needs_conversion(unit, conc) and time_u in ENGINE_TIME_UNITS): return None
+        if self._units_mcp is None:
+            if self._units_factory is None: return None
+            self._units_mcp = self._units_factory()
+        if self._units_ws is None:
+            args = {"name": "donnees", "csv": self.data["csv"], "columns": header_columns(self.data["csv"])}
+            d = self._unit_call("data_import", args)
+            if d is None: self.converted[ref["id"]] = None; return None
+            self._units_ws = (d.get("worksheet") or {}).get("id")
+        opts = dict((ref["args"].get("options") or {}), units={"time": time_u, "concentration": conc, "dose": _mass(unit)})
+        d = self._unit_call("nca_run", {**ref["args"], "worksheet": self._units_ws, "options": opts}, digest=_units_digest)
+        self.converted[ref["id"]] = d
+        return d
+
+    def _unit_call(self, name, args, digest=None):
+        """One call of the units session, logged in unit_log; returns the parsed answer (or its digest) or None."""
+        try: ok, text = self._units_mcp.call(name, args)
+        except apothicaire.MCPError as e: ok, text = False, f"mcp error: {e}"
+        out = None
+        if ok:
+            try: out = json.loads(text)
+            except ValueError: ok = False
+        if ok and digest is not None: out = digest(out)
+        shown = json.dumps(out, ensure_ascii=False, separators=(",", ":")) if ok and digest is not None else text
+        self.unit_log.append({"turn": self.turns, "name": name, "args": args, "ok": ok, "text": text, "shown": shown})
+        if not ok: self._info["notes"].append(f"units session: {name} failed: {text.strip()[:200]}")
+        return out if ok else None
+
     def _reference(self, method):
         same = [a for a in self.analyses if a["auc_method"] == method]
         return same[0] if same else (self.analyses[0] if self.analyses else None)
@@ -324,7 +460,7 @@ class Harness:
         if self.data is None:
             first = md.split_first_message(text)
             if not first["csv"]: return T_NO_DATA, self._info
-            self.data = {"intro": first["intro"], "csv": first["csv"], "notes": first["notes"]}
+            self.data = {"intro": first["intro"], "csv": first["csv"], "notes": first["notes"], "request": first["request"]}
             request = first["request"]
         else:
             request = text.strip()
@@ -332,8 +468,9 @@ class Harness:
         return self._act(a, request), self._info
 
     def _act(self, a, request):
-        if a["is_not_available"] == "true": return self._refuse(a)
         kind = a["analysis"]
+        if kind == "not_supported": return T_NOT_SUPPORTED
+        if a["is_not_available"] == "true" and kind != "nca": return self._refuse(a)    # an NCA turn checks availability on its own result
         if kind == "nca": return self._nca(a)
         if kind == "compare": return self._compare(a, request)
         if kind in ANALYSIS_FR: return T_NOT_WIRED.format(what=ANALYSIS_FR[kind])
@@ -341,27 +478,42 @@ class Harness:
         return T_UNDECIDED.format(qs="type d'analyse")
 
     # -- actions
-    def _nca(self, a):
-        intro = self.data["intro"]
+    def _nca_arguments(self, a):
+        """(dose, engine route) of the NCA the decisions ask for, or the template that asks for what is missing: the route, the dose ("no
+        dose" and "a dose without a unit" are two questions), the infusion duration (read anywhere in the first message)."""
+        text = self._dose_text()
         if a["route"] in (None, "unknown"): return T_ASK_ROUTE
+        dose, unit = parse_dose(text)
+        if dose is None: return T_ASK_DOSE_UNIT if has_bare_number(text) else T_ASK_DOSE
         if a["dose_has_unit"] != "true": return T_ASK_DOSE_UNIT
-        dose, _ = parse_dose(intro)
-        if dose is None: return T_ASK_DOSE
         route = ENGINE_ROUTE[a["route"]]
         cols = header_columns(self.data["csv"])
         data_time = cols[0].get("unit") if cols else None
         if route == "iv_infusion":
-            dur, dur_unit = parse_duration(intro)
+            dur, dur_unit = parse_duration(text)
             if dur is None: return T_ASK_DURATION.format(t=data_time or "l'unité des données")
-            if data_time and dur_unit != data_time: return T_ASK_DURATION_UNIT.format(u=dur_unit, t=data_time)
+            if data_time and dur_unit != time_unit_of(data_time): return T_ASK_DURATION_UNIT.format(u=dur_unit, t=data_time)
             route = {"iv_infusion": {"duration": dur}}
+        return dose, route
+
+    def _render(self, d, ps, ref):
+        """render_params with the user's dose unit and, when the units differ, Caladrius's conversion of the analysis `ref`."""
+        conv = self._converted(ref) if any("dose unit" in str(v) for s in (d.get("subjects") or [])
+                                           for k, v in (s.get("parameters") or {}).items()
+                                           if k in {engine_key(p, s.get("route")) for p in ps}) else None
+        return render_params(d, ps, self._time_unit(), dose_unit=self.dose_unit(), converted=conv)
+
+    def _nca(self, a):
+        args = self._nca_arguments(a)
+        if isinstance(args, str): return args
+        dose, route = args
         if self._import() is None: return self._failed("data_import")
         method = a["auc_method"] if a["auc_method"] in METHODS else None
         d = self._run_nca(dose, route, method)
         if d is None: return self._failed("nca_run")
         ps = self.asked(a)
         if not ps: return T_NO_PARAMETER
-        return render_params(d, ps, self._time_unit())
+        return self._render(d, ps, self.analyses[-1])
 
     def _read(self, a):
         ref = self._reference(a["auc_method"])
@@ -369,21 +521,27 @@ class Harness:
         d = self._call("analysis_get", {"analysis": ref["id"]})
         if d is None: return self._failed("analysis_get")
         ps = self.asked(a)
-        if not ps: return render_recall(d, parse_dose(self.data["intro"])[1], self._time_unit())
-        return render_params(d, ps, self._time_unit())
+        if not ps: return render_recall(d, self.dose_unit(), self._time_unit(), converted=bool(self.converted.get(ref["id"])))
+        return self._render(d, ps, ref)
 
     def _refuse(self, a):
-        p = next(iter(self.asked(a)), None)          # the first parameter asked; a refusal names one
+        """`is_not_available` = true on a turn that runs no NCA. No parameter asked: an out-of-scope request (not_supported). Otherwise each
+        parameter asked is checked against the reference analysis: the ones Caladrius computed are given, the others are refused by name."""
+        ps = self.asked(a)
+        if not ps: return T_NOT_SUPPORTED
         ref = self._reference(a["auc_method"])
-        if ref is None: return render_refusal(p)
+        if ref is None:                                   # nothing to check against: one parameter is named, several are not guessed
+            if len(ps) == 1: return render_refusal(ps[0])
+            return T_NOT_AVAILABLE_UNCHECKED.format(labels=", ".join(label_fr(p, None).split(" (")[0] for p in ps))
         d = self._call("analysis_get", {"analysis": ref["id"]})
         if d is None: return self._failed("analysis_get")
         s = (d.get("subjects") or [{}])[0]
-        k = engine_key(p, s.get("route")) if p else None
-        if k and k in (s.get("parameters") or {}):          # the engine did compute it: its value, not a false refusal
-            self._info["notes"].append(f"is_not_available overruled: Caladrius computed {k}")
-            return render_params(d, [p], self._time_unit())
-        return render_refusal(p, d, s.get("route"))
+        computed = [p for p in ps if engine_key(p, s.get("route")) in (s.get("parameters") or {})]
+        if len(computed) == len(ps):                      # the engine did compute them all: their values, not a false refusal
+            self._info["notes"].append("is_not_available overruled: Caladrius computed " + ", ".join(engine_key(p, s.get("route")) for p in ps))
+            return self._render(d, ps, ref)
+        if computed: return self._render(d, ps, ref)      # mixed: the values computed, then the ones not computed with the engine's reason
+        return "\n".join(render_refusal(p, d, s.get("route")) for p in ps)
 
     def _compare(self, a, request):
         if not self.analyses: return T_NO_ANALYSIS

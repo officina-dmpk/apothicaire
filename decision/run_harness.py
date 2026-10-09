@@ -3,7 +3,7 @@
 
   python decision/run_harness.py [--decider gold | module:function] [--date YYYY-MM-DD] [--ids ex01_iv_bolus,...] [--first N]
 
---decider gold: the answers are the gold labels of decision/data/bench.jsonl (the scripted-wording row of the same exercise and turn,
+--decider gold (also accepted: gold-asked, the name of its run folder): the answers are the gold labels of decision/data/bench.jsonl (the scripted-wording row of the same exercise and turn,
 found by the state without its analyses), i.e. perfect decisions: the run measures the ceiling of the decision pipeline.
 --decider module:function: any `function(state, questions) -> {question: label}` (decision/ and the agent folder are on sys.path).
 
@@ -11,7 +11,9 @@ For each exercise (bench/exercises/, sorted ids) one Harness (one fresh Caladriu
 bench/scripts.py, one record per turn in the format of bench/run_bench.py, so that the same scorer judges it: score.score_turn (the
 expected numbers), the compare turn resolved from the analysis_compare call (run_bench.resolve_turn), the oracle check and the
 tool-call argument audit (run_bench.attach_oracle). The gate (gate.py) is run on every answer for completeness: the harness writes
-only engine values, so it should find 0 unverified numbers. Writes decision/runs/<date>-harness-<decider>/<id>.json, report.json
+only engine values, so it should find 0 unverified numbers; its allowed numbers are those of both Caladrius sessions (the calls of the
+units session, which converts CL and V when the dose unit is not the concentrations' mass unit, are recorded per turn as `unit_calls`
+and kept out of the tool-call counts and audit, which describe the conversation's own session). Writes decision/runs/<date>-harness-<decider>/<id>.json, report.json
 and report.md (the report of run_bench.py, plus a section on the decisions).
 """
 import argparse, datetime, importlib, json, os, sys, time
@@ -54,7 +56,7 @@ def gold_decider(path=BENCH_JSONL):
     return decide
 
 def load_decider(spec):
-    if spec == "gold": return gold_decider()
+    if spec in ("gold", "gold-asked"): return gold_decider()       # gold-asked: the name of its run folder, which an earlier brief used
     mod, _, fn = spec.partition(":")
     f = getattr(importlib.import_module(mod), fn)
     f.name = getattr(f, "name", fn)
@@ -69,7 +71,7 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
     turns, t_ex = [], time.time()
     try:
         for k, t in enumerate(script):
-            n_log = len(h.tool_log)
+            n_log, n_units = len(h.tool_log), len(h.unit_log)
             rec = {"exercise": meta["id"], "turn": k + 1, "id": t["id"], "kind": t["kind"], "question": t["question"]}
             t0 = time.time()
             try:
@@ -77,7 +79,7 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
             except Exception as e:                                       # recorded, the exercise continues
                 rec.update(error=f"{type(e).__name__}: {e}", wall_s=round(time.time() - t0, 3)); turns.append(rec); continue
             wall = time.time() - t0
-            allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log], h.user_texts)
+            allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log + h.unit_log], h.user_texts)
             g = gate.check(ans, allowed=allowed)
             cls = [{"text": f["text"], "value": f["value"], "significant_digits": f.get("significant_digits"), "position": f.get("position"),
                     "nearest": f.get("nearest_allowed"), "class": score.classify(f, allowed, t["kind"], ans)} for f in g["findings"]]
@@ -93,10 +95,11 @@ def run_exercise(ex_dir, run_dir, decide, mcp_bin=None):
                        decisions=[{"answers": d["answers"], "outside_options": d["outside_options"],
                                    "analyses_in_state": [x["id"] for x in d["state"]["analyses"]],
                                    **({"model_info": d["model_info"]} if d.get("model_info") else {})} for d in info["decisions"]],
-                       harness_notes=info["notes"])
+                       harness_notes=info["notes"],
+                       unit_calls=[{"name": c["name"], "args": run_bench.elide(c["args"], csv_text), "ok": c["ok"]} for c in h.unit_log[n_units:]])
             if usage is not None: rec["compare_tool"] = usage
             turns.append(rec)
-        allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log], h.user_texts)
+        allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log + h.unit_log], h.user_texts)
         baseline = {str(d): score.chance_baseline(allowed, n=50, seed=meta["index"], digits=d) for d in (3, 4)}
     finally:
         h.close()
@@ -119,12 +122,15 @@ def decision_section(records):
             for q in d["outside_options"]: outside.setdefault(f"{q} ({t['kind']}, ask {i + 1})", []).append(t["exercise"])
     notes = [f"{t['exercise']} t{t['turn']}: {n}" for t in turns for n in t.get("harness_notes", [])]
     walls = [t["wall_s"] for t in turns]
+    units = [c for t in turns for c in t.get("unit_calls", [])]
     L = ["## Decision harness", "",
          f"{len(decs)} decide calls in {len(turns)} turns; mean {sum(walls) / len(walls):.3f} s per turn (engine calls and rendering; "
          f"no prompt tokens; with a trained decider the time includes its forward passes, see the decision model section if any)." if walls else "No turn.", "",
          "Answers outside the options offered by the question set (left unused by the harness): " +
          ("; ".join(f"{k}: {len(v)}" for k, v in sorted(outside.items())) if outside else "none") + ".", "",
-         "Harness notes: " + ("; ".join(notes) if notes else "none") + ".", ""]
+         "Harness notes: " + ("; ".join(notes) if notes else "none") + ".", "",
+         f"Units session (dose unit given to Caladrius to convert CL and V; not in the tool-call counts above): {len(units)} calls in "
+         f"{len({t['exercise'] for t in turns if t.get('unit_calls')})} exercises, {sum(1 for c in units if not c['ok'])} refused.", ""]
     return L
 
 def write_report(run_dir, records, meta):

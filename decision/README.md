@@ -41,13 +41,13 @@ what the harness knows at one turn:
 
 | question | type | answers | gold comes from |
 |---|---|---|---|
-| `analysis` | choice | nca, fit_pk1, fit_pk2, simulate, compare, none_needed | turn kind: `import_nca` -> nca; `compare` -> compare; fit/simulate kinds; every question about a result already computed (and the recall, and the not-available question) -> none_needed |
+| `analysis` | choice | nca, fit_pk1, fit_pk2, simulate, compare, none_needed, not_supported | turn kind: `import_nca` -> nca; `compare` -> compare; fit/simulate kinds; every question about a result already computed (and the recall, and the not-available question) -> none_needed; `not_supported` (out-of-scope asks, added 2026-10-10) has no generated row |
 | `route` | choice | iv_bolus, iv_infusion, oral, unknown | `meta.json` route; `unknown` when the sentence omits it |
 | `auc_method` | choice | linear, lin_up_log_down, not_applicable | the method the request specifies or requires: linear (turn 1), lin_up_log_down (compare turn), else not_applicable |
 | `asked_<key>` (14 questions: `asked_cmax`, `asked_tmax`, `asked_c0`, `asked_auclast`, `asked_aucinf`, `asked_lambda_z`, `asked_half_life`, `asked_cl`, `asked_vz`, `asked_mrt`, `asked_aucpext`, `asked_lambda_z_points`, `asked_adj_r2`, `asked_tlag`) | noul | false, true | true when the wording of the turn names that parameter ("The last request asks for ..."). One boolean per parameter, so a request for two or nine parameters has two or nine true answers. All false on a recall, a fit and a simulation (the fit parameters are model parameters, not NCA ones). The turn that asks for a parameter Caladrius does not compute for the route (`not_available`) has that one parameter true (C0 or Tlag). The first request of the benchmark (`import_nca`) has the nine it names true: Cmax, Tmax, AUC(0-tlast), AUC(0-inf), lambda_z, t1/2, CL, Vz, MRT |
 | `dose_has_unit` | noul | false, true | whether the dose sentence carries mg / ug |
 | `is_not_available` | noul | false, true | true exactly for the `not_available` kind: the parameter asked (C0 after an oral dose, Tlag or C0 after an IV dose) is in `ground_truth.nca.linear.not_calculated` of `meta.json` |
-| `compare_pair` | choice | `not_applicable` and one key `a+b` per pair of analysis ids present (`2+3`); `none_available` when fewer than two analyses exist | true only on the compare turn |
+| `compare_pair` | choice | `not_applicable` and one key `a+b` per ordered pair of analysis ids present (`2+3` and `3+2`: a is the reference, b - a; directed since 2026-10-10); `none_available` when fewer than two analyses exist | true only on the compare turn (always `2+3`: the linear analysis is the reference) |
 
 Turn kinds: the 8 scripted ones of `bench/scripts.py` (import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall,
 compare, not_available) and 4 extra kinds written for this dataset so that every option of `analysis` has examples and every parameter is asked by some turn:
@@ -762,3 +762,53 @@ Wrong decisions in the run, answers that contradict the gold decisions, errors, 
 4. The 99.9 % held-out and the 175/175 are memorisation figures, as the reviewer argued (720/720 held-out requests are verbatim in train): what they measure is the
    83 sentences of the generator.
 5. The 0.8B model's confidence does not warn about any of this (135 of 143 wrong decisions at 0.90 or more), so a threshold on that probability cannot be the gate.
+
+## Harness fixes after the review (2026-10-10)
+
+Item 4 of the reordered next steps (`PLAN.md`): the six defects the reviewer found by running its 74 requests through the gold path
+(`ood/REVIEW.md`), each fixed in `harness.py` with a regression test built from the failing request (`tests/test_decision_harness.py`,
+class `TestReviewDefects`).
+
+| # | defect (request) | fix |
+|---|---|---|
+| 1 | infusion duration read in 0 of 8 natural wordings (ood-008, 010, 011, 037, 043, 055, 062, 070) | `parse_duration` reads a number and a time unit anywhere in the first message (dose sentence, then request): "sur 2 h", "pendant 1,5 h", "90 minutes", "perfusée sur 1 h", "en 2 heures", decimal comma; with several, the first after "perfus". Absent: asked (`T_ASK_DURATION`). In another time unit than the data: asked again in the data's unit, as before (the harness converts nothing; ood-010, ood-062) |
+| 2 | compare direction `2+1` unrepresentable (ood-015, ood-072) | `questions_for` offers both orders (`2+3`, `3+2`; a = reference, b - a); `analysis_compare` gets a and b in that order; the first line of the answer names the reference |
+| 3 | the refusal named the first parameter in table order ("Cmax n'est pas calculé" for Cmax + C0) | checked parameter by parameter on the reference analysis: computed ones are given, the others refused by name with the engine's reason; an NCA turn lets the engine say which; before any analysis one parameter is refused by name, several are not guessed (`T_NOT_AVAILABLE_UNCHECKED`) |
+| 4 | "no dose" answered "the dose has no unit" (ood-021) | the dose is read first: no number at all -> `T_ASK_DOSE`; a number without unit, or `dose_has_unit` = false -> `T_ASK_DOSE_UNIT` ("pas d'unité que je reconnaisse"); the dose pattern also reads g, mcg, ng |
+| 5 | out-of-scope asks got "not calculated for this route" (ood-019, 020, 064, 065) | new `analysis` option `not_supported` -> `T_NOT_SUPPORTED` (says what the harness does and that it gives no value); `is_not_available` = true with no parameter asked, the reviewer's encoding, gets the same answer |
+| 6 | "2 mg" on a 2000 µg exercise ran dose = 2 silently (ood-023) | the header prints the dose with the user's unit ("dose 2 mg"). When the dose's mass unit is not the concentrations' (mg or µg against ng/mL), Caladrius receives the units (`nca_run` option `units`: time, concentration, dose) in a second session and each value labelled "dose unit/..." is followed by its conversion: "0.0110019 dose unit/(h*ng/mL), soit 11.0019 L/h (conversion faite par Caladrius avec la dose en mg)". The analysis of record still gets the amount only (the oracle's convention), and the second session keeps the conversation's analysis ids; its calls are in `unit_log`, outside the tool-call counts |
+
+`run_harness.py --decider gold-asked` (the wording of the reviewer's brief) is now accepted as `gold`.
+
+**Dataset.** `analysis` gains `not_supported` and `compare_pair` the reversed pairs. The generator writes no out-of-scope request and no
+reversed compare, so no row is relabelled: regeneration gives the same 1980 / 720 / 900 rows with the same ids, states, factors and labels,
+only `questions` and the zero probabilities of the new options in `gold` differ, and the counts block is unchanged. The test that every
+declared option has train rows lists these two as the known gaps.
+
+**Retraining.** The trained 0.8B must be retrained before any trained figure is quoted on this schema: its prompt now lists 7 `analysis`
+options and both pair orders (the option numbering shifts), and it never saw a positive `not_supported` or `3+2`. Retraining on the current
+generator would only teach it never to choose them: the generator needs out-of-scope and reversed-compare wordings first (Step 6 shows the
+wording problem is wider anyway). Not re-measured here (no GPU used).
+
+**Ceiling** (`python decision/run_harness.py --decider gold`, [`runs/2026-10-10-harness-gold-asked/`](runs/2026-10-10-harness-gold-asked/report.md)):
+**175 / 175 oracle turns, 558 / 558 numbers**, 0 / 250 invalid or failed calls, 0 / 75 deviating calls, gate 0 / 778 unverified, 0.002 s
+per turn. The units session made 36 calls in the 18 exercises whose dose is mg or µg against ng/mL. `score_turn` counts 178 / 200 turns
+correct: the 22 others are the import and clearance turns of the 11 mg-against-ng/mL exercises, where its `must_not` rule ("CL x 10^3",
+"Vz x 10^3", written against a model that converts by itself) fires on Caladrius's L/h and L values. The gate verifies those values against
+the units session. These are the only 22 scorer/oracle disagreements.
+
+**The reviewer's 74 requests, gold decisions.** `eval_ood.py --decider gold` (outputs redirected to
+[`runs/2026-10-10-ood-gold/`](runs/2026-10-10-ood-gold/report.md); `ood/` untouched): `--no-run` 1480 / 1480 decisions, 74 / 74 rows; the
+run gives 47 answers and 27 refusals or questions, 0 errors, 0 answers where a refusal is expected. Six requests are refused where an answer
+is expected. ood-010 and 062 give the duration in h on data in min, so it is asked again in min. ood-013, 030 and 071 compare after a single
+analysis: the harness re-runs, re-asks, and the stateless gold says `not_applicable` (open item (b)). ood-058 asks for a compare with no
+analysis. With the reviewer's own gold path (the state, gold decider and expected branch of `ood/run_ood_goldpath.py`, imported unchanged; its loop
+rerun from a copy outside the repository that writes nothing under `ood/` and also classifies the new templates):
+
+- **64 / 64** of the lines it counted as intended still behave as intended. Three intents are the corrected ones: ood-021 now asks for
+  the dose; ood-019, 020, 064 and 065 get `not_supported`; ood-023 says "dose 2 mg" and shows 11.0019 L/h.
+- All **10** it did not count now behave as intended. The 6 infusions with a duration in the data's unit run. ood-010 and 062 ask for the
+  duration in minutes; the reviewer's expected branch was an answer, so by its letter the count is 72 / 74. ood-015 and 072 compare 3
+  against 2 in the user's order.
+- `eval_ood.py` sorts a gold pair (`translate_pair`), so its rows lose the direction of ood-015 and 072, and it files `T_NOT_SUPPORTED`
+  under `refusal:not-wired` because both templates start "Cette demande (". Both need a fix in `eval_ood.py`.

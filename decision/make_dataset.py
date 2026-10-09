@@ -44,7 +44,9 @@ ANALYSES = {"nca": "Run a new non-compartmental analysis (NCA) on the imported d
             "fit_pk2": "Fit a two-compartment model to the data.",
             "simulate": "Simulate a concentration profile from a model that is already fitted.",
             "compare": "Compare two analyses of the project (the second one has been run for this request).",
-            "none_needed": "No new computation: answer from the analyses already in the project or from what the user said."}
+            "none_needed": "No new computation: answer from the analyses already in the project or from what the user said.",
+            "not_supported": ("Something the harness cannot do (bioequivalence, population or steady-state modelling, urine data, a "
+                              "parameter outside the list, a written explanation): nothing is computed and the user is told so.")}
 ROUTES = {"iv_bolus": "Intravenous bolus.", "iv_infusion": "Intravenous infusion.", "oral": "Oral (extravascular) administration.",
           "unknown": "The user did not state the route."}
 AUC_METHODS = {"linear": "Linear trapezoidal rule.", "lin_up_log_down": "Linear up, logarithmic down.",
@@ -63,8 +65,10 @@ NCA_USUAL = ["cmax", "tmax", "auclast", "aucinf", "lambda_z", "half_life", "cl",
 TF = {"false": "No.", "true": "Yes."}
 
 def questions_for(analysis_ids):
-    """The closed set of questions (6 + one per parameter of PARAMETERS) for a state whose project holds the analyses `analysis_ids` (sorted ids)."""
-    pairs = {f"{a}+{b}": f"Compare analysis {a} with analysis {b}." for i, a in enumerate(analysis_ids) for b in analysis_ids[i + 1:]}
+    """The closed set of questions (6 + one per parameter of PARAMETERS) for a state whose project holds the analyses `analysis_ids` (sorted ids).
+    A pair is directed: "a+b" compares b with a as the reference (b minus a), so both orders of two analyses are offered."""
+    pairs = {f"{a}+{b}": f"Compare analysis {b} with analysis {a} as the reference (b minus a)."
+             for a in analysis_ids for b in analysis_ids if a != b}
     pair_options = {"not_applicable": "The request compares no analyses.", **(pairs or {"none_available": "Fewer than two analyses exist, so no pair can be compared."})}
     return {
         "analysis": {"type": "choice", "instructions": "Which computation does the last request of the user need, given the analyses already in the project?", "criteria": ANALYSES},
@@ -73,7 +77,7 @@ def questions_for(analysis_ids):
         **{f"asked_{k}": {"type": "noul", "instructions": f"The last request asks for {phrase}.", "criteria": TF} for k, phrase in PARAMETERS.items()},
         "dose_has_unit": {"type": "noul", "instructions": "The dose stated by the user carries a unit (mg, ug, ...).", "criteria": TF},
         "is_not_available": {"type": "noul", "instructions": "The last request asks for a parameter that Caladrius does not compute for the stated route.", "criteria": TF},
-        "compare_pair": {"type": "choice", "instructions": "Which two analyses of the project does the last request ask to compare?", "criteria": pair_options}}
+        "compare_pair": {"type": "choice", "instructions": "Which two analyses of the project does the last request ask to compare, and in which order (the first one is the reference)?", "criteria": pair_options}}
 
 def gold_choice(options, label):
     assert label in options, (label, list(options))
