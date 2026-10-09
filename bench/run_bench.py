@@ -202,7 +202,9 @@ def build_report(records, meta=None):
     return out
 
 def _pct(x): return "n/a" if x is None else f"{100 * x:.1f} %"
-def _ci(c): return "" if not c else f" (95 % CI over exercises {100 * c[0]:.1f}-{100 * c[1]:.1f} %)"
+def _ci(c, u=None, n=None):
+    if u == 0 and n: return f" (none observed: upper 95 % bound by the rule of three 3/{n} = {300 / n:.2f} %)"
+    return "" if not c else f" (95 % CI, exercises resampled: {100 * c[0]:.1f}-{100 * c[1]:.1f} %)"
 
 def render_md(rep):
     h, c, t, tm = rep["hallucination"], rep["correctness"], rep["tool_calls"], rep["time"]
@@ -211,8 +213,8 @@ def render_md(rep):
     if m: L += [", ".join(f"{k}: {v}" for k, v in m.items()), ""]
     b, a = h["before_gate"], h["after_gate"]
     L += [f"**Hallucination rate = numbers not found in a tool result or user message / numbers checked (deterministic gate `gate.py`).**", "",
-          f"- before the gate's regeneration (first drafts): **{b['unverified']} / {b['total']} = {_pct(b['rate'])}**{_ci(b['ci95_cluster_bootstrap'])}",
-          f"- in the answers shown (gate in the loop): **{a['unverified']} / {a['total']} = {_pct(a['rate'])}**{_ci(a['ci95_cluster_bootstrap'])}",
+          f"- before the gate's regeneration (first drafts): **{b['unverified']} / {b['total']} = {_pct(b['rate'])}**{_ci(b['ci95_cluster_bootstrap'], b['unverified'], b['total'])}",
+          f"- in the answers shown (gate in the loop): **{a['unverified']} / {a['total']} = {_pct(a['rate'])}**{_ci(a['ci95_cluster_bootstrap'], a['unverified'], a['total'])}",
           f"- {rep['exercises']} exercises, {rep['turns']} turns ({rep['turns_failed']} failed by an error); turns with an unverified number: "
           f"{h['turns_with_unverified_before']} before, {h['turns_with_unverified_after']} after; regenerated {h['turns_regenerated']} "
           f"(regeneration kept {h['regeneration_kept']}); turns shown with the badge: {h['turns_with_badge']}", "",
@@ -246,6 +248,25 @@ def render_md(rep):
                  f"{e['correct_turns']} / {e['turns'] - e['turns_failed']} | {e['badge_turns']} | {e['calls_valid']} / {e['calls_total']} | {w} |")
     return "\n".join(L) + "\n"
 
+def rescore(run_dir, ids):
+    """Recomputes the `score` of every stored turn from the stored answer and the current expectation rules (no model,
+    no engine). Used after a fix of a scoring rule; the gate counts and the taxonomy are not touched."""
+    changed = []
+    for i in ids:
+        p = os.path.join(run_dir, i + ".json")
+        if not os.path.exists(p): continue
+        with open(p, encoding="utf-8") as f: rec = json.load(f)
+        meta, csv_text = mk.load(os.path.join(mk.OUT, i))
+        script = scripts.build_script(meta, csv_text)
+        for t, st in zip(rec["turns"], script):
+            if "error" in t: continue
+            ans = t["answer"].split(BADGE_MARK)[0]
+            new = score.score_turn(ans, st["expect"], t["numbers_unverified_after"])
+            if new != t["score"]: changed.append((i, t["turn"], t["kind"], t["score"]["correct"], new["correct"]))
+            t["score"] = new
+        with open(p, "w", encoding="utf-8") as f: json.dump(rec, f, ensure_ascii=False, indent=1)
+    return changed
+
 def load_records(run_dir, ids):
     out = []
     for i in ids:
@@ -268,13 +289,16 @@ def main():
     ap.add_argument("--ids", default="", help="comma-separated exercise ids")
     ap.add_argument("--resume", action="store_true", help="skip the exercises whose <id>.json exists")
     ap.add_argument("--report-only", action="store_true")
+    ap.add_argument("--rescore", action="store_true", help="recompute the scores of the stored turns with the current rules, then the report")
     a = ap.parse_args(); optchat._utf8_stdout()
     run_dir = os.path.join(RUNS, a.date); os.makedirs(run_dir, exist_ok=True)
     dirs = mk.list_exercises()
     if a.ids: dirs = [d for d in dirs if os.path.basename(d) in a.ids.split(",")]
     if a.first: dirs = dirs[:a.first]
     ids = [os.path.basename(d) for d in dirs]
-    if not a.report_only:
+    if a.rescore:
+        for ch in rescore(run_dir, ids): print("rescored", ch)
+    if not a.report_only and not a.rescore:
         for d in dirs:
             i = os.path.basename(d)
             if a.resume and os.path.exists(os.path.join(run_dir, i + ".json")): print("skip", i); continue

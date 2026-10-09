@@ -68,6 +68,15 @@ class TestScripts(unittest.TestCase):
         self.assertFalse(score.score_turn("C0 vaut 0", s["not_available"]["expect"], 0)["correct"])   # no 'not available'
         self.assertFalse(score.score_turn("Dose 450 mg, voie orale, linéaire", s["recall"]["expect"])["correct"])   # wrong dose
 
+    def test_not_available_phrasings(self):
+        import re
+        yes = ["Caladrius ne retourne pas de valeur pour C0.", "Caladrius ne renvoie pas de paramètre c0.", "C0 n'a pas été calculée.",
+               "C0 n'est pas disponible pour cette voie.", "Le paramètre est non calculé.", "Il n'y a pas de C0.", "C0 not calculated for this route.",
+               "Impossible de donner C0.", "Le Tlag n'est pas défini pour un bolus."]
+        no = ["C0 vaut 12 ng/mL.", "La concentration initiale extrapolée est 12.", "Le Tlag est de 0,5 h."]
+        for t in yes: self.assertTrue(re.search(sc.NOT_AVAILABLE, t, re.I), t)
+        for t in no: self.assertFalse(re.search(sc.NOT_AVAILABLE, t, re.I), t)
+
     def test_not_available_asks_for_a_parameter_caladrius_did_not_compute(self):
         for meta, csv in self.ex:
             t = sc.build_script(meta, csv)[7]

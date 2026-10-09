@@ -1,0 +1,331 @@
+{
+ "meta": {
+  "date": "2026-10-09-prelim-route-anyof",
+  "exercises_run": 8,
+  "model": "Bonsai 2 27B (Ternary-Bonsai-2-27B-PTQ1_0), temperature 0.3, no fixed seed"
+ },
+ "exercises": 8,
+ "turns": 64,
+ "turns_failed": 0,
+ "hallucination": {
+  "before_gate": {
+   "unverified": 34,
+   "total": 296,
+   "rate": 0.11486486486486487,
+   "ci95_cluster_bootstrap": [
+    0.08908045977011494,
+    0.1523809523809524
+   ]
+  },
+  "after_gate": {
+   "unverified": 3,
+   "total": 248,
+   "rate": 0.012096774193548387,
+   "ci95_cluster_bootstrap": [
+    0.0,
+    0.049723756906077346
+   ]
+  },
+  "turns_with_unverified_before": 11,
+  "turns_with_unverified_after": 3,
+  "turns_regenerated": 11,
+  "regeneration_kept": 11,
+  "turns_with_badge": 3
+ },
+ "taxonomy": {
+  "before_gate": {
+   "unit_conversion": 0,
+   "arithmetic": 17,
+   "unlabelled_misread": 2,
+   "recall_error": 0,
+   "other": 15
+  },
+  "after_gate": {
+   "unit_conversion": 0,
+   "arithmetic": 0,
+   "unlabelled_misread": 0,
+   "recall_error": 0,
+   "other": 3
+  }
+ },
+ "taxonomy_chance_baseline": {
+  "3": {
+   "unit_conversion": 37,
+   "arithmetic": 0,
+   "unlabelled_misread": 44,
+   "recall_error": 0,
+   "other": 319
+  },
+  "4": {
+   "unit_conversion": 13,
+   "arithmetic": 76,
+   "unlabelled_misread": 29,
+   "recall_error": 0,
+   "other": 282
+  }
+ },
+ "by_question_type": {
+  "import_nca": {
+   "turns": 8,
+   "correct": 6,
+   "found": 58,
+   "must": 72,
+   "unverified_before": 1,
+   "total_before": 125,
+   "unverified_after": 0,
+   "total_after": 125,
+   "correct_rate": 0.75,
+   "found_rate": 0.8055555555555556
+  },
+  "cmax_tmax": {
+   "turns": 8,
+   "correct": 7,
+   "found": 17,
+   "must": 19,
+   "unverified_before": 0,
+   "total_before": 19,
+   "unverified_after": 0,
+   "total_after": 19,
+   "correct_rate": 0.875,
+   "found_rate": 0.8947368421052632
+  },
+  "clearance_volume": {
+   "turns": 8,
+   "correct": 6,
+   "found": 12,
+   "must": 16,
+   "unverified_before": 0,
+   "total_before": 17,
+   "unverified_after": 0,
+   "total_after": 17,
+   "correct_rate": 0.75,
+   "found_rate": 0.75
+  },
+  "half_life": {
+   "turns": 8,
+   "correct": 6,
+   "found": 13,
+   "must": 16,
+   "unverified_before": 1,
+   "total_before": 40,
+   "unverified_after": 1,
+   "total_after": 40,
+   "correct_rate": 0.75,
+   "found_rate": 0.8125
+  },
+  "lambda_z_regression": {
+   "turns": 8,
+   "correct": 7,
+   "found": 14,
+   "must": 16,
+   "unverified_before": 1,
+   "total_before": 22,
+   "unverified_after": 1,
+   "total_after": 22,
+   "correct_rate": 0.875,
+   "found_rate": 0.875
+  },
+  "recall": {
+   "turns": 8,
+   "correct": 6,
+   "found": 7,
+   "must": 8,
+   "unverified_before": 0,
+   "total_before": 7,
+   "unverified_after": 0,
+   "total_after": 7,
+   "correct_rate": 0.75,
+   "found_rate": 0.875
+  },
+  "compare": {
+   "turns": 8,
+   "correct": 6,
+   "found": 13,
+   "must": 16,
+   "unverified_before": 30,
+   "total_before": 64,
+   "unverified_after": 0,
+   "total_after": 16,
+   "correct_rate": 0.75,
+   "found_rate": 0.8125
+  },
+  "not_available": {
+   "turns": 8,
+   "correct": 7,
+   "found": 0,
+   "must": 0,
+   "unverified_before": 1,
+   "total_before": 2,
+   "unverified_after": 1,
+   "total_after": 2,
+   "correct_rate": 0.875,
+   "found_rate": null
+  }
+ },
+ "correctness": {
+  "correct_turns": 51,
+  "turns": 64,
+  "expected_numbers_found": 134,
+  "expected_numbers": 163,
+  "forbidden_values_present": 0
+ },
+ "tool_calls": {
+  "valid": 35,
+  "invalid": 6,
+  "failed": 0,
+  "total": 41,
+  "validity_rate": 0.8536585365853658,
+  "nca_run_calls": 20,
+  "nca_run_right_dose": 20,
+  "nca_run_right_route": 14,
+  "memory_calls": 51,
+  "by_tool": {
+   "analysis_get": 13,
+   "data_import": 8,
+   "nca_run": 20
+  }
+ },
+ "time": {
+  "mean_wall_s_per_turn": 12.98125,
+  "mean_prompt_tokens_first_call": 4426.15625,
+  "total_wall_s": 1781.9
+ },
+ "per_exercise": [
+  {
+   "id": "ex01_iv_bolus",
+   "family": "iv_bolus",
+   "dose": "200 mg",
+   "units": "h, mg/L",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 4,
+   "total_before": 50,
+   "unverified_after": 0,
+   "total_after": 43,
+   "correct_turns": 8,
+   "badge_turns": 0,
+   "calls_valid": 9,
+   "calls_total": 9,
+   "mean_wall_s": 15.637500000000001
+  },
+  {
+   "id": "ex02_oral_1",
+   "family": "oral_1",
+   "dose": "400 mg",
+   "units": "h, ng/mL",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 6,
+   "total_before": 41,
+   "unverified_after": 0,
+   "total_after": 30,
+   "correct_turns": 8,
+   "badge_turns": 0,
+   "calls_valid": 4,
+   "calls_total": 4,
+   "mean_wall_s": 9.75
+  },
+  {
+   "id": "ex03_pk2_iv_bolus",
+   "family": "pk2_iv_bolus",
+   "dose": "300 mg",
+   "units": "h, mg/L",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 4,
+   "total_before": 44,
+   "unverified_after": 0,
+   "total_after": 37,
+   "correct_turns": 8,
+   "badge_turns": 0,
+   "calls_valid": 4,
+   "calls_total": 4,
+   "mean_wall_s": 10.4
+  },
+  {
+   "id": "ex04_oral_1_lag",
+   "family": "oral_1_lag",
+   "dose": "300 mg",
+   "units": "h, ng/mL",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 6,
+   "total_before": 41,
+   "unverified_after": 0,
+   "total_after": 33,
+   "correct_turns": 7,
+   "badge_turns": 0,
+   "calls_valid": 4,
+   "calls_total": 4,
+   "mean_wall_s": 12.174999999999999
+  },
+  {
+   "id": "ex05_iv_infusion",
+   "family": "iv_infusion",
+   "dose": "150 mg",
+   "units": "h, mg/L",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 3,
+   "total_before": 4,
+   "unverified_after": 3,
+   "total_after": 4,
+   "correct_turns": 0,
+   "badge_turns": 3,
+   "calls_valid": 1,
+   "calls_total": 7,
+   "mean_wall_s": 25.6375
+  },
+  {
+   "id": "ex06_oral_0",
+   "family": "oral_0",
+   "dose": "100 mg",
+   "units": "h, ng/mL",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 2,
+   "total_before": 36,
+   "unverified_after": 0,
+   "total_after": 34,
+   "correct_turns": 8,
+   "badge_turns": 0,
+   "calls_valid": 4,
+   "calls_total": 4,
+   "mean_wall_s": 9.1
+  },
+  {
+   "id": "ex07_iv_bolus",
+   "family": "iv_bolus",
+   "dose": "2000 ug",
+   "units": "h, ng/mL",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 5,
+   "total_before": 42,
+   "unverified_after": 0,
+   "total_after": 34,
+   "correct_turns": 4,
+   "badge_turns": 0,
+   "calls_valid": 5,
+   "calls_total": 5,
+   "mean_wall_s": 11.8625
+  },
+  {
+   "id": "ex08_oral_1",
+   "family": "oral_1",
+   "dose": "800 ug",
+   "units": "min, ng/mL",
+   "turns": 8,
+   "turns_failed": 0,
+   "unverified_before": 4,
+   "total_before": 38,
+   "unverified_after": 0,
+   "total_after": 33,
+   "correct_turns": 8,
+   "badge_turns": 0,
+   "calls_valid": 4,
+   "calls_total": 4,
+   "mean_wall_s": 9.2875
+  }
+ ]
+}

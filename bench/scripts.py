@@ -29,6 +29,12 @@ import gate  # noqa: E402
 from bench import score  # noqa: E402
 
 KINDS = ("import_nca", "cmax_tmax", "clearance_volume", "half_life", "lambda_z_regression", "recall", "compare", "not_available")
+# "the parameter is not available": any of these phrasings (French or English). The turn is also required to
+# contain no number outside the sources (no_new_numbers), so a made-up value with a negation still fails.
+NOT_AVAILABLE = (r"pas (?:de |d')?(?:valeur|param[èe]tre|r[ée]sultat|d[ée]fini|disponible|calcul|applicable|fourni|renvoy|retourn|rapport)|"
+                 r"\bne (?:retourne|renvoie|fournit|donne|calcule|contient|rapporte|produit|permet|peut|dispose)|n'(?:a|est|y a) pas|"
+                 r"\bnon (?:calcul|disponible|d[ée]fini|applicable)|impossible|indisponible|sans objet|"
+                 r"not (?:calculated|available|applicable|defined|returned)|no value|does not|did not")
 UNIT_FR = {"ug": "µg", "mg": "mg"}
 
 def kind_of(meta):
@@ -150,8 +156,6 @@ def build_script(meta, csv_text):
         q8, what = "Quel est le temps de latence Tlag ?", "tlag"
     assert what in meta["ground_truth"]["nca"]["linear"]["not_calculated"], (meta["id"], what)
     turns.append(("not_available", q8, {"words": [{"label": "says it is not available",
-                  "pattern": r"pas (?:été )?(?:calcul|disponible|défini|applicable|fourni|renvoy|retourn)|non (?:calcul|disponible|défini|applicable)|"
-                             r"n'est pas (?:calcul|disponible|défini|applicable)|ne (?:peut|permet|fournit|calcule)|impossible|not (?:calculated|available|applicable)|"
-                             r"sans objet|indisponible|aucun"}],
+                  "pattern": NOT_AVAILABLE}],
                   "no_new_numbers": True, "not_calculated_parameter": what}))
     return [{"id": f"t{i + 1}", "kind": k, "question": q, "expect": e} for i, (k, q, e) in enumerate(turns)]
