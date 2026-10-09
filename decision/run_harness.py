@@ -50,7 +50,7 @@ def gold_decider(path=BENCH_JSONL):
             index[k] = gold
     def decide(state, questions):
         return index[state_key(state)]
-    decide.name = "gold"
+    decide.name = "gold-asked"          # the gold answers include the asked_<parameter> questions (step 4b); step 4 was the run "gold"
     return decide
 
 def load_decider(spec):

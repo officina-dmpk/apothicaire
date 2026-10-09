@@ -28,7 +28,7 @@ Our `split` values are `train` and `test` (the file `heldout.jsonl` holds the `t
 
 ## Our rows
 
-`workflow` = `pk_analysis_requests`, 7 questions per row, no `score` question (nothing in the closed set is graded). `state` is a digest of
+`workflow` = `pk_analysis_requests`, 20 questions per row (6 + one `asked_<key>` per parameter, 14), no `score` question (nothing in the closed set is graded). `state` is a digest of
 what the harness knows at one turn:
 
 ```
@@ -44,13 +44,13 @@ what the harness knows at one turn:
 | `analysis` | choice | nca, fit_pk1, fit_pk2, simulate, compare, none_needed | turn kind: `import_nca` -> nca; `compare` -> compare; fit/simulate kinds; every question about a result already computed (and the recall, and the not-available question) -> none_needed |
 | `route` | choice | iv_bolus, iv_infusion, oral, unknown | `meta.json` route; `unknown` when the sentence omits it |
 | `auc_method` | choice | linear, lin_up_log_down, not_applicable | the method the request specifies or requires: linear (turn 1), lin_up_log_down (compare turn), else not_applicable |
-| `parameter_asked` | choice | cmax, tmax, c0, auclast, aucinf, lambda_z, half_life, cl, vz, mrt, aucpext, lambda_z_points, adj_r2, tlag, several, none | parameters named by the wording (one key => that key, two or more => several, none for a recall or a simulation) |
+| `asked_<key>` (14 questions: `asked_cmax`, `asked_tmax`, `asked_c0`, `asked_auclast`, `asked_aucinf`, `asked_lambda_z`, `asked_half_life`, `asked_cl`, `asked_vz`, `asked_mrt`, `asked_aucpext`, `asked_lambda_z_points`, `asked_adj_r2`, `asked_tlag`) | noul | false, true | true when the wording of the turn names that parameter ("The last request asks for ..."). One boolean per parameter, so a request for two or nine parameters has two or nine true answers. All false on a recall, a fit and a simulation (the fit parameters are model parameters, not NCA ones). The turn that asks for a parameter Caladrius does not compute for the route (`not_available`) has that one parameter true (C0 or Tlag). The first request of the benchmark (`import_nca`) has the nine it names true: Cmax, Tmax, AUC(0-tlast), AUC(0-inf), lambda_z, t1/2, CL, Vz, MRT |
 | `dose_has_unit` | noul | false, true | whether the dose sentence carries mg / ug |
 | `is_not_available` | noul | false, true | true exactly for the `not_available` kind: the parameter asked (C0 after an oral dose, Tlag or C0 after an IV dose) is in `ground_truth.nca.linear.not_calculated` of `meta.json` |
 | `compare_pair` | choice | `not_applicable` and one key `a+b` per pair of analysis ids present (`2+3`); `none_available` when fewer than two analyses exist | true only on the compare turn |
 
 Turn kinds: the 8 scripted ones of `bench/scripts.py` (import_nca, cmax_tmax, clearance_volume, half_life, lambda_z_regression, recall,
-compare, not_available) and 4 extra kinds written for this dataset so that every option of `analysis` and `parameter_asked` has examples:
+compare, not_available) and 4 extra kinds written for this dataset so that every option of `analysis` has examples and every parameter is asked by some turn:
 `nca_other` (AUC(0-inf), MRT, AUC(0-tlast), lambda_z read from the NCA already run), `fit_pk1`, `fit_pk2`, `simulate`.
 
 Per (exercise, kind): the scripted wording (scripted kinds only, verbatim from `bench/scripts.py`) and 2 hand-written French paraphrases
@@ -84,7 +84,7 @@ deterministic: regeneration is byte-identical); the exercises are versioned.
 
 ## Step 2: zero-shot baseline
 
-Liquid AI `d1-omni-600M` and `d1-3B` (license lfm1.0), no training, asked the 7 questions of every row in one `system_one(state, questions)` call
+Liquid AI `d1-omni-600M` and `d1-3B` (license lfm1.0), no training, asked the 7 questions of that time (`parameter_asked` was then one `choice`, replaced by the 14 `asked_<key>` questions on 2026-10-09, step 4b) of every row in one `system_one(state, questions)` call
 (`decision/zero_shot_d1.py`; environment in `decision/requirements-d1.txt`: torch 2.14.1+cu130, transformers 5.19.0). Full report with the
 confusion of `analysis` and `parameter_asked`, the calibration tables and the times: [`runs/2026-10-09/report.md`](runs/2026-10-09/report.md)
 (run folder: [`runs/2026-10-09/`](runs/2026-10-09/)). Accuracy over all questions of the rows (one-hot gold):
@@ -150,26 +150,103 @@ Per question (held-out rows every 6th, 600M / 3B): `analysis` 68.3 / 90.0 %, `pa
 | linear | 165 | 60 | 75 |
 | not_applicable | 1650 | 600 | 750 |
 
-`parameter_asked`
+`asked_cmax`
 
 | answer | train | heldout | bench |
 |---|---|---|---|
-| adj_r2 | 24 | 9 | 12 |
-| aucinf | 39 | 11 | 21 |
-| auclast | 194 | 73 | 89 |
-| aucpext | 19 | 9 | 9 |
-| c0 | 104 | 33 | 50 |
-| cl | 23 | 13 | 13 |
-| cmax | 23 | 7 | 7 |
-| half_life | 46 | 16 | 23 |
-| lambda_z | 33 | 12 | 13 |
-| lambda_z_points | 47 | 16 | 19 |
-| mrt | 31 | 12 | 11 |
-| none | 330 | 120 | 150 |
-| several | 963 | 349 | 441 |
-| tlag | 67 | 28 | 28 |
-| tmax | 16 | 4 | 4 |
-| vz | 21 | 8 | 10 |
+| false | 1672 | 605 | 757 |
+| true | 308 | 115 | 143 |
+
+`asked_tmax`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1679 | 608 | 760 |
+| true | 301 | 112 | 140 |
+
+`asked_c0`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1844 | 674 | 836 |
+| true | 136 | 46 | 64 |
+
+`asked_auclast`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1621 | 587 | 736 |
+| true | 359 | 133 | 164 |
+
+`asked_aucinf`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1743 | 637 | 788 |
+| true | 237 | 83 | 112 |
+
+`asked_lambda_z`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1782 | 648 | 812 |
+| true | 198 | 72 | 88 |
+
+`asked_half_life`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1669 | 609 | 759 |
+| true | 311 | 111 | 141 |
+
+`asked_cl`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1671 | 608 | 760 |
+| true | 309 | 112 | 140 |
+
+`asked_vz`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1673 | 613 | 763 |
+| true | 307 | 107 | 137 |
+
+`asked_mrt`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1751 | 636 | 798 |
+| true | 229 | 84 | 102 |
+
+`asked_aucpext`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1861 | 676 | 848 |
+| true | 119 | 44 | 52 |
+
+`asked_lambda_z_points`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1839 | 669 | 837 |
+| true | 141 | 51 | 63 |
+
+`asked_adj_r2`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1862 | 676 | 844 |
+| true | 118 | 44 | 56 |
+
+`asked_tlag`
+
+| answer | train | heldout | bench |
+|---|---|---|---|
+| false | 1913 | 692 | 872 |
+| true | 67 | 28 | 28 |
 
 `dose_has_unit`
 
@@ -202,7 +279,9 @@ Per question (held-out rows every 6th, 600M / 3B): `analysis` 68.3 / 90.0 %, `pa
 - `none_needed` is 58 % of the `analysis` answers (1155 of 1980 train rows): not rebalanced here. If the model over-predicts it, step 3
   can weight or subsample these rows.
 - Class balance is poor by construction: `is_not_available` is true on 1 row out of 12, `compare_pair` is `not_applicable` on 11 out of 12.
-  Single-parameter answers are a few dozen rows each.
+  Each `asked_<key>` is false on most rows (true on 3 % of the train rows for `asked_tlag`, 6 to 7 % for `asked_adj_r2`, `asked_aucpext`, `asked_c0` and `asked_lambda_z_points`, 10 to 18 % for the others).
+  Rows by number of true `asked_*` (train / held-out / bench): 0 true 660 / 240 / 300, 1 true 687 / 251 / 309, 2 true 436 / 156 / 202,
+  3 true 32 / 13 / 14, 9 true 165 / 60 / 75 (the first request).
 - Labels are decided by the generator, not by annotators: one-hot gold, so calibration on this set measures the model against a
   certain truth, not against annotator disagreement; ambiguous requests (a user who gives no AUC method, no unit and no route) are not covered.
 - `route` = `unknown` and `dose_has_unit` = false come from synthetic omissions in the sentence, not from the exercise data.
@@ -250,15 +329,44 @@ above the 27B's 170. Its 5 failures do not occur here: the recall writes the dos
 the 27B), and the compare turn always calls `analysis_compare` and labels both AUC (2 `missing_value` for the 27B).
 
 What this ceiling does not measure:
-- **`parameter_asked` = `several` cannot say which parameters.** The harness answers it with the standard table of 13 parameters, so turns 2
-  to 5 ("Cmax et Tmax ?") give more than was asked. Neither the scorer nor the oracle penalises answering more. A multi-label question (one
-  `noul` per parameter) would close this gap if step 3 wants exact answers.
+- **(closed in step 4b)** `parameter_asked` = `several` used to let the harness answer with the table of 13 parameters; see Step 4b.
 - **The gold decider is not a model.** It finds the scripted row by the state without its analyses: the dataset draws some reading turns
   "late", and it describes the compare turn after the re-run. On the first ask of every compare turn its `compare_pair` ("2+3") is outside
-  the offered options (25 / 25). This is expected and the harness does not use it: the pair is decided on the state after the re-run.
+  the offered options (25 / 25). This is expected and the harness does not use it: the pair is decided on the state after the re-run
+  (open, see Step 4b).
 - **The style of the answers follows the engine.** Numbers keep the engine's decimal point. Engine messages (reasons, unit warnings) are
   quoted in English. The dose unit is never sent to Caladrius, as in the 27B pipeline, so CL and V are in "dose unit/(...)"; the recall
   says so.
 - **What is not covered.** `fit_pk1`, `fit_pk2` and `simulate` are not wired; the template says so, and the benchmark never asks for them.
   The dose, the infusion duration and the column units are read from the user's text with fixed patterns, and anything outside them is
   asked for.
+
+## Step 4b: an honest ceiling (one `asked_<key>` question per parameter)
+
+`parameter_asked` is gone. The question set has 14 `noul` questions `asked_cmax`, `asked_tmax`, ..., `asked_tlag` (same keys as the old options, without
+`several` and `none`), gold true when the turn names the parameter (table in "Our rows"; datasets regenerated: same 1980 / 720 / 900 rows, 20 questions
+per row instead of 7). The harness acts on them: `analysis_get` and the NCA template print only the parameters answered true, in the engine's
+order (the order of the engine's `parameters`, not the order of the questions); a parameter Caladrius did not compute is still said with the engine's
+reason. An NCA turn where no `asked_*` is true runs the analysis, prints no value and says that no parameter was designated (`T_NO_PARAMETER`); a
+reading turn where none is true is the recall of the settings. `analysis_compare` is called with the parameters asked. The `import_nca` wording
+"tous les paramètres standards" was rewritten to name the nine parameters, so no wording asks for something that is not in the gold.
+
+Gold run on the 25 benchmark exercises (`python decision/run_harness.py --decider gold`, folder
+[`runs/2026-10-09-harness-gold-asked/`](runs/2026-10-09-harness-gold-asked/report.md), scored by the unchanged `bench/score.py`):
+
+| pipeline | oracle-correct turns | oracle-correct numbers | invalid or failed tool calls | gate: unverified numbers | time per turn |
+|---|---|---|---|---|---|
+| decision harness, gold, `parameter_asked` (step 4) | 175 / 175 | 558 / 558 | 0 / 250 | 0 / 1698 | 1.4 ms |
+| decision harness, gold, `asked_<key>` (step 4b) | **175 / 175** | **558 / 558** | **0 / 250** | 0 / 691 | 1 ms |
+
+- The ceiling holds at 175 / 175 turns and 558 / 558 numbers, now with exactly the parameters asked: the numbers written in the answers go from
+  1698 to 691 (the old table of 13 parameters is no longer printed; the gate counts every number of an answer). No failure to list: the
+  scorer and the oracle agree on every turn (0 disagreements), 0 deviating tool calls, no harness note, so the failure counts by class are
+  all 0 (engine option 0, scorer label 0, template 0, other 0). The first ceiling was therefore not inflated in oracle terms; it was only
+  not exact. What a model must now get right is 14 booleans per turn instead of one choice, and a missed `asked_*` removes a number that
+  the oracle then counts as `missing_value`, where before the table covered it.
+- **Item (b), the compare turn asked twice, is not fixed.** Gold `compare_pair` before the re-run would have to name an analysis that
+  does not exist yet ("2+3" with 3 not run), so the question set needs a new option (for example `<id>+new`: compare with the analysis the
+  harness runs for this request) and the compare rows have to be described before the re-run. That changes the answer set of every state with
+  at least one analysis, so it is left for the step 3 / 5 design. The harness still asks twice on the compare turn (225 decide calls in 200
+  turns); the first ask's `compare_pair` is outside the options (25 / 25), unused.

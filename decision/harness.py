@@ -25,7 +25,9 @@ Conventions:
   * a compare whose AUC method has no analysis yet re-runs the reference analysis with that method (same dose, same route), then asks
     the decision model again on the new state: the dataset describes the compare turn after the re-run (decision/README.md), so the
     pair to compare is decided on that state;
-  * "several" (or "none" after a new NCA) renders the standard table of parameters; the question set does not say which several;
+  * the parameters shown are the ones whose `asked_<key>` answer is true, in the engine's order, nothing else: an NCA turn where no
+    `asked_*` is true runs the analysis, prints no value and says that no parameter was designated; a reading turn where none is true
+    is a recall of the settings (dose, route, AUC method);
   * `is_not_available` = true is checked against the engine: when Caladrius did compute the parameter, its value is given and the
     turn records the conflict (a false refusal would be a wrong answer).
 """
@@ -41,11 +43,10 @@ import make_dataset as md  # noqa: E402
 
 METHODS = ("linear", "lin_up_log_down")
 ENGINE_ROUTE = {"oral": "extravascular", "iv_bolus": "iv_bolus", "iv_infusion": "iv_infusion"}
-# parameter_asked -> engine (PKNCA) key; mrt depends on the route (see engine_key)
+# parameter key (asked_<key>) -> engine (PKNCA) key; mrt depends on the route (see engine_key)
 ENGINE_KEY = {"cmax": "cmax", "tmax": "tmax", "c0": "c0", "auclast": "auclast", "aucinf": "aucinf.obs", "lambda_z": "lambda.z",
               "half_life": "half.life", "cl": "cl.obs", "vz": "vz.obs", "aucpext": "aucpext.obs",
               "lambda_z_points": "lambda.z.n.points", "adj_r2": "adj.r.squared", "tlag": "tlag"}
-STANDARD = ("c0", "cmax", "tmax", "auclast", "aucinf", "aucpext", "lambda_z", "lambda_z_points", "adj_r2", "half_life", "cl", "vz", "mrt")
 METHOD_FR = {"linear": "trapèzes linéaires (linear)", "lin_up_log_down": "linear-up/log-down", "lin_log": "lin-log"}
 METHOD_SHORT_FR = {"linear": "linéaire", "lin_up_log_down": "linear-up/log-down", "lin_log": "lin-log"}
 ANALYSIS_FR = {"fit_pk1": "ajustement d'un modèle à un compartiment", "fit_pk2": "ajustement d'un modèle à deux compartiments",
@@ -66,6 +67,8 @@ T_NO_ANALYSIS = ("Aucune analyse n'est encore faite dans ce projet : demandez d'
                  "la voie et la méthode d'AUC).")
 T_NOT_WIRED = ("Cette demande ({what}) n'est pas encore prise en charge par le harnais de décision : seules l'analyse non "
                "compartimentale, la lecture de ses résultats et la comparaison de deux analyses le sont.")
+T_NO_PARAMETER = ("L'analyse non compartimentale est faite, mais votre demande ne désigne aucun paramètre à afficher : "
+                  "je ne donne aucune valeur. Indiquez le ou les paramètres voulus (Cmax, Tmax, AUC, λz, t½, CL, Vz, MRT...).")
 T_UNDECIDED = "Je n'ai pas pu interpréter la demande ({qs}). Pouvez-vous la reformuler ?"
 T_TOOL_FAILED = "Caladrius a refusé l'appel {tool} : « {error} ». Je ne donne aucune valeur."
 T_WHICH_PAIR = "Quelles analyses faut-il comparer ? Analyses du projet : {analyses}."
@@ -120,7 +123,7 @@ def normalize_answers(raw, questions):
 
 # ---------------------------------------------------------------- rendering (pure functions of engine digests)
 def engine_key(param, route):
-    """Engine key of a parameter_asked answer; MRT is mrt.obs after an extravascular dose, mrt.iv.obs otherwise."""
+    """Engine key of a parameter asked (key of make_dataset.PARAMETERS); MRT is mrt.obs after an extravascular dose, mrt.iv.obs otherwise."""
     if param == "mrt": return "mrt.obs" if route == "extravascular" else "mrt.iv.obs"
     return ENGINE_KEY.get(param)
 
@@ -167,28 +170,27 @@ def render_header(digest, time_unit=None):
             f"dose {value_text(dose) if dose is not None else 'non indiquée'}, {route_fr(s.get('route'), time_unit)}) :")
 
 def render_params(digest, params, time_unit=None, footer=True):
-    """Lines "- label : value unit" for the parameters asked (parameter_asked keys), per subject; a parameter Caladrius did not
-    compute is listed with the engine's reason. footer=False writes the not-computed ones inline instead of at the end."""
+    """Lines "- label : value unit" for the parameters asked (keys of make_dataset.PARAMETERS), per subject, in the order of the engine's
+    parameters; a parameter Caladrius did not compute is listed with the engine's reason. footer=False writes the not-computed ones
+    inline instead of at the end."""
     lines = [render_header(digest, time_unit)]
     for s, head in _subject_blocks(digest):
         if head: lines.append(head)
         if "parameters" not in s:
             lines.append(f"Caladrius n'a pas pu analyser ce sujet : « {json.dumps(s.get('outcome'), ensure_ascii=False)} ».")
             continue
-        route, vals, missing = s.get("route"), s["parameters"], []
+        route, vals, missing, found = s.get("route"), s["parameters"], [], []
+        order = {k: i for i, k in enumerate(vals)}
         for p in params:
             k = engine_key(p, route)
-            if k in vals: lines.append(f"- {label_fr(p, route)} : {value_text(vals[k])}")
+            if k in vals: found.append((order[k], p, k))
             else: missing.append((p, _not_calculated_reason(s, k)))
+        lines += [f"- {label_fr(p, route)} : {value_text(vals[k])}" for _, p, k in sorted(found)]            # the engine's order
         for p, why in missing:
             text = f"{label_fr(p, route)} n'est pas calculé par Caladrius" + (f" (« {why} »)" if why else "") + "."
             lines.append(("- " + text) if not footer else text)
         lines += _warnings(digest, s)
     return "\n".join(lines)
-
-def render_table(digest, time_unit=None):
-    """The standard table (answers "several", and "none" after a new NCA)."""
-    return render_params(digest, STANDARD, time_unit)
 
 def render_recall(digest, dose_unit=None, time_unit=None):
     """The settings of an analysis as Caladrius recorded them; the dose unit is the token of the user's sentence (Caladrius never
@@ -301,6 +303,11 @@ class Harness:
         return same[0] if same else (self.analyses[0] if self.analyses else None)
 
     # -- decisions
+    @staticmethod
+    def asked(a):
+        """The parameters asked: the keys of make_dataset.PARAMETERS whose `asked_<key>` answer is true."""
+        return [k for k in md.PARAMETERS if a.get(f"asked_{k}") == "true"]
+
     def _ask(self, request):
         state = md.make_state(self.data["csv"], self.data["intro"], list(self.data["notes"]), request,
                               [{"id": a["id"], "kind": a["kind"], "auc_method": a["auc_method"]} for a in self.analyses])
@@ -351,22 +358,21 @@ class Harness:
         method = a["auc_method"] if a["auc_method"] in METHODS else None
         d = self._run_nca(dose, route, method)
         if d is None: return self._failed("nca_run")
-        p = a["parameter_asked"]
-        if p in (None, "several", "none"): return render_table(d, self._time_unit())
-        return render_params(d, [p], self._time_unit())
+        ps = self.asked(a)
+        if not ps: return T_NO_PARAMETER
+        return render_params(d, ps, self._time_unit())
 
     def _read(self, a):
         ref = self._reference(a["auc_method"])
         if ref is None: return T_NO_ANALYSIS
         d = self._call("analysis_get", {"analysis": ref["id"]})
         if d is None: return self._failed("analysis_get")
-        p = a["parameter_asked"]
-        if p == "none": return render_recall(d, parse_dose(self.data["intro"])[1], self._time_unit())
-        if p in (None, "several"): return render_table(d, self._time_unit())
-        return render_params(d, [p], self._time_unit())
+        ps = self.asked(a)
+        if not ps: return render_recall(d, parse_dose(self.data["intro"])[1], self._time_unit())
+        return render_params(d, ps, self._time_unit())
 
     def _refuse(self, a):
-        p = a["parameter_asked"]
+        p = next(iter(self.asked(a)), None)          # the first parameter asked; a refusal names one
         ref = self._reference(a["auc_method"])
         if ref is None: return render_refusal(p)
         d = self._call("analysis_get", {"analysis": ref["id"]})
@@ -393,8 +399,8 @@ class Harness:
         by_id = {x["id"]: x for x in self.analyses}
         route = (by_id.get(ia) or {}).get("args", {}).get("route")
         args = {"a": ia, "b": ib}
-        k = engine_key(a["parameter_asked"], route) if a["parameter_asked"] else None
-        if k: args["parameters"] = [k]
+        keys = [engine_key(p, route) for p in self.asked(a)]
+        if keys: args["parameters"] = keys
         d = self._call("analysis_compare", args)
         if d is None: return self._failed("analysis_compare")
         return render_compare(d, (by_id.get(ia) or {}).get("auc_method"), (by_id.get(ib) or {}).get("auc_method"), route)

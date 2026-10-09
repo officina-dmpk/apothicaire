@@ -43,7 +43,7 @@ class TestDecisionDataset(unittest.TestCase):
                 assert all(isinstance(r[k], str) for k in FIELDS if k != "n_questions") and isinstance(r["n_questions"], int)
                 assert r["id"] not in ids; ids.add(r["id"])
                 assert r["split"] in ("train", "test", "bench") and r["id"].startswith({"train": "tr_", "test": "te_", "bench": "be_"}[r["split"]])
-                assert r["n_questions"] == len(qs) == len(gold) == 7 and set(qs) == set(gold) == set(json.loads(r["label_agreement"]))
+                assert r["n_questions"] == len(qs) == len(gold) == 6 + len(md.PARAMETERS) and set(qs) == set(gold) == set(json.loads(r["label_agreement"]))
                 assert set(state) == {"analyses", "data", "notes", "request", "user_dose_sentence"}
                 assert set(state["data"]) == {"header", "first_rows", "n_rows", "n_subjects"}
                 assert state["data"]["header"].startswith("time (") and "conc (" in state["data"]["header"]
@@ -110,9 +110,9 @@ class TestDecisionDataset(unittest.TestCase):
             assert label("auc_method") == {"import_nca": "linear", "compare": "lin_up_log_down"}.get(kind, "not_applicable")
             assert (label("compare_pair") != "not_applicable") == (kind == "compare")
             if kind == "compare": assert label("compare_pair") == "2+3"
-            # parameter asked: one key => that key, several or "many" => several, none => none
+            # parameters asked: one boolean `asked_<key>` per parameter, true exactly for the keys the wording names
             p = factors["parameters_asked"]
-            assert label("parameter_asked") == ("none" if not p else p[0] if len(p) == 1 and p[0] != "many" else "several")
+            assert [k for k in md.PARAMETERS if label(f"asked_{k}") == "true"] == [k for k in md.PARAMETERS if k in p], r["id"]
             if kind == "recall": assert p == []
             # the state's analyses
             assert state["data"]["header"] == f"time ({meta['units']['time']}),conc ({meta['units']['conc']})"
@@ -132,6 +132,35 @@ class TestDecisionDataset(unittest.TestCase):
             n += 1
         assert n == 8 * 100
 
+    def test_one_noul_question_per_parameter(self):
+        """`asked_<key>` replaces the single parameter_asked choice: one noul per parameter, a boolean gold, no several / none."""
+        keys = ["cmax", "tmax", "c0", "auclast", "aucinf", "lambda_z", "half_life", "cl", "vz", "mrt", "aucpext", "lambda_z_points", "adj_r2", "tlag"]
+        assert list(md.PARAMETERS) == keys
+        qs = md.questions_for([2, 3])
+        assert "parameter_asked" not in qs and [q for q in qs if q.startswith("asked_")] == [f"asked_{k}" for k in keys]
+        for r, state, qs, gold, factors in parsed(sum(data(), [])):
+            asked = []
+            for k in keys:
+                q, g = qs[f"asked_{k}"], gold[f"asked_{k}"]
+                assert q["type"] == "noul" and q["criteria"] == md.TF and g["type"] == "noul"
+                assert g["label"] in ("true", "false") and g["noul"] in (0.0, 1.0) and g["noul"] == (g["label"] == "true")
+                if g["label"] == "true": asked.append(k)
+            kind = factors["kind"]
+            # every turn that expects numbers (the 6 reading kinds, the first request, the compare turn) asks at least one parameter
+            if kind in ("import_nca", "cmax_tmax", "clearance_volume", "half_life", "lambda_z_regression", "compare", "nca_other"):
+                assert asked, r["id"]
+            # no parameter on a recall, a fit or a simulation
+            if kind in ("recall", "fit_pk1", "fit_pk2", "simulate"): assert asked == [], r["id"]
+            # the not-available turn asks the one parameter Caladrius did not compute for the route (C0 or Tlag), and no other
+            not_calculated = set(metas()[factors["exercise"]]["ground_truth"]["nca"]["linear"]["not_calculated"])
+            if kind == "not_available":
+                assert len(asked) == 1 and asked[0] in ("c0", "tlag") and asked[0] in not_calculated, r["id"]
+            else:
+                assert not set(asked) & not_calculated, r["id"]          # no other turn asks for what the route does not give
+            if kind == "import_nca" and factors["scripted_wording"]:
+                assert asked == [k for k in keys if k in ("cmax", "tmax", "auclast", "aucinf", "lambda_z", "half_life", "cl", "vz", "mrt")]
+            if kind == "compare": assert asked == ["auclast"]
+
     # ---------------------------------------------------------------- paraphrases
     def test_paraphrases_are_french_hand_written_and_several_per_kind(self):
         for key, pool in md.WORDINGS.items():
@@ -140,7 +169,7 @@ class TestDecisionDataset(unittest.TestCase):
             assert len(set(texts)) == len(texts)
             for t, params in pool:
                 assert re.search(r"[éèàêç']|\b(?:le|la|les|de|des|un|une|est|et|ou|moi|je|ai)\b", t), t
-                assert all(p in md.PARAMETERS or p == "many" for p in params), (key, params)
+                assert all(p in md.PARAMETERS for p in params) and len(set(params)) == len(params), (key, params)
         assert set(scripts.KINDS + md.EXTRA_KINDS) == set(md.KINDS)
 
     def test_each_scripted_kind_has_distinct_rows_per_exercise(self):
@@ -195,7 +224,7 @@ class TestDecisionDataset(unittest.TestCase):
         with open(md.README, encoding="utf-8") as f: text = f.read()
         block = text[text.index(md.COUNTS_BEGIN):text.index(md.COUNTS_END) + len(md.COUNTS_END)]
         assert block == md.counts_block(st), "README counts are stale: run python decision/make_dataset.py"
-        for q in ("analysis", "route", "auc_method", "parameter_asked", "dose_has_unit", "is_not_available", "compare_pair"):
+        for q in ("analysis", "route", "auc_method", *(f"asked_{k}" for k in md.PARAMETERS), "dose_has_unit", "is_not_available", "compare_pair"):
             assert f"`{q}`" in block
         assert sum(st[n]["rows"] for n in md.FILES) >= 3000
         # every declared option of the closed set has examples in train, except the placeholder of a pair-less state

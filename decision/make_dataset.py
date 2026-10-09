@@ -3,7 +3,7 @@
 
   python decision/make_dataset.py [--out decision/data] [--no-readme]
 
-One row = one state and seven closed questions, with their gold answers (schema of the Hugging Face dataset
+One row = one state and its closed questions, with their gold answers (schema of the Hugging Face dataset
 `LocalLLaMA/typed-decisions`, subset `all`, recorded in decision/README.md): id, workflow, split, state, questions, gold, factors,
 label_agreement, n_questions; the five last-but-one fields are JSON strings. Writes data/train.jsonl, data/heldout.jsonl and data/bench.jsonl.
 
@@ -49,26 +49,28 @@ ROUTES = {"iv_bolus": "Intravenous bolus.", "iv_infusion": "Intravenous infusion
           "unknown": "The user did not state the route."}
 AUC_METHODS = {"linear": "Linear trapezoidal rule.", "lin_up_log_down": "Linear up, logarithmic down.",
                "not_applicable": "The request names no AUC method and runs no NCA."}
-PARAMETERS = {"cmax": "Cmax only.", "tmax": "Tmax only.", "c0": "C0 (extrapolated initial concentration) only.",
-              "auclast": "AUC(0-tlast) only.", "aucinf": "AUC(0-inf) only.", "lambda_z": "The terminal rate constant lambda_z only.",
-              "half_life": "The terminal half-life only.", "cl": "The clearance (CL or CL/F) only.",
-              "vz": "The volume of distribution (Vz or Vz/F) only.", "mrt": "The mean residence time only.",
-              "aucpext": "The percentage of the AUC extrapolated to infinity only.",
-              "lambda_z_points": "The number of points of the lambda_z regression only.",
-              "adj_r2": "The adjusted R squared of the lambda_z regression only.", "tlag": "The lag time only.",
-              "several": "Two or more parameters, or all the parameters of a model.",
-              "none": "No parameter value: a recall, a simulation, a comparison of methods without a named parameter."}
+# parameter key -> how the question `asked_<key>` names it ("The last request asks for ...")
+PARAMETERS = {"cmax": "the observed maximum concentration (Cmax)", "tmax": "the time of the maximum concentration (Tmax)",
+              "c0": "the extrapolated initial concentration (C0)", "auclast": "the area under the curve up to the last point, AUC(0-tlast)",
+              "aucinf": "the area under the curve extrapolated to infinity, AUC(0-inf)",
+              "lambda_z": "the terminal rate constant (lambda_z)", "half_life": "the terminal half-life",
+              "cl": "the clearance (CL or CL/F)", "vz": "the volume of distribution (Vz or Vz/F)", "mrt": "the mean residence time (MRT)",
+              "aucpext": "the percentage of the AUC extrapolated to infinity",
+              "lambda_z_points": "the number of points of the lambda_z regression",
+              "adj_r2": "the adjusted R squared of the lambda_z regression", "tlag": "the lag time (Tlag)"}
+# the nine parameters the scripted first request names (bench/scripts.py): Cmax, Tmax, AUC(0-tlast), AUC(0-inf), lambda_z, t1/2, CL, Vz, MRT
+NCA_USUAL = ["cmax", "tmax", "auclast", "aucinf", "lambda_z", "half_life", "cl", "vz", "mrt"]
 TF = {"false": "No.", "true": "Yes."}
 
 def questions_for(analysis_ids):
-    """The closed set of seven questions for a state whose project holds the analyses `analysis_ids` (sorted ids)."""
+    """The closed set of questions (6 + one per parameter of PARAMETERS) for a state whose project holds the analyses `analysis_ids` (sorted ids)."""
     pairs = {f"{a}+{b}": f"Compare analysis {a} with analysis {b}." for i, a in enumerate(analysis_ids) for b in analysis_ids[i + 1:]}
     pair_options = {"not_applicable": "The request compares no analyses.", **(pairs or {"none_available": "Fewer than two analyses exist, so no pair can be compared."})}
     return {
         "analysis": {"type": "choice", "instructions": "Which computation does the last request of the user need, given the analyses already in the project?", "criteria": ANALYSES},
         "route": {"type": "choice", "instructions": "Which administration route did the user state for the dose?", "criteria": ROUTES},
         "auc_method": {"type": "choice", "instructions": "Which AUC integration method does the last request specify or require for the analysis to run?", "criteria": AUC_METHODS},
-        "parameter_asked": {"type": "choice", "instructions": "Which pharmacokinetic parameter does the last request ask for?", "criteria": PARAMETERS},
+        **{f"asked_{k}": {"type": "noul", "instructions": f"The last request asks for {phrase}.", "criteria": TF} for k, phrase in PARAMETERS.items()},
         "dose_has_unit": {"type": "noul", "instructions": "The dose stated by the user carries a unit (mg, ug, ...).", "criteria": TF},
         "is_not_available": {"type": "noul", "instructions": "The last request asks for a parameter that Caladrius does not compute for the stated route.", "criteria": TF},
         "compare_pair": {"type": "choice", "instructions": "Which two analyses of the project does the last request ask to compare?", "criteria": pair_options}}
@@ -83,13 +85,14 @@ def gold_noul(flag):
 
 # ---------------------------------------------------------------- hand-written French wordings
 # (text, parameters asked). {cl} / {vz}: CL, Vz (CL/F, Vz/F after an oral dose). The scripted wording of each kind comes from
-# bench/scripts.py and is not repeated here. Parameters asked: keys of PARAMETERS; one key => that key, several => "several".
+# bench/scripts.py and is not repeated here. Parameters asked: keys of PARAMETERS, the ones the wording names (the gold of the questions
+# `asked_<key>`); [] for a recall, a simulation and the fits (their parameters are model parameters, not the NCA parameters of PARAMETERS).
 WORDINGS = {
     "import_nca": [
-        ("Lance une NCA (trapèzes linéaires) et rapporte-moi Cmax, Tmax, les deux AUC, λz, la demi-vie, {cl}, {vz} et le MRT avec leurs unités.", ["many"]),
-        ("Peux-tu analyser ces données en non-compartimental, AUC par la méthode linéaire, et me donner les paramètres usuels (Cmax, Tmax, AUC, λz, t½, {cl}, {vz}, MRT) ?", ["many"]),
-        ("NCA s'il te plaît, trapèzes linéaires. J'attends Cmax, Tmax, AUC0-t, AUC0-inf, lambda z, demi-vie, clairance, volume de distribution et MRT.", ["many"]),
-        ("Analyse non compartimentale de ce profil avec la méthode des trapèzes linéaires : tous les paramètres standards, avec leurs unités.", ["many"])],
+        ("Lance une NCA (trapèzes linéaires) et rapporte-moi Cmax, Tmax, les deux AUC, λz, la demi-vie, {cl}, {vz} et le MRT avec leurs unités.", NCA_USUAL),
+        ("Peux-tu analyser ces données en non-compartimental, AUC par la méthode linéaire, et me donner les paramètres usuels (Cmax, Tmax, AUC(0-tlast), AUC(0-inf), λz, t½, {cl}, {vz}, MRT) ?", NCA_USUAL),
+        ("NCA s'il te plaît, trapèzes linéaires. J'attends Cmax, Tmax, AUC0-t, AUC0-inf, lambda z, demi-vie, clairance, volume de distribution et MRT.", NCA_USUAL),
+        ("Analyse non compartimentale de ce profil avec la méthode des trapèzes linéaires : Cmax, Tmax, les deux AUC, λz, t½, {cl}, {vz} et MRT, avec leurs unités.", NCA_USUAL)],
     "cmax_tmax_bolus": [
         ("Donne-moi la concentration initiale extrapolée, ainsi que le pic observé et son temps.", ["c0", "cmax", "tmax"]),
         ("Quelle est la concentration extrapolée à t = 0 ?", ["c0"]),
@@ -155,15 +158,15 @@ WORDINGS = {
         ("Donne-moi λz avec son unité.", ["lambda_z"]),
         ("Quelle est l'AUC jusqu'à l'infini et quel est le MRT ?", ["aucinf", "mrt"])],
     "fit_pk1": [
-        ("Ajuste un modèle à un compartiment sur ces données.", ["many"]),
-        ("Peux-tu faire un fit mono-compartimental ?", ["many"]),
-        ("Fais une régression non linéaire avec un modèle à un compartiment et donne-moi les paramètres.", ["many"]),
-        ("Je veux ajuster un modèle PK à 1 compartiment (clairance, volume).", ["many"])],
+        ("Ajuste un modèle à un compartiment sur ces données.", []),
+        ("Peux-tu faire un fit mono-compartimental ?", []),
+        ("Fais une régression non linéaire avec un modèle à un compartiment et donne-moi les paramètres.", []),
+        ("Je veux ajuster un modèle PK à 1 compartiment (clairance, volume).", [])],
     "fit_pk2": [
-        ("Ajuste un modèle à deux compartiments sur ces données.", ["many"]),
-        ("Peux-tu faire un fit bicompartimental ?", ["many"]),
-        ("Fais une régression non linéaire avec un modèle à deux compartiments et donne-moi les paramètres.", ["many"]),
-        ("Je veux ajuster un modèle PK à 2 compartiments (CL, Vc, Q, Vp).", ["many"])],
+        ("Ajuste un modèle à deux compartiments sur ces données.", []),
+        ("Peux-tu faire un fit bicompartimental ?", []),
+        ("Fais une régression non linéaire avec un modèle à deux compartiments et donne-moi les paramètres.", []),
+        ("Je veux ajuster un modèle PK à 2 compartiments (CL, Vc, Q, Vp).", [])],
     "simulate": [
         ("Simule le profil attendu avec les paramètres du modèle ajusté.", []),
         ("Peux-tu simuler la concentration avec le modèle ajusté ?", []),
@@ -193,13 +196,10 @@ ANALYSIS_OF = {"import_nca": "nca", "cmax_tmax": "none_needed", "clearance_volum
 AUC_METHOD_OF = {"import_nca": "linear", "compare": "lin_up_log_down"}            # every other kind: not_applicable
 
 def scripted_params(kind, route_kind, what):
-    """Parameters asked by the scripted wording of a kind."""
-    return {"import_nca": ["many"], "cmax_tmax": ["c0", "cmax", "tmax"] if route_kind == "iv_bolus" else ["cmax", "tmax"],
+    """Parameters (keys of PARAMETERS) asked by the scripted wording of a kind."""
+    return {"import_nca": list(NCA_USUAL), "cmax_tmax": ["c0", "cmax", "tmax"] if route_kind == "iv_bolus" else ["cmax", "tmax"],
             "clearance_volume": ["cl", "vz"], "half_life": ["half_life", "aucpext"], "lambda_z_regression": ["lambda_z_points", "adj_r2"],
             "recall": [], "compare": ["auclast"], "not_available": [what]}[kind]
-
-def parameter_label(params):
-    return "none" if not params else (params[0] if len(params) == 1 and params[0] != "many" else "several")
 
 def pool_key(kind, route_kind):
     if kind == "cmax_tmax" and route_kind == "iv_bolus": return "cmax_tmax_bolus"
@@ -256,7 +256,7 @@ def route_phrase(meta, rng):
     return rng.choice(ROUTE_PHRASES[kind]).format(d=d, t=meta["units"]["time"])
 
 def build_row(meta, csv, bench, kind, j, wording, rng):
-    """One state with its seven questions. `wording` is None for the scripted wording of a scripted kind (j = 0), else the index of a
+    """One state with its closed questions. `wording` is None for the scripted wording of a scripted kind (j = 0), else the index of a
     hand-written paraphrase in WORDINGS[pool_key(kind, route)]."""
     route_kind = scripts.kind_of(meta); u = meta["units"]
     script = {t["kind"]: t for t in scripts.build_script(meta, csv)}
@@ -301,11 +301,11 @@ def build_row(meta, csv, bench, kind, j, wording, rng):
     gold = {"analysis": gold_choice(qs["analysis"]["criteria"], ANALYSIS_OF[kind]),
             "route": gold_choice(ROUTES, "unknown" if omit_route else route_kind),
             "auc_method": gold_choice(AUC_METHODS, AUC_METHOD_OF.get(kind, "not_applicable")),
-            "parameter_asked": gold_choice(PARAMETERS, parameter_label(params)),
+            **{f"asked_{k}": gold_noul(k in params) for k in PARAMETERS},
             "dose_has_unit": gold_noul(not omit_unit),
             "is_not_available": gold_noul(kind == "not_available"),
             "compare_pair": gold_choice(qs["compare_pair"]["criteria"], pair)}
-    assert set(gold) == set(qs)
+    assert set(gold) == set(qs) and set(params) <= set(PARAMETERS)
     factors = {"exercise": meta["id"], "family": meta["family"], "kind": kind, "route": route_kind, "scripted_wording": scripted,
                "scripted_kind": kind in scripts.KINDS, "bench": bench, "wording": j, "intro_variant": intro_variant,
                "dose_unit_omitted": omit_unit, "route_omitted": omit_route, "late_state": bool(late), "n_analyses": len(analyses),

@@ -27,12 +27,13 @@ WORKSHEET = {"worksheet": {"id": 1, "name": "donnees", "rows": 6, "subjects": ["
                            "columns": [{"name": "time", "role": "time", "unit": "h"}, {"name": "conc", "role": "concentration", "unit": "mg/L"}],
                            "derived_units": {"auc": "h*mg/L", "aumc": "h^2*mg/L", "half_life": "h", "lambda_z": "1/h", "mrt": "h"},
                            "unit_warnings": [UNIT_WARNING]}}
-VALUES = {"linear": {"cmax": 812.5, "tmax": 1.5, "auclast": 4012.25, "aucinf.obs": 4210.5, "aucpext.obs": 4.7083, "lambda.z": 0.1155,
-                     "lambda.z.n.points": 4.0, "adj.r.squared": 0.9981, "half.life": 6.0012, "cl.obs": 0.0475, "vz.obs": 0.4113,
-                     "mrt.obs": 7.25, "mrt.iv.obs": 6.75, "tlag": 0.0},
-          "lin_up_log_down": {"cmax": 812.5, "tmax": 1.5, "auclast": 3950.75, "aucinf.obs": 4149.0, "aucpext.obs": 4.7843, "lambda.z": 0.1155,
-                              "lambda.z.n.points": 4.0, "adj.r.squared": 0.9981, "half.life": 6.0012, "cl.obs": 0.0482, "vz.obs": 0.4174,
-                              "mrt.obs": 7.31, "mrt.iv.obs": 6.81, "tlag": 0.0}}
+ENGINE_ORDER = ("cmax", "tmax", "auclast", "lambda.z", "adj.r.squared", "lambda.z.n.points", "half.life", "aucinf.obs", "aucpext.obs",
+                "mrt.iv.obs", "mrt.obs", "cl.obs", "vz.obs", "tlag")       # the order of the engine's parameters (not the order of the questions)
+_LIN = {"cmax": 812.5, "tmax": 1.5, "auclast": 4012.25, "aucinf.obs": 4210.5, "aucpext.obs": 4.7083, "lambda.z": 0.1155,
+        "lambda.z.n.points": 4.0, "adj.r.squared": 0.9981, "half.life": 6.0012, "cl.obs": 0.0475, "vz.obs": 0.4113,
+        "mrt.obs": 7.25, "mrt.iv.obs": 6.75, "tlag": 0.0}
+_LUD = {**_LIN, "auclast": 3950.75, "aucinf.obs": 4149.0, "aucpext.obs": 4.7843, "cl.obs": 0.0482, "vz.obs": 0.4174, "mrt.obs": 7.31, "mrt.iv.obs": 6.81}
+VALUES = {"linear": {k: _LIN[k] for k in ENGINE_ORDER}, "lin_up_log_down": {k: _LUD[k] for k in ENGINE_ORDER}}
 REASON = "not defined for this route of administration"
 
 class FakeMCP:
@@ -72,9 +73,15 @@ def message(route="par voie orale", dose="400 mg"):
             "time (h),conc (mg/L)\n0,0\n0.5,310.2\n1.5,812.5\n4,520.1\n8,250.3\n12,120.7\n"
             "Fais l'analyse non compartimentale avec la méthode linéaire des trapèzes et donne-moi les paramètres.")
 
-BASE = {"analysis": "none_needed", "route": "oral", "auc_method": "not_applicable", "parameter_asked": "none", "dose_has_unit": "true",
-        "is_not_available": "false", "compare_pair": "not_applicable"}
-NCA = dict(BASE, analysis="nca", auc_method="linear", parameter_asked="several")
+def asking(*keys):
+    """The 14 `asked_<key>` answers of the question set: true for the keys given, false for the others."""
+    assert set(keys) <= set(md.PARAMETERS), keys
+    return {f"asked_{k}": "true" if k in keys else "false" for k in md.PARAMETERS}
+
+BASE = {"analysis": "none_needed", "route": "oral", "auc_method": "not_applicable", "dose_has_unit": "true",
+        "is_not_available": "false", "compare_pair": "not_applicable", **asking()}
+USUAL = ("cmax", "tmax", "auclast", "aucinf", "lambda_z", "half_life", "cl", "vz", "mrt")        # what the first message of the benchmark asks
+NCA = dict(BASE, analysis="nca", auc_method="linear", **asking(*USUAL))
 
 class Scripted:
     """A decision model that answers a fixed sequence of answer sets and records the states it was shown."""
@@ -91,12 +98,19 @@ def run(*turns, msg=None):
 
 HEADER = "Résultats de Caladrius (analyse 2, méthode d'AUC trapèzes linéaires (linear), dose 400, voie orale (extravasculaire)) :"
 WARN = "Avertissement de Caladrius : « the dose has no unit; derived units (AUC, clearance, volume) cannot be named »."
-TABLE = "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- Tmax : 1.5 h", "- AUC(0-tlast) : 4012.25 h*mg/L", "- AUC(0-inf) : 4210.5 h*mg/L",
-                   "- AUC extrapolée (%) : 4.7083 %", "- λz (constante d'élimination terminale) : 0.1155 1/h",
-                   "- Nombre de points de la régression terminale : 4", "- R² ajusté de la régression terminale : 0.9981",
-                   "- t½ (demi-vie terminale) : 6.0012 h", "- CL/F (clairance) : 0.0475 dose unit/(h*mg/L)",
-                   "- Vz/F (volume de distribution) : 0.4113 dose unit/(mg/L)", "- MRT (temps moyen de résidence) : 7.25 h",
-                   "C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius (« not defined for this route of administration »).", WARN])
+TABLE = "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- Tmax : 1.5 h", "- AUC(0-tlast) : 4012.25 h*mg/L",
+                   "- λz (constante d'élimination terminale) : 0.1155 1/h", "- t½ (demi-vie terminale) : 6.0012 h",
+                   "- AUC(0-inf) : 4210.5 h*mg/L", "- MRT (temps moyen de résidence) : 7.25 h",
+                   "- CL/F (clairance) : 0.0475 dose unit/(h*mg/L)", "- Vz/F (volume de distribution) : 0.4113 dose unit/(mg/L)", WARN])
+# all 14 questions true: the engine's order again, and C0 (not computed after an oral dose) said at the end
+TABLE_ALL = "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- Tmax : 1.5 h", "- AUC(0-tlast) : 4012.25 h*mg/L",
+                       "- λz (constante d'élimination terminale) : 0.1155 1/h", "- R² ajusté de la régression terminale : 0.9981",
+                       "- Nombre de points de la régression terminale : 4", "- t½ (demi-vie terminale) : 6.0012 h",
+                       "- AUC(0-inf) : 4210.5 h*mg/L", "- AUC extrapolée (%) : 4.7083 %", "- MRT (temps moyen de résidence) : 7.25 h",
+                       "- CL/F (clairance) : 0.0475 dose unit/(h*mg/L)", "- Vz/F (volume de distribution) : 0.4113 dose unit/(mg/L)",
+                       "- Tlag (temps de latence) : 0 h",
+                       "C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius (« not defined for this route of administration »).",
+                       WARN])
 RECALL = "\n".join(["Réglages de l'analyse 2 tels que Caladrius les a enregistrés :",
                     "- Dose : 400 mg (unité de votre premier message ; Caladrius a reçu la dose sans unité)",
                     "- Voie d'administration : voie orale (extravasculaire)", "- Méthode d'AUC : trapèzes linéaires (linear)"])
@@ -109,12 +123,42 @@ REFUSAL_C0 = ("C0 (concentration initiale extrapolée) n'est pas calculé par Ca
 
 class TestTemplates(unittest.TestCase):
     """Golden strings: what the harness writes for fixed engine results."""
-    def test_nca_table(self):
+    def test_nca_prints_the_parameters_asked_in_the_engines_order(self):
         h, out, _ = run((None, [NCA]))
         self.assertEqual(out[0][0], TABLE)
+        self.assertNotIn("C0", out[0][0]); self.assertNotIn("Nombre de points", out[0][0])           # not asked, not printed
+
+    def test_every_parameter_asked(self):
+        h, out, _ = run((None, [dict(NCA, **asking(*md.PARAMETERS))]))
+        self.assertEqual(out[0][0], TABLE_ALL)
+
+    def test_one_parameter_of_the_nca_turn(self):
+        h, out, _ = run((None, [dict(NCA, **asking("cmax"))]))
+        self.assertEqual(out[0][0], "\n".join([HEADER, "- Cmax : 812.5 mg/L", WARN]))
+
+    def test_order_follows_the_engine_not_the_questions(self):
+        """Six parameters asked: printed in the engine's order, which is not the order of the questions."""
+        h, out, _ = run((None, [dict(NCA, **asking("half_life", "auclast", "cmax", "vz", "mrt", "cl"))]))
+        self.assertEqual(out[0][0], "\n".join([HEADER, "- Cmax : 812.5 mg/L", "- AUC(0-tlast) : 4012.25 h*mg/L", "- t½ (demi-vie terminale) : 6.0012 h",
+                                               "- MRT (temps moyen de résidence) : 7.25 h", "- CL/F (clairance) : 0.0475 dose unit/(h*mg/L)",
+                                               "- Vz/F (volume de distribution) : 0.4113 dose unit/(mg/L)", WARN]))
+        # the question set lists cl, vz, mrt; the engine lists mrt, cl, vz: the printed order is the engine's
+        order = list(md.PARAMETERS)
+        self.assertLess(order.index("cl"), order.index("vz")); self.assertLess(order.index("vz"), order.index("mrt"))
+        self.assertLess(out[0][0].index("MRT"), out[0][0].index("CL/F")); self.assertLess(out[0][0].index("CL/F"), out[0][0].index("Vz/F"))
+
+    def test_nca_with_no_parameter_asked_prints_nothing_numeric(self):
+        h, out, _ = run((None, [dict(NCA, **asking())]))
+        self.assertEqual(out[0][0], H.T_NO_PARAMETER)
+        self.assertIsNone(re.search(r"\d", out[0][0]))
+        self.assertEqual([c[0] for c in h.mcp.calls], ["data_import", "nca_run"])          # the analysis is run and recorded, no value is shown
+
+    def test_reading_with_no_parameter_asked_is_the_recall(self):
+        h, out, _ = run((None, [NCA]), ("Rappelle-moi.", [BASE]))
+        self.assertEqual(out[1][0], RECALL)
 
     def test_single_parameter(self):
-        h, out, _ = run((None, [NCA]), ("Et la clairance ?", [dict(BASE, parameter_asked="cl")]))
+        h, out, _ = run((None, [NCA]), ("Et la clairance ?", [dict(BASE, **asking("cl"))]))
         self.assertEqual(out[1][0], "\n".join([HEADER, "- CL/F (clairance) : 0.0475 dose unit/(h*mg/L)", WARN]))
 
     def test_recall(self):
@@ -122,12 +166,12 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(out[1][0], RECALL)
 
     def test_compare(self):
-        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", parameter_asked="auclast", compare_pair="2+3")
+        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", **asking("auclast"), compare_pair="2+3")
         h, out, _ = run((None, [NCA]), ("Compare avec lin-up/log-down.", [cmp_, cmp_]))
         self.assertEqual(out[1][0], COMPARE)
 
     def test_refusal(self):
-        h, out, _ = run((None, [NCA]), ("Quelle est C0 ?", [dict(BASE, is_not_available="true", parameter_asked="c0")]))
+        h, out, _ = run((None, [NCA]), ("Quelle est C0 ?", [dict(BASE, is_not_available="true", **asking("c0"))]))
         self.assertEqual(out[1][0], REFUSAL_C0)
         self.assertRegex(out[1][0], scripts.NOT_AVAILABLE)
 
@@ -141,9 +185,9 @@ class TestTemplates(unittest.TestCase):
 
     def test_answers_hold_only_engine_numbers(self):
         """The gate finds no number outside the tool results and the user's messages in any template above."""
-        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", parameter_asked="auclast", compare_pair="2+3")
-        h, out, _ = run((None, [NCA]), ("cl", [dict(BASE, parameter_asked="cl")]), ("recall", [BASE]), ("cmp", [cmp_, cmp_]),
-                        ("c0", [dict(BASE, is_not_available="true", parameter_asked="c0")]))
+        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", **asking("auclast"), compare_pair="2+3")
+        h, out, _ = run((None, [NCA]), ("cl", [dict(BASE, **asking("cl"))]), ("recall", [BASE]), ("cmp", [cmp_, cmp_]),
+                        ("c0", [dict(BASE, is_not_available="true", **asking("c0"))]))
         allowed = gate.allowed_numbers([c["shown"] for c in h.tool_log], h.user_texts)
         for ans, _ in out:
             g = gate.check(ans, allowed=allowed)
@@ -152,7 +196,7 @@ class TestTemplates(unittest.TestCase):
 class TestActions(unittest.TestCase):
     """Which MCP calls each kind of turn makes."""
     def test_import_and_nca_once(self):
-        h, out, _ = run((None, [NCA]), ("Cmax ?", [dict(BASE, parameter_asked="several")]))
+        h, out, _ = run((None, [NCA]), ("Cmax ?", [dict(BASE, **asking(*USUAL))]))
         csv = "time (h),conc (mg/L)\n0,0\n0.5,310.2\n1.5,812.5\n4,520.1\n8,250.3\n12,120.7"
         self.assertEqual(h.mcp.calls, [
             ("data_import", {"name": "donnees", "csv": csv, "columns": [{"name": "time", "unit": "h"}, {"name": "conc", "unit": "mg/L"}]}),
@@ -172,7 +216,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(h.mcp.calls[1], ("nca_run", {"worksheet": 1, "dose": 400, "route": "extravascular"}))
 
     def test_compare_reruns_then_decides_again(self):
-        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", parameter_asked="auclast", compare_pair="2+3")
+        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", **asking("auclast"), compare_pair="2+3")
         h, out, dec = run((None, [NCA]), ("Compare.", [cmp_, cmp_]))
         self.assertEqual(h.mcp.calls[2:], [("nca_run", {"worksheet": 1, "dose": 400, "route": "extravascular", "options": {"auc_method": "lin_up_log_down"}}),
                                            ("analysis_compare", {"a": 2, "b": 3, "parameters": ["auclast"]})])
@@ -188,9 +232,9 @@ class TestActions(unittest.TestCase):
         self.assertEqual([c[0] for c in h.mcp.calls], ["data_import", "nca_run"])
 
     def test_reading_uses_the_analysis_of_the_decided_method(self):
-        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", parameter_asked="auclast", compare_pair="2+3")
-        h, out, _ = run((None, [NCA]), ("cmp", [cmp_, cmp_]), ("AUC lud ?", [dict(BASE, auc_method="lin_up_log_down", parameter_asked="auclast")]),
-                        ("AUC ?", [dict(BASE, parameter_asked="auclast")]))
+        cmp_ = dict(BASE, analysis="compare", auc_method="lin_up_log_down", **asking("auclast"), compare_pair="2+3")
+        h, out, _ = run((None, [NCA]), ("cmp", [cmp_, cmp_]), ("AUC lud ?", [dict(BASE, auc_method="lin_up_log_down", **asking("auclast"))]),
+                        ("AUC ?", [dict(BASE, **asking("auclast"))]))
         self.assertEqual(h.mcp.calls[-2:], [("analysis_get", {"analysis": 3}), ("analysis_get", {"analysis": 2})])
         self.assertIn("- AUC(0-tlast) : 3950.75 h*mg/L", out[2][0]); self.assertIn("- AUC(0-tlast) : 4012.25 h*mg/L", out[3][0])
 
@@ -231,20 +275,20 @@ class TestRefusals(unittest.TestCase):
         self.assertEqual(h.turn("Bonjour, peux-tu m'aider ?")[0], H.T_NO_DATA)
 
     def test_reading_before_any_analysis(self):
-        self.assertEqual(self.no_engine_call(dict(BASE, parameter_asked="cmax")), H.T_NO_ANALYSIS)
+        self.assertEqual(self.no_engine_call(dict(BASE, **asking("cmax"))), H.T_NO_ANALYSIS)
 
     def test_refusal_before_any_analysis(self):
-        out = self.no_engine_call(dict(BASE, is_not_available="true", parameter_asked="c0"))
+        out = self.no_engine_call(dict(BASE, is_not_available="true", **asking("c0")))
         self.assertEqual(out, "C0 (concentration initiale extrapolée) n'est pas calculé par Caladrius pour cette voie d'administration ; "
                               "aucune analyse n'est encore faite.")
 
     def test_refusal_overruled_when_the_engine_computed_the_parameter(self):
-        h, out, _ = run((None, [NCA]), ("Tlag ?", [dict(BASE, is_not_available="true", parameter_asked="tlag")]))
+        h, out, _ = run((None, [NCA]), ("Tlag ?", [dict(BASE, is_not_available="true", **asking("tlag"))]))
         self.assertEqual(out[1][0], "\n".join([HEADER, "- Tlag (temps de latence) : 0 h", WARN]))
         self.assertEqual(out[1][1]["notes"], ["is_not_available overruled: Caladrius computed tlag"])
 
     def test_engine_error_is_quoted_not_hidden(self):
-        h = H.Harness(Scripted(NCA, dict(BASE, parameter_asked="cmax")), mcp=FakeMCP())
+        h = H.Harness(Scripted(NCA, dict(BASE, **asking("cmax"))), mcp=FakeMCP())
         h.turn(message()); h.analyses[0]["id"] = 9                       # a stale id: the engine refuses it
         ans = h.turn("Cmax ?")[0]
         self.assertEqual(ans, "Caladrius a refusé l'appel analysis_get : « unknown_analysis: there is no analysis 9 ». Je ne donne aucune valeur.")
@@ -253,7 +297,7 @@ class TestRefusals(unittest.TestCase):
         qs = md.questions_for([2])
         got, outside = H.normalize_answers({"analysis": {"label": "nca"}, "dose_has_unit": True, "route": "boat"}, qs)
         self.assertEqual((got["analysis"], got["dose_has_unit"], got["route"]), ("nca", "true", None))
-        self.assertEqual(sorted(outside), ["auc_method", "compare_pair", "is_not_available", "parameter_asked", "route"])
+        self.assertEqual(sorted(outside), sorted(["auc_method", "compare_pair", "is_not_available", "route"] + [f"asked_{k}" for k in md.PARAMETERS]))
 
 class TestState(unittest.TestCase):
     """The harness's state is the dataset's state: compared with the scripted-wording rows of the 25 benchmark exercises."""
