@@ -1,0 +1,49 @@
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1010 04:00:43.128000 19884 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 04:00:43.179000 19884 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.3: Fast Qwen3_5 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA GeForce RTX 3060. Num GPUs = 1. Max memory: 12.0 GB. Platform: Windows.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.6. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]Loading weights:   0%|          | 1/473 [00:00<03:35,  2.19it/s]Loading weights:   3%|▎         | 14/473 [00:00<00:14, 32.12it/s]Loading weights:  10%|▉         | 46/473 [00:00<00:04, 103.18it/s]Loading weights:  18%|█▊        | 85/473 [00:00<00:02, 178.03it/s]Loading weights:  25%|██▌       | 120/473 [00:00<00:01, 220.71it/s]Loading weights:  34%|███▎      | 159/473 [00:00<00:01, 263.90it/s]Loading weights:  42%|████▏     | 200/473 [00:01<00:00, 300.61it/s]Loading weights:  50%|█████     | 238/473 [00:01<00:00, 322.20it/s]Loading weights:  58%|█████▊    | 276/473 [00:01<00:00, 338.34it/s]Loading weights:  66%|██████▌   | 312/473 [00:01<00:00, 332.68it/s]Loading weights:  86%|████████▋ | 408/473 [00:01<00:00, 511.36it/s]Loading weights: 100%|██████████| 473/473 [00:01<00:00, 299.68it/s]
+`causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+none done
+random_conc done
+no_table done
+# Relevance ablation on heldout_both.jsonl (593 rows), model qwen35-0.8b-d01-v2-adapters
+
+`decision/ablation.py`; none = the rows as they are, random_conc = concentrations of the digest replaced by random values of the same magnitude, no_table = the data key removed from the state. Gold unchanged (no gold label is computed from a concentration value).
+
+| mode | decisions right | all 20 right on a row | decisions that flip against `none` |
+|---|---|---|---|
+| none | 11643 / 11860 = 98.17 % | 400 / 593 | - |
+| random_conc | 11648 / 11860 = 98.21 % | 406 / 593 | 18 / 11860 |
+| no_table | 11635 / 11860 = 98.10 % | 394 / 593 | 74 / 11860 |
+
+Per question: accuracy without ablation, accuracy after, flips (of 593), mean absolute change of the probability of the original label.
+
+| question | none | random_conc | flips | mean dp | no_table | flips | mean dp |
+|---|---|---|---|---|---|---|---|
+| analysis | 95.1 % | 94.9 % | 9 | 0.0092 | 92.9 % | 17 | 0.0329 |
+| asked_adj_r2 | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_aucinf | 99.8 % | 100.0 % | 1 | 0.0010 | 100.0 % | 1 | 0.0019 |
+| asked_auclast | 97.0 % | 97.3 % | 2 | 0.0026 | 97.8 % | 11 | 0.0183 |
+| asked_aucpext | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_c0 | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_cl | 97.5 % | 97.5 % | 0 | 0.0003 | 97.5 % | 0 | 0.0006 |
+| asked_cmax | 97.6 % | 97.6 % | 0 | 0.0000 | 100.0 % | 14 | 0.0236 |
+| asked_half_life | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_lambda_z | 98.8 % | 98.8 % | 0 | 0.0001 | 96.5 % | 14 | 0.0207 |
+| asked_lambda_z_points | 97.5 % | 97.5 % | 0 | 0.0000 | 97.5 % | 0 | 0.0000 |
+| asked_mrt | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0002 |
+| asked_tlag | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_tmax | 100.0 % | 100.0 % | 0 | 0.0000 | 100.0 % | 0 | 0.0000 |
+| asked_vz | 96.0 % | 96.0 % | 0 | 0.0000 | 96.0 % | 0 | 0.0002 |
+| auc_method | 90.7 % | 91.1 % | 3 | 0.0043 | 91.6 % | 9 | 0.0167 |
+| compare_pair | 98.0 % | 98.0 % | 0 | 0.0007 | 98.0 % | 0 | 0.0029 |
+| dose_has_unit | 100.0 % | 100.0 % | 0 | 0.0000 | 99.3 % | 4 | 0.0060 |
+| is_not_available | 96.3 % | 96.5 % | 1 | 0.0013 | 96.0 % | 2 | 0.0037 |
+| route | 99.2 % | 99.2 % | 2 | 0.0024 | 99.2 % | 2 | 0.0040 |
+

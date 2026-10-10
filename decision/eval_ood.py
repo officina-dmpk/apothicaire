@@ -2,7 +2,7 @@
 """Evaluation of the decision pipeline on out-of-distribution requests (D-01, blind review by an independent expert).
 
   python decision/eval_ood.py --decider gold|majority|module:function [--date YYYY-MM-DD] [--requests PATH] [--no-run]
-                              [--convert-only] [--ids ood-001,ood-002] [--mcp PATH]
+                              [--convert-only] [--ids ood-001,ood-002] [--model DIR] [--mcp PATH]
 
 Input: decision/ood/requests.jsonl, one JSON object per line (format fixed by decision/review-dsh-brief.md):
   {"id", "exercise", "turn", "prior_analyses": [{"id", "auc_method"[, "kind"]}], "request", "tags": [...],
@@ -281,7 +281,8 @@ def load_decider(spec, train_path=TRAIN):
     mod, _, fn = spec.partition(":")
     if not fn: raise SystemExit(f"--decider must be gold, majority or module:function, got {spec!r}")
     f = getattr(importlib.import_module(mod), fn)
-    return f, getattr(f, "name", fn)
+    get_name = getattr(f, "get_name", None)          # a decider whose name depends on its model (decider_unsloth: $D01_MODEL)
+    return f, (get_name() if callable(get_name) else getattr(f, "name", fn))
 
 
 # ---------------------------------------------------------------- scoring
@@ -610,8 +611,10 @@ def main(argv=None):
     ap.add_argument("--ids", default="", help="comma-separated request ids to keep")
     ap.add_argument("--no-run", action="store_true", help="score the decisions only, no harness run (no engine needed)")
     ap.add_argument("--convert-only", action="store_true", help="write rows.jsonl and the schema report, nothing else")
+    ap.add_argument("--model", default=None, help="model folder for decider_unsloth (sets $D01_MODEL; its run folder is named after the model)")
     ap.add_argument("--mcp", default=None, help="path of caladrius-mcp (default: apothicaire.MCP_BIN)")
     a = ap.parse_args(argv)
+    if a.model: os.environ["D01_MODEL"] = os.path.abspath(a.model)
     if not os.path.isfile(a.requests): raise SystemExit(f"{a.requests} is missing")
     items, rejected = read_requests(a.requests)
     write_rows(items)

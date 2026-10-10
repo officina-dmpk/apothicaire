@@ -61,7 +61,8 @@ def load_decider(spec):
     if spec in ("gold", "gold-asked"): return gold_decider()       # gold-asked: the name of its run folder, which an earlier brief used
     mod, _, fn = spec.partition(":")
     f = getattr(importlib.import_module(mod), fn)
-    f.name = getattr(f, "name", fn)
+    get_name = getattr(f, "get_name", None)        # decider_unsloth: the name follows $D01_MODEL
+    f.name = get_name() if callable(get_name) else getattr(f, "name", fn)
     return f
 
 # ---------------------------------------------------------------- one exercise
@@ -152,7 +153,9 @@ def main():
     ap.add_argument("--date", default=datetime.date.today().isoformat())
     ap.add_argument("--first", type=int, default=0)
     ap.add_argument("--ids", default="")
+    ap.add_argument("--model", default=None, help="model folder for decider_unsloth (sets $D01_MODEL; the run folder is named after the model)")
     a = ap.parse_args()
+    if a.model: os.environ["D01_MODEL"] = os.path.abspath(a.model)
     decide = load_decider(a.decider)
     name = "".join(c if c.isalnum() or c in "-_." else "-" for c in getattr(decide, "name", "custom"))
     run_dir = os.path.join(RUNS, f"{a.date}-harness-{name}"); os.makedirs(run_dir, exist_ok=True)

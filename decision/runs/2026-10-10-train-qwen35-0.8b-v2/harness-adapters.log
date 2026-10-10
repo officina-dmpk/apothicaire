@@ -1,0 +1,39 @@
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1010 03:59:02.040000 18140 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 03:59:02.211000 18140 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.3: Fast Qwen3_5 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA GeForce RTX 3060. Num GPUs = 1. Max memory: 12.0 GB. Platform: Windows.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.6. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]Loading weights:   0%|          | 1/473 [00:00<03:28,  2.26it/s]Loading weights:   3%|▎         | 14/473 [00:00<00:13, 32.97it/s]Loading weights:  10%|▉         | 46/473 [00:00<00:04, 104.54it/s]Loading weights:  17%|█▋        | 80/473 [00:00<00:02, 163.61it/s]Loading weights:  24%|██▍       | 114/473 [00:00<00:01, 209.82it/s]Loading weights:  31%|███       | 146/473 [00:00<00:01, 237.19it/s]Loading weights:  37%|███▋      | 175/473 [00:01<00:01, 251.50it/s]Loading weights:  43%|████▎     | 205/473 [00:01<00:01, 262.93it/s]Loading weights:  51%|█████     | 239/473 [00:01<00:00, 283.14it/s]Loading weights:  58%|█████▊    | 273/473 [00:01<00:00, 297.38it/s]Loading weights:  64%|██████▍   | 305/473 [00:01<00:00, 298.48it/s]Loading weights:  74%|███████▍  | 350/473 [00:01<00:00, 341.83it/s]Loading weights:  92%|█████████▏| 433/473 [00:01<00:00, 482.39it/s]Loading weights: 100%|██████████| 473/473 [00:01<00:00, 269.58it/s]
+`causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+ex01_iv_bolus: 8/8 turns, oracle-correct 7/7, 30.95 s
+ex02_oral_1: 8/8 turns, oracle-correct 7/7, 3.00 s
+ex03_pk2_iv_bolus: 8/8 turns, oracle-correct 7/7, 2.70 s
+ex04_oral_1_lag: 8/8 turns, oracle-correct 7/7, 2.69 s
+ex05_iv_infusion: 8/8 turns, oracle-correct 7/7, 2.62 s
+ex06_oral_0: 8/8 turns, oracle-correct 7/7, 2.77 s
+ex07_iv_bolus: 8/8 turns, oracle-correct 7/7, 2.94 s
+ex08_oral_1: 8/8 turns, oracle-correct 7/7, 2.74 s
+ex09_pk2_oral_1: 8/8 turns, oracle-correct 7/7, 2.80 s
+ex10_oral_1_lag: 8/8 turns, oracle-correct 7/7, 2.67 s
+ex11_pk2_iv_bolus: 8/8 turns, oracle-correct 7/7, 2.73 s
+ex12_iv_infusion: 8/8 turns, oracle-correct 7/7, 2.77 s
+ex13_oral_1: 8/8 turns, oracle-correct 7/7, 2.85 s
+ex14_iv_bolus: 8/8 turns, oracle-correct 7/7, 3.12 s
+ex15_oral_0: 8/8 turns, oracle-correct 7/7, 2.61 s
+ex16_pk2_oral_1: 8/8 turns, oracle-correct 7/7, 2.76 s
+ex17_oral_1: 8/8 turns, oracle-correct 7/7, 2.56 s
+ex18_pk2_iv_bolus: 8/8 turns, oracle-correct 7/7, 3.10 s
+ex19_oral_1_lag: 8/8 turns, oracle-correct 7/7, 2.67 s
+ex20_iv_infusion: 8/8 turns, oracle-correct 7/7, 2.84 s
+ex21_oral_0: 8/8 turns, oracle-correct 7/7, 2.83 s
+ex22_pk2_oral_1: 8/8 turns, oracle-correct 7/7, 2.69 s
+ex23_iv_bolus: 8/8 turns, oracle-correct 7/7, 3.02 s
+ex24_pk2_iv_bolus: 8/8 turns, oracle-correct 7/7, 2.98 s
+ex25_oral_1: 8/8 turns, oracle-correct 7/7, 2.86 s
+decider: {'model': 'C:\\Users\\abdou\\apothicaire\\agent\\decision\\models\\qwen35-0.8b-d01-v2\\adapters', 'load_s': 8.6, 'decide_calls': 225, 'model_seconds_total': 50.71, 'model_seconds_per_call': 0.2254, 'torch_peak_allocated_mib': 1440, 'nvidia_smi_used_mib_at_end': 2325}
+oracle 175/175 turns, 558/558 numbers; tool calls invalid 0, failed 0 of 250; gate unverified 0/778; 0.375 s per turn
+report: C:\Users\abdou\apothicaire\agent\decision\runs\2026-10-10-harness-qwen35-0.8b-d01-v2-adapters\report.md

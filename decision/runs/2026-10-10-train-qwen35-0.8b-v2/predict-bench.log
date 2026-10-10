@@ -1,0 +1,45 @@
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1010 03:26:42.280000 8492 Lib\site-packages\torch\utils\_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 03:26:42.337000 8492 Lib\site-packages\torch\utils\_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.3: Fast Qwen3_5 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA GeForce RTX 3060. Num GPUs = 1. Max memory: 12.0 GB. Platform: Windows.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.6. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: QLoRA and full finetuning all not selected. Switching to 16bit LoRA.
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]Loading weights:   5%|▍         | 22/473 [00:00<00:02, 218.69it/s]Loading weights:  15%|█▌        | 73/473 [00:00<00:01, 388.90it/s]Loading weights:  24%|██▍       | 114/473 [00:00<00:00, 390.20it/s]Loading weights:  34%|███▍      | 163/473 [00:00<00:00, 427.96it/s]Loading weights:  44%|████▎     | 206/473 [00:00<00:00, 427.93it/s]Loading weights:  53%|█████▎    | 250/473 [00:00<00:00, 428.59it/s]Loading weights:  64%|██████▎   | 301/473 [00:00<00:00, 448.03it/s]Loading weights:  81%|████████  | 384/473 [00:00<00:00, 558.98it/s]Loading weights: 100%|██████████| 473/473 [00:00<00:00, 519.91it/s]
+`causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+  100/1150 rows, 176.0 ms/row
+  200/1150 rows, 178.7 ms/row
+  300/1150 rows, 175.4 ms/row
+  400/1150 rows, 177.0 ms/row
+  500/1150 rows, 177.1 ms/row
+  600/1150 rows, 179.1 ms/row
+  700/1150 rows, 183.5 ms/row
+  800/1150 rows, 177.5 ms/row
+  900/1150 rows, 177.1 ms/row
+  1000/1150 rows, 176.7 ms/row
+  1100/1150 rows, 176.4 ms/row
+wrote decision/runs/2026-10-10-train-qwen35-0.8b-v2\unsloth-qwen35-0.8b-d01-v2-merged-bench-cuda.json / .md
+overall 22880/23000 = 99.5 %; ECE 0.004; mean 177.9 ms/row
+  analysis                 98.8 %
+  asked_adj_r2             100.0 %
+  asked_aucinf             100.0 %
+  asked_auclast            100.0 %
+  asked_aucpext            100.0 %
+  asked_c0                 100.0 %
+  asked_cl                 100.0 %
+  asked_cmax               100.0 %
+  asked_half_life          100.0 %
+  asked_lambda_z           100.0 %
+  asked_lambda_z_points    100.0 %
+  asked_mrt                100.0 %
+  asked_tlag               100.0 %
+  asked_tmax               100.0 %
+  asked_vz                 100.0 %
+  auc_method               98.2 %
+  compare_pair             99.4 %
+  dose_has_unit            99.7 %
+  is_not_available         93.5 %
+  route                    100.0 %

@@ -1,0 +1,15 @@
+converted 74 lines, rejected 0; rows: C:\Users\abdou\apothicaire\agent\decision\ood\rows.jsonl; schema report: C:\Users\abdou\apothicaire\agent\decision\ood\schema_report.md
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1010 03:57:59.273000 10396 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 03:57:59.321000 10396 .venv-unsloth\Lib\site-packages\torch\utils\_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.3: Fast Qwen3_5 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA GeForce RTX 3060. Num GPUs = 1. Max memory: 12.0 GB. Platform: Windows.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.6. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]Loading weights:   0%|          | 1/473 [00:00<02:57,  2.65it/s]Loading weights:   5%|▍         | 22/473 [00:00<00:07, 59.12it/s]Loading weights:  11%|█         | 53/473 [00:00<00:03, 127.33it/s]Loading weights:  19%|█▉        | 92/473 [00:00<00:01, 199.91it/s]Loading weights:  25%|██▌       | 120/473 [00:00<00:01, 219.41it/s]Loading weights:  32%|███▏      | 152/473 [00:00<00:01, 246.68it/s]Loading weights:  39%|███▉      | 186/473 [00:01<00:01, 269.13it/s]Loading weights:  47%|████▋     | 220/473 [00:01<00:00, 287.68it/s]Loading weights:  53%|█████▎    | 252/473 [00:01<00:00, 291.79it/s]Loading weights:  60%|█████▉    | 283/473 [00:01<00:00, 292.43it/s]Loading weights:  66%|██████▋   | 314/473 [00:01<00:00, 289.35it/s]Loading weights:  82%|████████▏ | 386/473 [00:01<00:00, 409.86it/s]Loading weights:  99%|█████████▊| 466/473 [00:01<00:00, 507.48it/s]Loading weights: 100%|██████████| 473/473 [00:01<00:00, 286.52it/s]
+`causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+decider decider_unsloth:decide: 1389/1480 decisions (93.9 %), 22/74 rows all right
+answers: {'answer': 38, 'refusal:no-analysis': 20, 'refusal:not-wired': 5, 'refusal:ask': 6, 'refusal:not-available': 1, 'refusal:not-supported': 4}
+report: C:\Users\abdou\apothicaire\agent\decision\ood\runs\2026-10-10-qwen35-0.8b-d01-v2-adapters\report.md

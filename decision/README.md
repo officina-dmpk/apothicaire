@@ -994,3 +994,84 @@ Reading.
    The margin of the 0.8B is +0.9 point per decision and +18 complete vectors per 100 in distribution, and -1.5 point (90.3 % against 91.8 %) and -3 complete vectors per 74 on the reviewer's requests:
    training bought the generator's wordings, not the task. Limits: one untuned prompt without examples, one quantisation, one reviewer as author, 74 and 100 rows, decisions only (the harness was
    not run with the 27B).
+
+## Step 7: v2 training on the wording-level split, and the relevance ablation
+
+Item 7 of the plan and the question of the reviewer Astra ("does the model use the concentration data at all?"). Trained on `train.jsonl` of dataset v2 (2530 rows, 55 exercises, 166 wordings),
+evaluated and calibrated on `heldout_exercises` only (920 rows); `heldout_wordings`, `heldout_both` and `bench` were not used for training, evaluation passes or calibration. Full report with every
+table (confusions, calibration, per tag, every wrong decision, the list of requests a human must read):
+[`runs/2026-10-10-train-qwen35-0.8b-v2/report.md`](runs/2026-10-10-train-qwen35-0.8b-v2/report.md).
+
+```
+python decision/train_unsloth.py --base <local snapshot of unsloth/Qwen3.5-0.8B> --train train --heldout heldout_exercises --epochs 2 --max-seq-length 2560 --out decision/models/qwen35-0.8b-d01-v2
+python decision/predict_unsloth.py --model decision/models/qwen35-0.8b-d01-v2/{merged,adapters --load-in-4bit} --split <set> --max-seq-length 2560
+python decision/eval_ood.py --decider decider_unsloth:decide --model decision/models/qwen35-0.8b-d01-v2[/adapters]      # --model sets $D01_MODEL; the run folder is named after the model
+python decision/run_harness.py --decider decider_unsloth:decide --model decision/models/qwen35-0.8b-d01-v2[/adapters]
+python decision/ablation.py --model decision/models/qwen35-0.8b-d01-v2[/adapters] --split heldout_both    # tests/test_ablation.py; tables per set: decision/set_tables.py
+```
+
+**Training.** `build_dataset`: 50600 train and 18400 held-out decisions, 0 skipped, 0 truncated. 160 steps, training 3831 s, total 4089 s (68 min), torch peak 3674 MiB, `nvidia-smi` peak 5201 MiB. Training loss
+0.468 (step 20), 0.0153 (80), 0.0021 (160); held-out loss 0.0127 after epoch 1, 0.0014 after epoch 2; `calibrate` accuracy 0.99984, ECE 0.0002, record accuracy 0.9967.
+
+**Two forms of the model.** The 16-bit `merged` file (what Steps 3, 5, 6 measured) is not the trained model: with it `is_not_available` is answered `false` on every row (recall 0 / 60 in distribution, P(true) about 0), 99.5 % per
+decision and 90.0 % complete vectors on `heldout_exercises`; the `adapters` on the 4-bit base give 100.0 % and 99.7 % there, exactly what `calibrate` reports (917 / 920 = 0.9967). The v1 merged file shows the same signature (its `calibrate`
+0.9958 against 98.1 % complete vectors measured). Cause not isolated. Both forms are reported as "adapters / merged".
+
+**The four sets** (per question, adapters / merged; best constant and the reviewer's rules on the same rows; v1: held-out 99.9 % and bench 99.9 % per decision, 175 / 175 harness turns, on its own older files):
+
+| question | heldout_exercises (920 rows) | heldout_wordings (825 rows) | heldout_both (593 rows) | bench (1150 rows) |
+|---|---|---|---|---|
+| analysis | 100.0 / 99.1 % | 95.2 / 94.5 % | 95.1 / 95.3 % | 100.0 / 98.8 % |
+| route | 100.0 / 100.0 % | 99.5 / 99.5 % | 99.2 / 98.3 % | 100.0 / 100.0 % |
+| auc_method | 99.7 / 98.4 % | 91.5 / 90.4 % | 90.7 / 88.0 % | 99.4 / 98.2 % |
+| dose_has_unit | 100.0 / 99.6 % | 100.0 / 100.0 % | 100.0 / 100.0 % | 100.0 / 99.7 % |
+| is_not_available | 100.0 / 93.5 % | 95.8 / 93.3 % | 96.3 / 94.4 % | 99.9 / 93.5 % |
+| compare_pair | 100.0 / 99.2 % | 98.5 / 97.3 % | 98.0 / 97.0 % | 100.0 / 99.4 % |
+| `asked_<parameter>` (14 pooled) | 100.0 / 100.0 % | 98.9 / 98.7 % | 98.9 / 98.8 % | 100.0 / 100.0 % |
+| macro-average of the seven | 100.0 / 98.5 % | 97.0 / 96.3 % | 96.9 / 96.0 % | 99.9 / 98.5 % |
+| **all 20, per decision** | 100.0 / 99.5 % | 98.2 / 97.9 % | 98.2 / 97.8 % | 100.0 / 99.5 % |
+| **all 20 right on a row** | 917 (99.7 %) / 828 (90.0 %) | 568 (68.8 %) / 520 (63.0 %) | 400 (67.5 %) / 362 (61.0 %) | 1142 (99.3 %) / 1031 (89.7 %) |
+| best constant, all 20 / macro | 85.2 / 74.4 % | 85.6 / 75.2 % | 85.6 / 74.1 % | 85.3 / 75.0 % |
+| reviewer's rules, all 20 / macro | 89.7 / 87.1 % | 87.4 / 80.3 % | 88.5 / 82.4 % | 89.5 / 86.8 % |
+| `is_not_available`: best constant / rules | 93.5 / 97.9 % | 93.3 / 94.9 % | 94.4 / 95.3 % | 93.5 / 97.5 % |
+
+**The reviewer's 74 requests** (`ood/runs/2026-10-10-qwen35-0.8b-d01-v2{,-adapters}/`; v1 columns rerun on the 74 rows as they were at 6a51a65, old question set; the 27B is the baseline above, also on those rows):
+
+| question | v1 merged | v1 adapters | v2 merged | v2 adapters | 27B (one call per row) | best constant | reviewer's rules |
+|---|---|---|---|---|---|---|---|
+| analysis | 37.8 % | 39.2 % | 82.4 % | 74.3 % | 68.9 % | 60.8 % | 77.0 % |
+| route | 82.4 % | 79.7 % | 90.5 % | 81.1 % | 94.6 % | 54.1 % | 87.8 % |
+| auc_method | 21.6 % | 23.0 % | 54.1 % | 67.6 % | 18.9 % | 77.0 % | 74.3 % |
+| dose_has_unit | 98.6 % | 98.6 % | 97.3 % | 97.3 % | 97.3 % | 93.2 % | 100.0 % |
+| is_not_available | 85.1 % | 85.1 % | 85.1 % | 85.1 % | 85.1 % | 85.1 % | 91.9 % |
+| compare_pair | 100.0 % | 100.0 % | 97.3 % | 97.3 % | 95.9 % | 94.6 % | 97.3 % |
+| `asked_<parameter>` (14 pooled) | 98.6 % | 98.4 % | 98.2 % | 98.2 % | 98.2 % | 90.4 % | 90.4 % |
+| macro-average of the seven | 74.9 % | 74.9 % | 86.4 % | 85.8 % | 79.9 % | 79.3 % | 88.4 % |
+| **all 20, per decision** | 90.3 % | 90.1 % | 94.1 % | 93.9 % | 91.8 % | 86.6 % | 89.7 % |
+| **all 20 right on a row** | 4 / 74 | 6 / 74 | 20 / 74 | 22 / 74 | 7 / 74 | 0 / 74 | 0 / 74 |
+
+`auc_method` and `is_not_available` stay at or below the best constant on the 74 requests (`is_not_available`: 0 of 11 true cases, highest P(true) 0.013). Wrong decisions: 88 (merged) / 91 (adapters), of which 71 / 77 at confidence 0.90 or more (v1: 135 of 143).
+
+**Harness.** 25 benchmark exercises: **175 / 175 oracle turns, 558 / 558 numbers, 0 / 250 invalid or failed calls, 0 unverified numbers** for both forms (0.34 s and 0.38 s per turn, model 0.20 s and 0.23 s per call, torch peak 1.9 GB and 1.4 GB). Decisions differing from the gold ones: 50 of 4500
+with the merged file (25 `compare_pair` first asks, unused, and 25 of 25 `is_not_available` on the not-available turns, answered `false` at confidence 1.0 and scored correct because the oracle does not cover that kind), 25 with the adapters (the `compare_pair` asks).
+74 requests through the harness (v1 / merged / adapters / gold decisions): answers with values 12 / **44** / **38** / 47; "no analysis yet" 58 / 13 / 20 / 1; asked back 0 / 9 / 6 / 7; answered where the gold decisions expect a refusal or a question 0 / 3 (ood-024, 034, 069) / 2 (ood-061, 069) / 0, of which
+ood-034 (Vdss answered with a Vz line, nothing said on Vdss) is a real defect; 64 of 74 requests need a human read in both runs (list in the report).
+
+**Relevance ablation** (`heldout_both`, 593 rows x 20 questions, same model; the gold is unchanged because no gold label depends on a concentration value):
+
+| mode | v2 adapters: decisions right | flips against `none` | v2 merged: decisions right | flips against `none` |
+|---|---|---|---|---|
+| none | 11643 / 11860 = 98.17 % (400 complete vectors) | | 11599 / 11860 = 97.80 % (362) | |
+| concentrations replaced by random values of the same magnitude | 11648 = 98.21 % (406) | 18 (0.15 %) | 11602 = 97.82 % (367) | 17 (0.14 %) |
+| data table removed from the state | 11635 = 98.10 % (394) | 74 (0.62 %) | 11561 = 97.48 % (347) | 88 (0.74 %) |
+
+Random values move 7 to 9 `analysis` answers of 593 (mean change of the probability 0.01) and nothing else by more than 3 rows per question. Removing the table moves `analysis` by -2.2 / -5.2 points (adapters / merged), `asked_cmax` by +2.4 / +1.2, `asked_mrt`, `asked_lambda_z`, `asked_auclast` (up to 14 rows each) and `dose_has_unit` (4 rows, adapters).
+
+Reading.
+
+1. Holding out wordings and adding 163 of them made the model transfer, not enough: on the reviewer's requests `analysis` rose from 37.8 % to 82.4 % (merged) / 74.3 % (adapters), `route` from 82.4 % to 90.5 % / 81.1 %, complete vectors from 4 / 74 to 20 / 74 and 22 / 74, answers with values in the harness from 12 to 44 / 38 (the 27B has 7 / 74 complete vectors,
+   the rules 0 / 74 on the current rows). Seven requests in ten still have a wrong decision, and on wordings it never saw 98.2 % per decision is only 67 to 69 % complete vectors (61 to 63 % merged), against 99.7 % on new exercises in known wordings.
+2. It still fails where the reviewer's requests leave the generator: `auc_method` (54 % / 68 %, below the 77 % constant: `linear` is answered `not_applicable` for 21 to 32 of the 57 `linear` requests), `is_not_available` (0 of 11, equal to the constant; recall 33 to 36 % on unseen wordings with the adapters, 0 % with the merged file), `fit_pk2` in unseen wordings (recall 55 to 73 %, answered `none_needed`), infusion routes (`unknown`), the reversed compare `3+2` (recall 28 to 61 % on unseen wordings), steady state, urine, Vdss.
+3. Its confidence still says nothing: 71 of 88 (merged) and 77 of 91 (adapters) wrong decisions are at 0.90 or more; the gate (0 unverified numbers in every run) remains the guard, the probability is not.
+4. The shipped 16-bit file is not the calibrated model (reading of "Two forms"): every merged-file figure of Steps 3, 5 and 6 understates it in distribution, and a missed `is_not_available` hides behind a 175 / 175 because the oracle does not cover the kind; the choice of the file to deploy, or the cause of the merge loss, is open.
+5. It does not read the concentration data: random values of the same magnitude flip 0.15 % of the decisions and leave the accuracy where it was (+0.04 / +0.02 points), while removing the table moves 0.6 to 0.7 % of them and `analysis` by up to 5 points: what is read is that a table is there and how it is headed, not its numbers. That is the right behaviour for these 20 questions, none of whose labels depends on a value, and it means this ablation cannot say whether the model could use data where an answer needs it.

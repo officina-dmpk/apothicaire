@@ -1,0 +1,1200 @@
+{
+ "rows": 74,
+ "decisions": 1480,
+ "correct": 1389,
+ "accuracy": 0.9385135135135135,
+ "exact_rows": 22,
+ "has_probs": true,
+ "per_question": {
+  "analysis": {
+   "correct": 55,
+   "total": 74,
+   "accuracy": 0.7432432432432432,
+   "majority": 0.6081081081081081,
+   "train_majority": 0.21621621621621623
+  },
+  "asked_adj_r2": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9864864864864865,
+   "train_majority": 0.9864864864864865
+  },
+  "asked_aucinf": {
+   "correct": 67,
+   "total": 74,
+   "accuracy": 0.9054054054054054,
+   "majority": 0.918918918918919,
+   "train_majority": 0.918918918918919
+  },
+  "asked_auclast": {
+   "correct": 67,
+   "total": 74,
+   "accuracy": 0.9054054054054054,
+   "majority": 0.7297297297297297,
+   "train_majority": 0.7297297297297297
+  },
+  "asked_aucpext": {
+   "correct": 72,
+   "total": 74,
+   "accuracy": 0.972972972972973,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_c0": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_cl": {
+   "correct": 73,
+   "total": 74,
+   "accuracy": 0.9864864864864865,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "asked_cmax": {
+   "correct": 73,
+   "total": 74,
+   "accuracy": 0.9864864864864865,
+   "majority": 0.7027027027027027,
+   "train_majority": 0.7027027027027027
+  },
+  "asked_half_life": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "asked_lambda_z": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9864864864864865,
+   "train_majority": 0.9864864864864865
+  },
+  "asked_lambda_z_points": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.972972972972973,
+   "train_majority": 0.972972972972973
+  },
+  "asked_mrt": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9594594594594594,
+   "train_majority": 0.9594594594594594
+  },
+  "asked_tlag": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9459459459459459,
+   "train_majority": 0.9459459459459459
+  },
+  "asked_tmax": {
+   "correct": 74,
+   "total": 74,
+   "accuracy": 1.0,
+   "majority": 0.9054054054054054,
+   "train_majority": 0.9054054054054054
+  },
+  "asked_vz": {
+   "correct": 73,
+   "total": 74,
+   "accuracy": 0.9864864864864865,
+   "majority": 0.8783783783783784,
+   "train_majority": 0.8783783783783784
+  },
+  "auc_method": {
+   "correct": 50,
+   "total": 74,
+   "accuracy": 0.6756756756756757,
+   "majority": 0.7702702702702703,
+   "train_majority": 0.12162162162162163
+  },
+  "compare_pair": {
+   "correct": 72,
+   "total": 74,
+   "accuracy": 0.972972972972973,
+   "majority": 0.9459459459459459,
+   "train_majority": 0.9459459459459459
+  },
+  "dose_has_unit": {
+   "correct": 72,
+   "total": 74,
+   "accuracy": 0.972972972972973,
+   "majority": 0.9324324324324325,
+   "train_majority": 0.9324324324324325
+  },
+  "is_not_available": {
+   "correct": 63,
+   "total": 74,
+   "accuracy": 0.8513513513513513,
+   "majority": 0.8513513513513513,
+   "train_majority": 0.8513513513513513
+  },
+  "route": {
+   "correct": 60,
+   "total": 74,
+   "accuracy": 0.8108108108108109,
+   "majority": 0.5405405405405406,
+   "train_majority": 0.5405405405405406
+  }
+ },
+ "per_tag": {
+  "colloquial": {
+   "rows": 6,
+   "correct": 114,
+   "total": 120,
+   "exact_rows": 3
+  },
+  "route-implied": {
+   "rows": 5,
+   "correct": 95,
+   "total": 100,
+   "exact_rows": 2
+  },
+  "abbreviation": {
+   "rows": 17,
+   "correct": 327,
+   "total": 340,
+   "exact_rows": 7
+  },
+  "typo": {
+   "rows": 2,
+   "correct": 39,
+   "total": 40,
+   "exact_rows": 1
+  },
+  "follow-up": {
+   "rows": 4,
+   "correct": 76,
+   "total": 80,
+   "exact_rows": 0
+  },
+  "route-stated": {
+   "rows": 8,
+   "correct": 155,
+   "total": 160,
+   "exact_rows": 5
+  },
+  "terminology-mismatch": {
+   "rows": 2,
+   "correct": 37,
+   "total": 40,
+   "exact_rows": 0
+  },
+  "fit": {
+   "rows": 4,
+   "correct": 79,
+   "total": 80,
+   "exact_rows": 3
+  },
+  "two-compartments": {
+   "rows": 2,
+   "correct": 40,
+   "total": 40,
+   "exact_rows": 2
+  },
+  "language-mix": {
+   "rows": 2,
+   "correct": 39,
+   "total": 40,
+   "exact_rows": 1
+  },
+  "infusion": {
+   "rows": 7,
+   "correct": 131,
+   "total": 140,
+   "exact_rows": 2
+  },
+  "dose-unit-micro": {
+   "rows": 9,
+   "correct": 163,
+   "total": 180,
+   "exact_rows": 0
+  },
+  "duration-unit-mismatch": {
+   "rows": 2,
+   "correct": 36,
+   "total": 40,
+   "exact_rows": 0
+  },
+  "unit-in-text": {
+   "rows": 5,
+   "correct": 96,
+   "total": 100,
+   "exact_rows": 3
+  },
+  "duration-word": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "compare": {
+   "rows": 8,
+   "correct": 147,
+   "total": 160,
+   "exact_rows": 0
+  },
+  "english-term": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "rerun": {
+   "rows": 4,
+   "correct": 75,
+   "total": 80,
+   "exact_rows": 0
+  },
+  "by-id": {
+   "rows": 2,
+   "correct": 35,
+   "total": 40,
+   "exact_rows": 0
+  },
+  "no-parameter": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "tlag": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "parameter-not-for-route": {
+   "rows": 5,
+   "correct": 89,
+   "total": 100,
+   "exact_rows": 0
+  },
+  "iv-explicit": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "out-of-scope": {
+   "rows": 4,
+   "correct": 66,
+   "total": 80,
+   "exact_rows": 0
+  },
+  "bioequivalence": {
+   "rows": 1,
+   "correct": 17,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "population": {
+   "rows": 1,
+   "correct": 17,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "no-dose": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "dose-without-unit": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "unit-conversion-in-text": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-mg": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-mcg": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "unrecognized-unit": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "blq": {
+   "rows": 4,
+   "correct": 78,
+   "total": 80,
+   "exact_rows": 2
+  },
+  "simulate": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "two-requests-in-one-sentence": {
+   "rows": 2,
+   "correct": 39,
+   "total": 40,
+   "exact_rows": 1
+  },
+  "latin-route": {
+   "rows": 3,
+   "correct": 58,
+   "total": 60,
+   "exact_rows": 1
+  },
+  "parameter-not-in-schema": {
+   "rows": 2,
+   "correct": 36,
+   "total": 40,
+   "exact_rows": 0
+  },
+  "unicode": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "method-explicit": {
+   "rows": 2,
+   "correct": 39,
+   "total": 40,
+   "exact_rows": 1
+  },
+  "route-missing": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "c0": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "recall": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "non-auc-parameter": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "no-prior-analysis": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "invented": {
+   "rows": 16,
+   "correct": 292,
+   "total": 320,
+   "exact_rows": 2
+  },
+  "unit-variety": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "multi-subject": {
+   "rows": 1,
+   "correct": 19,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "steady-state": {
+   "rows": 1,
+   "correct": 15,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "multiple-dose": {
+   "rows": 1,
+   "correct": 15,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "urine": {
+   "rows": 1,
+   "correct": 17,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "oral": {
+   "rows": 1,
+   "correct": 20,
+   "total": 20,
+   "exact_rows": 1
+  },
+  "dose-unit-g": {
+   "rows": 1,
+   "correct": 18,
+   "total": 20,
+   "exact_rows": 0
+  },
+  "plain": {
+   "rows": 2,
+   "correct": 38,
+   "total": 40,
+   "exact_rows": 0
+  }
+ },
+ "wrong_decisions": [
+  {
+   "id": "ood-002",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "et la t1/2 stp ?"
+  },
+  {
+   "id": "ood-003",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "AUC0-t et AUC0-inf svp"
+  },
+  {
+   "id": "ood-005",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.94,
+   "request": "bolus de 200 mg : Cl/F ?"
+  },
+  {
+   "id": "ood-005",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9994,
+   "request": "bolus de 200 mg : Cl/F ?"
+  },
+  {
+   "id": "ood-007",
+   "question": "route",
+   "gold": "iv_bolus",
+   "pred": "unknown",
+   "confidence": 0.5212,
+   "request": "fit un modèle mono-compartiment sur ces données (bolus de 300 mg)"
+  },
+  {
+   "id": "ood-009",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Et la MRT ?"
+  },
+  {
+   "id": "ood-010",
+   "question": "asked_auclast",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Perfusion de 500 µg pendant 1,5 h, Cmax et AUC0-inf."
+  },
+  {
+   "id": "ood-010",
+   "question": "route",
+   "gold": "iv_infusion",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Perfusion de 500 µg pendant 1,5 h, Cmax et AUC0-inf."
+  },
+  {
+   "id": "ood-011",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9557,
+   "request": "Perfusion de 500 µg pendant 90 minutes : que vaut l'AUC(0-t) ?"
+  },
+  {
+   "id": "ood-011",
+   "question": "route",
+   "gold": "iv_infusion",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Perfusion de 500 µg pendant 90 minutes : que vaut l'AUC(0-t) ?"
+  },
+  {
+   "id": "ood-012",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 0.9991,
+   "request": "J'ai avalé 800 µg, les temps sont en minutes ; Cmax et AUC0-t."
+  },
+  {
+   "id": "ood-012",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "J'ai avalé 800 µg, les temps sont en minutes ; Cmax et AUC0-t."
+  },
+  {
+   "id": "ood-013",
+   "question": "asked_auclast",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9995,
+   "request": "Compare l'AUC linéaire et la lin-up/log-down."
+  },
+  {
+   "id": "ood-014",
+   "question": "asked_aucpext",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Compare les deux AUC (valeur et %)."
+  },
+  {
+   "id": "ood-014",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Compare les deux AUC (valeur et %)."
+  },
+  {
+   "id": "ood-015",
+   "question": "auc_method",
+   "gold": "lin_up_log_down",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Compare l'analyse 2 à l'analyse 1."
+  },
+  {
+   "id": "ood-015",
+   "question": "compare_pair",
+   "gold": "3+2",
+   "pred": "2+3",
+   "confidence": 1.0,
+   "request": "Compare l'analyse 2 à l'analyse 1."
+  },
+  {
+   "id": "ood-016",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9768,
+   "request": "Voie orale, 300 mg : y a-t-il un Tlag ?"
+  },
+  {
+   "id": "ood-016",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9997,
+   "request": "Voie orale, 300 mg : y a-t-il un Tlag ?"
+  },
+  {
+   "id": "ood-017",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9991,
+   "request": "Quel est le Tlag de ce bolus de 200 mg ?"
+  },
+  {
+   "id": "ood-017",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9928,
+   "request": "Quel est le Tlag de ce bolus de 200 mg ?"
+  },
+  {
+   "id": "ood-018",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9998,
+   "request": "Quelle est la C0 après cette prise orale de 400 mg ?"
+  },
+  {
+   "id": "ood-018",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9888,
+   "request": "Quelle est la C0 après cette prise orale de 400 mg ?"
+  },
+  {
+   "id": "ood-019",
+   "question": "analysis",
+   "gold": "none_needed",
+   "pred": "not_supported",
+   "confidence": 1.0,
+   "request": "Ce produit de 400 mg est-il bioéquivalent au princeps ?"
+  },
+  {
+   "id": "ood-019",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 1.0,
+   "request": "Ce produit de 400 mg est-il bioéquivalent au princeps ?"
+  },
+  {
+   "id": "ood-019",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Ce produit de 400 mg est-il bioéquivalent au princeps ?"
+  },
+  {
+   "id": "ood-020",
+   "question": "analysis",
+   "gold": "none_needed",
+   "pred": "not_supported",
+   "confidence": 1.0,
+   "request": "Estime un modèle de population à effets mixtes (NONMEM) sur ces données, dose 400 mg."
+  },
+  {
+   "id": "ood-020",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 1.0,
+   "request": "Estime un modèle de population à effets mixtes (NONMEM) sur ces données, dose 400 mg."
+  },
+  {
+   "id": "ood-020",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Estime un modèle de population à effets mixtes (NONMEM) sur ces données, dose 400 mg."
+  },
+  {
+   "id": "ood-021",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.8668,
+   "request": "Après une prise orale, voici mes concentrations : quelle est la demi-vie ?"
+  },
+  {
+   "id": "ood-021",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9968,
+   "request": "Après une prise orale, voici mes concentrations : quelle est la demi-vie ?"
+  },
+  {
+   "id": "ood-022",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9829,
+   "request": "Prise orale de 100, voici les données. Cmax ?"
+  },
+  {
+   "id": "ood-022",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9078,
+   "request": "Prise orale de 100, voici les données. Cmax ?"
+  },
+  {
+   "id": "ood-024",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.7345,
+   "request": "Bolus de 2000 mcg : CL et Vz."
+  },
+  {
+   "id": "ood-024",
+   "question": "dose_has_unit",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Bolus de 2000 mcg : CL et Vz."
+  },
+  {
+   "id": "ood-025",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Et le pourcentage d'AUC extrapolée ?"
+  },
+  {
+   "id": "ood-029",
+   "question": "route",
+   "gold": "iv_bolus",
+   "pred": "unknown",
+   "confidence": 0.9109,
+   "request": "Donne-moi le Cmax puis refais l'analyse en lin-up/log-down, bolus de 300 mg."
+  },
+  {
+   "id": "ood-030",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 0.9783,
+   "request": "Refais l'analyse en lin-up/log-down et compare les deux AUC en valeur et en %."
+  },
+  {
+   "id": "ood-030",
+   "question": "asked_aucpext",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Refais l'analyse en lin-up/log-down et compare les deux AUC en valeur et en %."
+  },
+  {
+   "id": "ood-034",
+   "question": "asked_vz",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Bolus de 150 mg : quel est le Vdss ?"
+  },
+  {
+   "id": "ood-034",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9999,
+   "request": "Bolus de 150 mg : quel est le Vdss ?"
+  },
+  {
+   "id": "ood-037",
+   "question": "route",
+   "gold": "iv_infusion",
+   "pred": "unknown",
+   "confidence": 0.9992,
+   "request": "Perfusion de 150 mg sur 2 h : clairance et volume de distribution."
+  },
+  {
+   "id": "ood-038",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9952,
+   "request": "Quel est le Tlag de cette perfusion de 150 mg ?"
+  },
+  {
+   "id": "ood-038",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9938,
+   "request": "Quel est le Tlag de cette perfusion de 150 mg ?"
+  },
+  {
+   "id": "ood-039",
+   "question": "asked_auclast",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Dose IV de 1000 µg : AUC(0-inf) et pourcentage extrapolé."
+  },
+  {
+   "id": "ood-039",
+   "question": "route",
+   "gold": "iv_bolus",
+   "pred": "iv_infusion",
+   "confidence": 1.0,
+   "request": "Dose IV de 1000 µg : AUC(0-inf) et pourcentage extrapolé."
+  },
+  {
+   "id": "ood-040",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.5998,
+   "request": "J'ai ingéré 2000 µg : au bout de combien de temps la concentration est-elle divisée par deux ?"
+  },
+  {
+   "id": "ood-040",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9993,
+   "request": "J'ai ingéré 2000 µg : au bout de combien de temps la concentration est-elle divisée par deux ?"
+  },
+  {
+   "id": "ood-040",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "J'ai ingéré 2000 µg : au bout de combien de temps la concentration est-elle divisée par deux ?"
+  },
+  {
+   "id": "ood-044",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Comprimé à libération prolongée de 5000 µg : Cmax, Tmax et demi-vie."
+  },
+  {
+   "id": "ood-046",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9999,
+   "request": "Bolus de 150 mg : le Cl/F et le Vz/F ?"
+  },
+  {
+   "id": "ood-047",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9648,
+   "request": "Voie orale, 100 mg : λz et t½."
+  },
+  {
+   "id": "ood-048",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Voie orale, 300 mg : quelle est la constante d'absorption ka ?"
+  },
+  {
+   "id": "ood-048",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9889,
+   "request": "Voie orale, 300 mg : quelle est la constante d'absorption ka ?"
+  },
+  {
+   "id": "ood-051",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.7125,
+   "request": "Bolus de 2000 µg : l'AUC(0-t) tient-elle compte du point sous la LLOQ ? et le % extrapolé ?"
+  },
+  {
+   "id": "ood-052",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 0.9993,
+   "request": "Dose orale de 500 mg, méthode des trapèzes linéaires : AUC0-t."
+  },
+  {
+   "id": "ood-053",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 1.0,
+   "request": "Voici mes concentrations après 400 mg ; quel est le Cmax ?"
+  },
+  {
+   "id": "ood-053",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.7025,
+   "request": "Voici mes concentrations après 400 mg ; quel est le Cmax ?"
+  },
+  {
+   "id": "ood-055",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9789,
+   "request": "Perfusion de 500 µg sur 90 min : Cmax."
+  },
+  {
+   "id": "ood-055",
+   "question": "route",
+   "gold": "iv_infusion",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Perfusion de 500 µg sur 90 min : Cmax."
+  },
+  {
+   "id": "ood-056",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Rappelle-moi la dose et la méthode d'AUC utilisées."
+  },
+  {
+   "id": "ood-057",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Compare le Cmax entre les deux méthodes."
+  },
+  {
+   "id": "ood-058",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 0.5246,
+   "request": "Compare les AUC linéaire et lin-up/log-down, dose orale de 400 mg."
+  },
+  {
+   "id": "ood-059",
+   "question": "asked_auclast",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "250 mg per os, voici les concentrations en µg/mL : Cmax, Tmax et AUC0-inf."
+  },
+  {
+   "id": "ood-060",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.7482,
+   "request": "Bolus IV de 120 mg : quel est le Tlag ?"
+  },
+  {
+   "id": "ood-060",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9868,
+   "request": "Bolus IV de 120 mg : quel est le Tlag ?"
+  },
+  {
+   "id": "ood-061",
+   "question": "analysis",
+   "gold": "none_needed",
+   "pred": "nca",
+   "confidence": 0.9836,
+   "request": "Quelle est la C0 après cette prise orale de 200 mg ?"
+  },
+  {
+   "id": "ood-061",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.9995,
+   "request": "Quelle est la C0 après cette prise orale de 200 mg ?"
+  },
+  {
+   "id": "ood-061",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.9905,
+   "request": "Quelle est la C0 après cette prise orale de 200 mg ?"
+  },
+  {
+   "id": "ood-062",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.659,
+   "request": "Perfusion de 75 mg sur 1,5 h, les temps sont en minutes : Cmax."
+  },
+  {
+   "id": "ood-062",
+   "question": "auc_method",
+   "gold": "linear",
+   "pred": "not_applicable",
+   "confidence": 0.7558,
+   "request": "Perfusion de 75 mg sur 1,5 h, les temps sont en minutes : Cmax."
+  },
+  {
+   "id": "ood-063",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Étude à deux sujets, 300 mg par voie orale : Cmax et AUC0-t par sujet."
+  },
+  {
+   "id": "ood-064",
+   "question": "analysis",
+   "gold": "none_needed",
+   "pred": "not_supported",
+   "confidence": 0.9998,
+   "request": "Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin."
+  },
+  {
+   "id": "ood-064",
+   "question": "asked_cmax",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin."
+  },
+  {
+   "id": "ood-064",
+   "question": "auc_method",
+   "gold": "not_applicable",
+   "pred": "linear",
+   "confidence": 0.5909,
+   "request": "Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin."
+  },
+  {
+   "id": "ood-064",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 1.0,
+   "request": "Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin."
+  },
+  {
+   "id": "ood-064",
+   "question": "route",
+   "gold": "oral",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Administration répétée de 100 mg toutes les 12 h : Cmax à l'état d'équilibre et Cmin."
+  },
+  {
+   "id": "ood-065",
+   "question": "analysis",
+   "gold": "none_needed",
+   "pred": "not_supported",
+   "confidence": 0.9997,
+   "request": "Recueil urinaire : quantité excrétée et clairance rénale."
+  },
+  {
+   "id": "ood-065",
+   "question": "asked_cl",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Recueil urinaire : quantité excrétée et clairance rénale."
+  },
+  {
+   "id": "ood-065",
+   "question": "is_not_available",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 1.0,
+   "request": "Recueil urinaire : quantité excrétée et clairance rénale."
+  },
+  {
+   "id": "ood-068",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.6904,
+   "request": "80 mg per os, il y a des zéros sous la LLOQ : AUC(0-t) et Cmax."
+  },
+  {
+   "id": "ood-069",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "J'ai pris 0,25 g par voie orale : Cmax et AUC0-t."
+  },
+  {
+   "id": "ood-069",
+   "question": "dose_has_unit",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "J'ai pris 0,25 g par voie orale : Cmax et AUC0-t."
+  },
+  {
+   "id": "ood-070",
+   "question": "analysis",
+   "gold": "nca",
+   "pred": "none_needed",
+   "confidence": 0.9097,
+   "request": "Perfusion de 750 µg sur 1 h : Vz et CL."
+  },
+  {
+   "id": "ood-070",
+   "question": "route",
+   "gold": "iv_infusion",
+   "pred": "unknown",
+   "confidence": 1.0,
+   "request": "Perfusion de 750 µg sur 1 h : Vz et CL."
+  },
+  {
+   "id": "ood-071",
+   "question": "asked_auclast",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 0.8294,
+   "request": "Compare l'AUC linéaire et la lin-up/log-down."
+  },
+  {
+   "id": "ood-072",
+   "question": "asked_auclast",
+   "gold": "true",
+   "pred": "false",
+   "confidence": 1.0,
+   "request": "Compare l'analyse 2 et l'analyse 1 pour l'AUC."
+  },
+  {
+   "id": "ood-072",
+   "question": "auc_method",
+   "gold": "lin_up_log_down",
+   "pred": "not_applicable",
+   "confidence": 1.0,
+   "request": "Compare l'analyse 2 et l'analyse 1 pour l'AUC."
+  },
+  {
+   "id": "ood-072",
+   "question": "compare_pair",
+   "gold": "3+2",
+   "pred": "2+3",
+   "confidence": 0.8584,
+   "request": "Compare l'analyse 2 et l'analyse 1 pour l'AUC."
+  },
+  {
+   "id": "ood-073",
+   "question": "asked_aucinf",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Prise orale de 200 mg : Cmax, Tmax et AUC0-t."
+  },
+  {
+   "id": "ood-074",
+   "question": "asked_auclast",
+   "gold": "false",
+   "pred": "true",
+   "confidence": 1.0,
+   "request": "Bolus de 120 mg : Cmax et AUC0-inf."
+  }
+ ]
+}

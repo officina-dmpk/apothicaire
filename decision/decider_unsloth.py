@@ -3,7 +3,8 @@
   python decision/run_harness.py --decider decider_unsloth:decide
 
 `decide(state, questions) -> {question: label}` as decision/harness.py expects it. The merged model is loaded once (first call), on cuda,
-from $D01_MODEL (default decision/models/qwen35-0.8b-d01/merged). One FastDecisionModel.predict call answers every question of the state.
+from $D01_MODEL (default decision/models/qwen35-0.8b-d01/merged; `eval_ood.py --model DIR` and `ablation.py --model DIR` set it; a folder
+that holds a `merged` folder is accepted for it, `.../adapters` is loaded as it was trained: LoRA + head on the 4-bit base). One FastDecisionModel.predict call answers every question of the state.
 A choice answer is its likeliest option, a noul answer is "true" when P(true) >= 0.5, as in decision/predict_unsloth.py.
 
 `decide.last_info` holds, for the last call, {question: {"label", "confidence", "probabilities"}} (confidence = probability of the label
@@ -17,6 +18,30 @@ DEFAULT_MODEL = os.path.join(HERE, "models", "qwen35-0.8b-d01", "merged")
 
 _M = {}          # model, tokenizer, load seconds (loaded once)
 _STATS = {"calls": 0, "seconds": 0.0}
+
+
+def model_path(env=None):
+    """The model folder: $D01_MODEL (a folder written by train_unsloth.py: `merged` or `adapters` itself, or its parent, which means `merged`)
+    or the default."""
+    path = (os.environ if env is None else env).get("D01_MODEL") or DEFAULT_MODEL
+    merged = os.path.join(path, "merged")
+    return merged if os.path.isdir(merged) else path
+
+
+def is_adapters(path):
+    """True for the `adapters` folder of train_unsloth.py (LoRA + head, to be loaded on the 4-bit base, as the model was trained)."""
+    return os.path.basename(os.path.normpath(path)) == "adapters"
+
+
+def model_label(path=None):
+    """Short name of a model folder, used for the run folder of eval_ood.py: `qwen35-0.8b` for the default (Step 3 model), else the name
+    of the folder that holds `merged` (`decision/models/<name>/merged` -> `<name>`) or `adapters` (-> `<name>-adapters`), so two models
+    never write to the same run folder."""
+    path = os.path.normpath(path or model_path())
+    if path == os.path.normpath(DEFAULT_MODEL): return "qwen35-0.8b"
+    parts = path.split(os.sep)
+    if parts[-1] == "adapters" and len(parts) > 1: return parts[-2] + "-adapters"
+    return parts[-2] if parts[-1] == "merged" and len(parts) > 1 else parts[-1]
 
 
 def labels_of(questions, answers):
@@ -40,9 +65,9 @@ def _load():
     if _M: return
     import torch
     from unsloth import FastDecisionModel
-    path = os.environ.get("D01_MODEL", DEFAULT_MODEL)
+    path = model_path()
     t0 = time.perf_counter()
-    model, tokenizer = FastDecisionModel.from_pretrained(path, max_seq_length=2560)
+    model, tokenizer = FastDecisionModel.from_pretrained(path, max_seq_length=2560, **({"load_in_4bit": True} if is_adapters(path) else {}))
     FastDecisionModel.for_inference(model)
     torch.cuda.reset_peak_memory_stats()
     _M.update(model=model, tokenizer=tokenizer, load_s=time.perf_counter() - t0, path=path)
@@ -78,6 +103,7 @@ def summary():
     return out
 
 
-decide.name = "qwen35-0.8b"
+decide.name = model_label()
+decide.get_name = lambda: model_label()      # read by eval_ood.load_decider after $D01_MODEL is set
 decide.last_info = None
 decide.summary = summary

@@ -1,0 +1,35 @@
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+W1010 03:41:44.297000 15600 Lib\site-packages\torch\utils\_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+W1010 03:41:44.346000 15600 Lib\site-packages\torch\utils\_pytree.py:630] <enum 'ScaleCalculationMode'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.10.3: Fast Qwen3_5 patching. Transformers: 5.17.0.
+   \\   /|    NVIDIA GeForce RTX 3060. Num GPUs = 1. Max memory: 12.0 GB. Platform: Windows.
+O^O/ \_/ \    Torch: 2.14.1+cu130. CUDA: 8.6. CUDA Toolkit: 13.0. Triton: 3.8.0
+\        /    Bfloat16 = TRUE. FA [Xformers = None. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Loading weights:   0%|          | 0/473 [00:00<?, ?it/s]Loading weights:   0%|          | 1/473 [00:00<04:08,  1.90it/s]Loading weights:   3%|▎         | 14/473 [00:00<00:15, 29.14it/s]Loading weights:  10%|▉         | 45/473 [00:00<00:04, 93.09it/s]Loading weights:  17%|█▋        | 79/473 [00:00<00:02, 152.26it/s]Loading weights:  24%|██▍       | 114/473 [00:00<00:01, 197.22it/s]Loading weights:  30%|███       | 143/473 [00:01<00:01, 221.10it/s]Loading weights:  36%|███▌      | 171/473 [00:01<00:01, 236.29it/s]Loading weights:  42%|████▏     | 200/473 [00:01<00:01, 246.31it/s]Loading weights:  49%|████▉     | 234/473 [00:01<00:00, 268.92it/s]Loading weights:  56%|█████▌    | 263/473 [00:01<00:00, 262.44it/s]Loading weights:  62%|██████▏   | 292/473 [00:01<00:00, 269.25it/s]Loading weights:  68%|██████▊   | 324/473 [00:01<00:00, 282.88it/s]Loading weights:  85%|████████▍ | 400/473 [00:01<00:00, 419.05it/s]Loading weights:  99%|█████████▉| 468/473 [00:01<00:00, 487.69it/s]Loading weights: 100%|██████████| 473/473 [00:01<00:00, 249.29it/s]
+`causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+  100/230 rows, 207.3 ms/row
+  200/230 rows, 205.1 ms/row
+wrote decision/runs/2026-10-10-train-qwen35-0.8b-v2/diag-adapters-4bit\unsloth-qwen35-0.8b-d01-v2-adapters-heldout_exercises-stride4-cuda.json / .md
+overall 4599/4600 = 100.0 %; ECE 0.000; mean 205.9 ms/row
+  analysis                 100.0 %
+  asked_adj_r2             100.0 %
+  asked_aucinf             100.0 %
+  asked_auclast            100.0 %
+  asked_aucpext            100.0 %
+  asked_c0                 100.0 %
+  asked_cl                 100.0 %
+  asked_cmax               100.0 %
+  asked_half_life          100.0 %
+  asked_lambda_z           100.0 %
+  asked_lambda_z_points    100.0 %
+  asked_mrt                100.0 %
+  asked_tlag               100.0 %
+  asked_tmax               100.0 %
+  asked_vz                 100.0 %
+  auc_method               99.6 %
+  compare_pair             100.0 %
+  dose_has_unit            100.0 %
+  is_not_available         100.0 %
+  route                    100.0 %

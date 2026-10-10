@@ -1,0 +1,9 @@
+{
+ "model": "C:\\Users\\abdou\\apothicaire\\agent\\decision\\models\\qwen35-0.8b-d01-v2\\adapters",
+ "load_s": 8.6,
+ "decide_calls": 225,
+ "model_seconds_total": 50.71,
+ "model_seconds_per_call": 0.2254,
+ "torch_peak_allocated_mib": 1440,
+ "nvidia_smi_used_mib_at_end": 2325
+}

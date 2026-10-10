@@ -38,4 +38,4 @@ Rows per tag: abbreviation 17, bioequivalence 1, blq 4, by-id 2, c0 1, colloquia
 Gold `analysis`: compare 8, fit_pk1 1, fit_pk2 3, nca 45, none_needed 16, simulate 1.
 Gold `route`: iv_bolus 22, iv_infusion 10, oral 40, unknown 2.
 Gold `auc_method`: lin_up_log_down 8, linear 57, not_applicable 9.
-Gold `compare_pair`: 2+3 4, not_applicable 70.
+Gold `compare_pair`: 2+3 2, 3+2 2, not_applicable 70.
