@@ -3,6 +3,8 @@
 Training data for a decision model that answers closed questions about the state of a PK-analysis conversation (see `PLAN.md`). Synthetic
 data only: the exercises are simulated by Caladrius, nothing comes from coursework or from `private/`.
 
+Every counting population used in this file (turns, rows, slots, numbers, decisions, subsamples, ECE rows) is defined and reconciled in `LEDGER.md`, with a test that recomputes the figures (`tests/test_ledger.py`).
+
 ## Row schema (found on 2026-10-09)
 
 Queried on 2026-10-09 from `https://datasets-server.huggingface.co/rows?dataset=LocalLLaMA%2Ftyped-decisions&config=all&split=train&offset=0&length=3`
