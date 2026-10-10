@@ -1,0 +1,14 @@
+{
+ "model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)",
+ "mode": "row",
+ "rows": 74,
+ "calls": 74,
+ "decisions": 1480,
+ "invalid_answers": 0,
+ "seconds_total": 812.2,
+ "seconds_per_row": 10.98,
+ "prompt_tokens": 108632,
+ "completion_tokens": 16452,
+ "nvidia_smi_used_mib": 7553,
+ "invalid": []
+}

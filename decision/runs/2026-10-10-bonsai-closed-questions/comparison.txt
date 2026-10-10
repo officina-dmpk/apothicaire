@@ -1,0 +1,116 @@
+## ood
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 68.9 % | 74.3 % | 37.8 % | 77.0 % | 60.8 % |
+| `route` | 94.6 % | 94.6 % | 82.4 % | 87.8 % | 54.1 % |
+| `auc_method` | 18.9 % | 23.0 % | 21.6 % | 74.3 % | 77.0 % |
+| `dose_has_unit` | 97.3 % | 97.3 % | 98.6 % | 100.0 % | 93.2 % |
+| `is_not_available` | 85.1 % | 86.5 % | 85.1 % | 91.9 % | 85.1 % |
+| `compare_pair` | 95.9 % | 21.6 % | 100.0 % | 100.0 % | 94.6 % |
+| `asked_<parameter>` (mean of 14) | 98.2 % | 96.5 % | 98.6 % | 90.4 % | 90.4 % |
+| macro-average of the seven | 79.9 % | 70.5 % | 74.9 % | 88.8 % | 79.3 % |
+| all 20 questions, per decision | 91.8 % | 87.4 % | 90.3 % | 89.9 % | 86.6 % |
+| **all 20 right on a row** | 7/74 = 9.5 % | 1/74 = 1.4 % | 4/74 = 5.4 % | 1/74 = 1.4 % | 0/74 = 0.0 % |
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 68.9 % | 74.3 % | 37.8 % | 77.0 % | 60.8 % |
+| `asked_adj_r2` | 100.0 % | 100.0 % | 100.0 % | 98.6 % | 98.6 % |
+| `asked_aucinf` | 98.6 % | 97.3 % | 93.2 % | 91.9 % | 91.9 % |
+| `asked_auclast` | 79.7 % | 86.5 % | 91.9 % | 73.0 % | 73.0 % |
+| `asked_aucpext` | 100.0 % | 98.6 % | 100.0 % | 95.9 % | 95.9 % |
+| `asked_c0` | 100.0 % | 98.6 % | 100.0 % | 95.9 % | 95.9 % |
+| `asked_cl` | 98.6 % | 97.3 % | 98.6 % | 87.8 % | 87.8 % |
+| `asked_cmax` | 98.6 % | 97.3 % | 98.6 % | 70.3 % | 70.3 % |
+| `asked_half_life` | 100.0 % | 97.3 % | 100.0 % | 87.8 % | 87.8 % |
+| `asked_lambda_z` | 100.0 % | 83.8 % | 100.0 % | 98.6 % | 98.6 % |
+| `asked_lambda_z_points` | 100.0 % | 100.0 % | 100.0 % | 97.3 % | 97.3 % |
+| `asked_mrt` | 100.0 % | 100.0 % | 100.0 % | 95.9 % | 95.9 % |
+| `asked_tlag` | 100.0 % | 98.6 % | 100.0 % | 94.6 % | 94.6 % |
+| `asked_tmax` | 100.0 % | 98.6 % | 100.0 % | 90.5 % | 90.5 % |
+| `asked_vz` | 98.6 % | 97.3 % | 98.6 % | 87.8 % | 87.8 % |
+| `auc_method` | 18.9 % | 23.0 % | 21.6 % | 74.3 % | 77.0 % |
+| `compare_pair` | 95.9 % | 21.6 % | 100.0 % | 100.0 % | 94.6 % |
+| `dose_has_unit` | 97.3 % | 97.3 % | 98.6 % | 100.0 % | 93.2 % |
+| `is_not_available` | 85.1 % | 86.5 % | 85.1 % | 91.9 % | 85.1 % |
+| `route` | 94.6 % | 94.6 % | 82.4 % | 87.8 % | 54.1 % |
+
+27B, one call per row by turn: {"first requests": {"rows": 62, "analysis": [39, 62], "route": [58, 62], "auc_method": [12, 62], "is_not_available": [51, 62]}, "follow-ups": {"rows": 12, "analysis": [12, 12], "route": [12, 12], "auc_method": [2, 12], "is_not_available": [12, 12]}} 
+
+  27B, one call per row analysis wrong cells: [('none_needed', 'fit_pk2', 8), ('nca', 'fit_pk2', 7), ('nca', 'fit_pk1', 4), ('none_needed', 'nca', 2), ('compare', 'nca', 1), ('none_needed', 'fit_pk1', 1)]
+  27B, one call per row route wrong cells: [('oral', 'unknown', 4)]
+  27B, one call per row auc_method wrong cells: [('linear', 'not_applicable', 55), ('lin_up_log_down', 'not_applicable', 5)]
+  27B, one call per row is_not_available wrong cells: [('true', 'false', 11)]
+  27B, one call per row compare_pair wrong cells: [('not_applicable', 'none_available', 3)]
+
+27B, one call per question by turn: {"first requests": {"rows": 62, "analysis": [47, 62], "route": [58, 62], "auc_method": [13, 62], "is_not_available": [52, 62]}, "follow-ups": {"rows": 12, "analysis": [8, 12], "route": [12, 12], "auc_method": [4, 12], "is_not_available": [12, 12]}} 
+
+  27B, one call per question analysis wrong cells: [('none_needed', 'nca', 10), ('nca', 'fit_pk1', 3), ('compare', 'nca', 2), ('compare', 'none_needed', 2), ('none_needed', 'fit_pk1', 1), ('none_needed', 'fit_pk2', 1)]
+  27B, one call per question route wrong cells: [('oral', 'unknown', 4)]
+  27B, one call per question auc_method wrong cells: [('linear', 'not_applicable', 54), ('lin_up_log_down', 'not_applicable', 2), ('linear', 'lin_up_log_down', 1)]
+  27B, one call per question is_not_available wrong cells: [('true', 'false', 10)]
+  27B, one call per question compare_pair wrong cells: [('not_applicable', 'none_available', 56), ('2+3', 'not_applicable', 2)]
+
+27B, one call per row {"model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)", "mode": "row", "rows": 74, "calls": 74, "decisions": 1480, "invalid_answers": 0, "seconds_total": 812.2, "seconds_per_row": 10.98, "prompt_tokens": 108632, "completion_tokens": 16452, "nvidia_smi_used_mib": 7553} 
+
+27B, one call per question {"model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)", "mode": "question", "rows": 74, "calls": 1480, "decisions": 1480, "invalid_answers": 0, "seconds_total": 1869.4, "seconds_per_row": 25.26, "prompt_tokens": 696346, "completion_tokens": 22015, "nvidia_smi_used_mib": 7553} 
+
+## heldout100
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 100.0 % | 98.0 % | 100.0 % | 95.0 % | 63.0 % |
+| `route` | 100.0 % | 100.0 % | 100.0 % | 100.0 % | 45.0 % |
+| `auc_method` | 95.0 % | 91.0 % | 100.0 % | 98.0 % | 88.0 % |
+| `dose_has_unit` | 99.0 % | 100.0 % | 100.0 % | 100.0 % | 84.0 % |
+| `is_not_available` | 90.0 % | 90.0 % | 97.0 % | 100.0 % | 90.0 % |
+| `compare_pair` | 100.0 % | 86.0 % | 100.0 % | 98.0 % | 94.0 % |
+| `asked_<parameter>` (mean of 14) | 99.6 % | 97.0 % | 100.0 % | 89.8 % | 89.8 % |
+| macro-average of the seven | 97.7 % | 94.6 % | 99.6 % | 97.3 % | 79.1 % |
+| all 20 questions, per decision | 98.9 % | 96.2 % | 99.8 % | 92.4 % | 86.0 % |
+| **all 20 right on a row** | 79/100 = 79.0 % | 49/100 = 49.0 % | 97/100 = 97.0 % | 30/100 = 30.0 % | 5/100 = 5.0 % |
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 100.0 % | 98.0 % | 100.0 % | 95.0 % | 63.0 % |
+| `asked_adj_r2` | 100.0 % | 99.0 % | 100.0 % | 94.0 % | 94.0 % |
+| `asked_aucinf` | 98.0 % | 96.0 % | 100.0 % | 91.0 % | 91.0 % |
+| `asked_auclast` | 99.0 % | 100.0 % | 100.0 % | 86.0 % | 86.0 % |
+| `asked_aucpext` | 100.0 % | 100.0 % | 100.0 % | 92.0 % | 92.0 % |
+| `asked_c0` | 100.0 % | 99.0 % | 100.0 % | 94.0 % | 94.0 % |
+| `asked_cl` | 99.0 % | 94.0 % | 100.0 % | 82.0 % | 82.0 % |
+| `asked_cmax` | 100.0 % | 100.0 % | 100.0 % | 89.0 % | 89.0 % |
+| `asked_half_life` | 100.0 % | 97.0 % | 100.0 % | 85.0 % | 85.0 % |
+| `asked_lambda_z` | 99.0 % | 81.0 % | 100.0 % | 93.0 % | 93.0 % |
+| `asked_lambda_z_points` | 100.0 % | 100.0 % | 100.0 % | 93.0 % | 93.0 % |
+| `asked_mrt` | 100.0 % | 100.0 % | 100.0 % | 92.0 % | 92.0 % |
+| `asked_tlag` | 100.0 % | 99.0 % | 100.0 % | 96.0 % | 96.0 % |
+| `asked_tmax` | 100.0 % | 99.0 % | 100.0 % | 88.0 % | 88.0 % |
+| `asked_vz` | 99.0 % | 94.0 % | 100.0 % | 82.0 % | 82.0 % |
+| `auc_method` | 95.0 % | 91.0 % | 100.0 % | 98.0 % | 88.0 % |
+| `compare_pair` | 100.0 % | 86.0 % | 100.0 % | 98.0 % | 94.0 % |
+| `dose_has_unit` | 99.0 % | 100.0 % | 100.0 % | 100.0 % | 84.0 % |
+| `is_not_available` | 90.0 % | 90.0 % | 97.0 % | 100.0 % | 90.0 % |
+| `route` | 100.0 % | 100.0 % | 100.0 % | 100.0 % | 45.0 % |
+
+27B, one call per row by turn: {"first requests": {"rows": 100, "analysis": [100, 100], "route": [100, 100], "auc_method": [95, 100], "is_not_available": [90, 100]}, "follow-ups": {"rows": 0, "analysis": [0, 0], "route": [0, 0], "auc_method": [0, 0], "is_not_available": [0, 0]}} 
+
+  27B, one call per row analysis wrong cells: []
+  27B, one call per row route wrong cells: []
+  27B, one call per row auc_method wrong cells: [('not_applicable', 'linear', 3), ('lin_up_log_down', 'not_applicable', 2)]
+  27B, one call per row is_not_available wrong cells: [('true', 'false', 10)]
+  27B, one call per row compare_pair wrong cells: []
+
+27B, one call per question by turn: {"first requests": {"rows": 100, "analysis": [98, 100], "route": [100, 100], "auc_method": [91, 100], "is_not_available": [90, 100]}, "follow-ups": {"rows": 0, "analysis": [0, 0], "route": [0, 0], "auc_method": [0, 0], "is_not_available": [0, 0]}} 
+
+  27B, one call per question analysis wrong cells: [('none_needed', 'nca', 2)]
+  27B, one call per question route wrong cells: []
+  27B, one call per question auc_method wrong cells: [('not_applicable', 'linear', 4), ('linear', 'lin_up_log_down', 3), ('lin_up_log_down', 'not_applicable', 2)]
+  27B, one call per question is_not_available wrong cells: [('true', 'false', 10)]
+  27B, one call per question compare_pair wrong cells: [('not_applicable', '2+3', 8), ('not_applicable', 'none_available', 6)]
+
+27B, one call per row {"model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)", "mode": "row", "rows": 100, "calls": 100, "decisions": 2000, "invalid_answers": 0, "seconds_total": 1104.7, "seconds_per_row": 11.05, "prompt_tokens": 150957, "completion_tokens": 22205, "nvidia_smi_used_mib": 7553} 
+
+27B, one call per question {"model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)", "mode": "question", "rows": 100, "calls": 2000, "decisions": 2000, "invalid_answers": 0, "seconds_total": 2691.9, "seconds_per_row": 26.92, "prompt_tokens": 1027089, "completion_tokens": 29806, "nvidia_smi_used_mib": 7553} 
+

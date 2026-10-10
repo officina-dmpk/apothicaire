@@ -1,0 +1,8822 @@
+{
+ "decider": "bonsai-27b-question",
+ "rows_file": "decision\\data\\heldout.jsonl",
+ "rows_sha256": "ed8e58135f89b21dbc6f05302e29f61cf19d18789bcee6948fecbd8034aede3d",
+ "n_rows": 100,
+ "n_exercises": 20,
+ "summary": {
+  "model": "Ternary-Bonsai-2-27B-PTQ1_0 (llama-server, http://127.0.0.1:18435)",
+  "mode": "question",
+  "rows": 100,
+  "calls": 2000,
+  "decisions": 2000,
+  "invalid_answers": 0,
+  "seconds_total": 2691.9,
+  "seconds_per_row": 26.92,
+  "prompt_tokens": 1027089,
+  "completion_tokens": 29806,
+  "nvidia_smi_used_mib": 7553
+ },
+ "results": [
+  {
+   "id": "te_pk_analysis_requests_000000",
+   "seconds": 25.96383560000686,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000001",
+   "seconds": 27.238985399999365,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000002",
+   "seconds": 27.213725400004478,
+   "gold": {
+    "analysis": "fit_pk1",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk1"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000003",
+   "seconds": 27.083915900002467,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000004",
+   "seconds": 25.954973300002166,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000005",
+   "seconds": 27.3860308000003,
+   "gold": {
+    "analysis": "fit_pk1",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk1"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000006",
+   "seconds": 26.409512799997174,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "true"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000007",
+   "seconds": 26.081666399993992,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000008",
+   "seconds": 26.184553400002187,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "true"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000009",
+   "seconds": 26.032375100003264,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000010",
+   "seconds": 27.581553500000155,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000011",
+   "seconds": 25.968087999994168,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000012",
+   "seconds": 26.25416170000244,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "true",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000013",
+   "seconds": 27.400556499997037,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000014",
+   "seconds": 27.42607020000287,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "true",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000015",
+   "seconds": 25.998357000004034,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000016",
+   "seconds": 26.045377900001768,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000017",
+   "seconds": 27.395072399995115,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "true",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "true"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000018",
+   "seconds": 26.308871400004136,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000019",
+   "seconds": 27.36963320000359,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000020",
+   "seconds": 28.553854899997532,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000021",
+   "seconds": 26.32853189999878,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "true",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000022",
+   "seconds": 27.29689459999645,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000023",
+   "seconds": 27.445078299999295,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000024",
+   "seconds": 27.109909400001925,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000025",
+   "seconds": 26.809167100000195,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000026",
+   "seconds": 27.328173400004744,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000027",
+   "seconds": 26.078279699999257,
+   "gold": {
+    "analysis": "fit_pk1",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk1"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000028",
+   "seconds": 25.915006600000197,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000029",
+   "seconds": 27.247163500003808,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000030",
+   "seconds": 27.261773500002164,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "true",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "true"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000031",
+   "seconds": 27.00573649999569,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000032",
+   "seconds": 26.902119300000777,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000033",
+   "seconds": 27.256888299998536,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000034",
+   "seconds": 27.24005679999391,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000035",
+   "seconds": 27.551373300004343,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000036",
+   "seconds": 27.048709000002418,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000037",
+   "seconds": 27.06571470000199,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000038",
+   "seconds": 27.376619100003154,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000039",
+   "seconds": 27.249136099999305,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "true",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "true"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000040",
+   "seconds": 26.176077199997962,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000041",
+   "seconds": 27.711989100003848,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000042",
+   "seconds": 26.64101039999514,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000043",
+   "seconds": 27.303275699996448,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000044",
+   "seconds": 27.247191200003726,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000045",
+   "seconds": 26.2317194999996,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000046",
+   "seconds": 27.19002599999658,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000047",
+   "seconds": 27.21285589999752,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000048",
+   "seconds": 27.03410559999611,
+   "gold": {
+    "analysis": "fit_pk1",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk1"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000049",
+   "seconds": 27.229620500002056,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000050",
+   "seconds": 26.26702910000313,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000051",
+   "seconds": 27.151375800000096,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000052",
+   "seconds": 26.027655900004902,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000053",
+   "seconds": 27.385315999999875,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000055",
+   "seconds": 27.100511999997252,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000056",
+   "seconds": 25.987801499999478,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000058",
+   "seconds": 25.632154200000514,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "true"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000060",
+   "seconds": 27.503192299998773,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000061",
+   "seconds": 27.06833270000061,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000063",
+   "seconds": 27.31400869999925,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000064",
+   "seconds": 26.258187699997507,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000066",
+   "seconds": 27.370964900001127,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000067",
+   "seconds": 26.322300100000575,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000068",
+   "seconds": 27.479171200000565,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000069",
+   "seconds": 26.060794400000304,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000071",
+   "seconds": 27.461597900000925,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "true",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000072",
+   "seconds": 26.23963019999792,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000073",
+   "seconds": 26.012291200000618,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "true"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000076",
+   "seconds": 27.308022099998198,
+   "gold": {
+    "analysis": "fit_pk1",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk1"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000078",
+   "seconds": 27.339358700002776,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "true",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "true"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000079",
+   "seconds": 26.424964300000283,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000080",
+   "seconds": 27.572911399998702,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "true"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000081",
+   "seconds": 27.06622359999892,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000084",
+   "seconds": 27.355372400001215,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000086",
+   "seconds": 27.67367589999776,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000087",
+   "seconds": 28.269960199999332,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000088",
+   "seconds": 27.437593400005426,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000095",
+   "seconds": 27.334801699995296,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000096",
+   "seconds": 27.393561200005934,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000097",
+   "seconds": 27.064474599996174,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000100",
+   "seconds": 27.12205299999914,
+   "gold": {
+    "analysis": "nca",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "true",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "true",
+    "asked_half_life": "true",
+    "asked_lambda_z": "true",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "true",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "true",
+    "auc_method": "linear",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "true"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "lin_up_log_down"
+    },
+    "compare_pair": {
+     "label": "none_available"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000104",
+   "seconds": 26.38757340000302,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000105",
+   "seconds": 27.328889600001276,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "unknown"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "unknown"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000106",
+   "seconds": 27.18278680000367,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "true",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "true",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "true"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "true"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000107",
+   "seconds": 26.31853570000385,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "true"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000110",
+   "seconds": 27.041806500004895,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000112",
+   "seconds": 28.22563000000082,
+   "gold": {
+    "analysis": "compare",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "lin_up_log_down",
+    "compare_pair": "2+3",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "compare"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "2+3"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000113",
+   "seconds": 27.22473820000596,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "false",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "false"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000114",
+   "seconds": 27.087692599998263,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "true",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "true",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "true"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000125",
+   "seconds": 27.137277100002393,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000126",
+   "seconds": 26.79723570000351,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "oral"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "linear"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "oral"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000130",
+   "seconds": 26.697962699996424,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "true",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "true"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000137",
+   "seconds": 27.416664300006232,
+   "gold": {
+    "analysis": "fit_pk2",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "fit_pk2"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000140",
+   "seconds": 27.041274800001702,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "true",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "true",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "true"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "true"
+    },
+    "asked_lambda_z": {
+     "label": "true"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000142",
+   "seconds": 27.32558109999809,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000160",
+   "seconds": 26.135020599998825,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "true",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "true",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "nca"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "true"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "true"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000167",
+   "seconds": 27.363962399998854,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000172",
+   "seconds": 26.245891600003233,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "true",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_infusion"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "true"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_infusion"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000173",
+   "seconds": 26.011168699995324,
+   "gold": {
+    "analysis": "none_needed",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "true",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "none_needed"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "true"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  },
+  {
+   "id": "te_pk_analysis_requests_000212",
+   "seconds": 27.253771599993343,
+   "gold": {
+    "analysis": "simulate",
+    "asked_adj_r2": "false",
+    "asked_aucinf": "false",
+    "asked_auclast": "false",
+    "asked_aucpext": "false",
+    "asked_c0": "false",
+    "asked_cl": "false",
+    "asked_cmax": "false",
+    "asked_half_life": "false",
+    "asked_lambda_z": "false",
+    "asked_lambda_z_points": "false",
+    "asked_mrt": "false",
+    "asked_tlag": "false",
+    "asked_tmax": "false",
+    "asked_vz": "false",
+    "auc_method": "not_applicable",
+    "compare_pair": "not_applicable",
+    "dose_has_unit": "true",
+    "is_not_available": "false",
+    "route": "iv_bolus"
+   },
+   "pred": {
+    "analysis": {
+     "label": "simulate"
+    },
+    "asked_adj_r2": {
+     "label": "false"
+    },
+    "asked_aucinf": {
+     "label": "false"
+    },
+    "asked_auclast": {
+     "label": "false"
+    },
+    "asked_aucpext": {
+     "label": "false"
+    },
+    "asked_c0": {
+     "label": "false"
+    },
+    "asked_cl": {
+     "label": "false"
+    },
+    "asked_cmax": {
+     "label": "false"
+    },
+    "asked_half_life": {
+     "label": "false"
+    },
+    "asked_lambda_z": {
+     "label": "false"
+    },
+    "asked_lambda_z_points": {
+     "label": "false"
+    },
+    "asked_mrt": {
+     "label": "false"
+    },
+    "asked_tlag": {
+     "label": "false"
+    },
+    "asked_tmax": {
+     "label": "false"
+    },
+    "asked_vz": {
+     "label": "false"
+    },
+    "auc_method": {
+     "label": "not_applicable"
+    },
+    "compare_pair": {
+     "label": "not_applicable"
+    },
+    "dose_has_unit": {
+     "label": "true"
+    },
+    "is_not_available": {
+     "label": "false"
+    },
+    "route": {
+     "label": "iv_bolus"
+    }
+   }
+  }
+ ]
+}

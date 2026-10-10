@@ -1,0 +1,866 @@
+{
+ "ood": {
+  "27B, one call per row": {
+   "rows": 74,
+   "exact_rows": 7,
+   "per_question": {
+    "analysis": [
+     51,
+     74
+    ],
+    "asked_adj_r2": [
+     74,
+     74
+    ],
+    "asked_aucinf": [
+     73,
+     74
+    ],
+    "asked_auclast": [
+     59,
+     74
+    ],
+    "asked_aucpext": [
+     74,
+     74
+    ],
+    "asked_c0": [
+     74,
+     74
+    ],
+    "asked_cl": [
+     73,
+     74
+    ],
+    "asked_cmax": [
+     73,
+     74
+    ],
+    "asked_half_life": [
+     74,
+     74
+    ],
+    "asked_lambda_z": [
+     74,
+     74
+    ],
+    "asked_lambda_z_points": [
+     74,
+     74
+    ],
+    "asked_mrt": [
+     74,
+     74
+    ],
+    "asked_tlag": [
+     74,
+     74
+    ],
+    "asked_tmax": [
+     74,
+     74
+    ],
+    "asked_vz": [
+     73,
+     74
+    ],
+    "auc_method": [
+     14,
+     74
+    ],
+    "compare_pair": [
+     71,
+     74
+    ],
+    "dose_has_unit": [
+     72,
+     74
+    ],
+    "is_not_available": [
+     63,
+     74
+    ],
+    "route": [
+     70,
+     74
+    ]
+   }
+  },
+  "27B, one call per question": {
+   "rows": 74,
+   "exact_rows": 1,
+   "per_question": {
+    "analysis": [
+     55,
+     74
+    ],
+    "asked_adj_r2": [
+     74,
+     74
+    ],
+    "asked_aucinf": [
+     72,
+     74
+    ],
+    "asked_auclast": [
+     64,
+     74
+    ],
+    "asked_aucpext": [
+     73,
+     74
+    ],
+    "asked_c0": [
+     73,
+     74
+    ],
+    "asked_cl": [
+     72,
+     74
+    ],
+    "asked_cmax": [
+     72,
+     74
+    ],
+    "asked_half_life": [
+     72,
+     74
+    ],
+    "asked_lambda_z": [
+     62,
+     74
+    ],
+    "asked_lambda_z_points": [
+     74,
+     74
+    ],
+    "asked_mrt": [
+     74,
+     74
+    ],
+    "asked_tlag": [
+     73,
+     74
+    ],
+    "asked_tmax": [
+     73,
+     74
+    ],
+    "asked_vz": [
+     72,
+     74
+    ],
+    "auc_method": [
+     17,
+     74
+    ],
+    "compare_pair": [
+     16,
+     74
+    ],
+    "dose_has_unit": [
+     72,
+     74
+    ],
+    "is_not_available": [
+     64,
+     74
+    ],
+    "route": [
+     70,
+     74
+    ]
+   }
+  },
+  "trained 0.8B": {
+   "rows": 74,
+   "exact_rows": 4,
+   "per_question": {
+    "analysis": [
+     28,
+     74
+    ],
+    "asked_adj_r2": [
+     74,
+     74
+    ],
+    "asked_aucinf": [
+     69,
+     74
+    ],
+    "asked_auclast": [
+     68,
+     74
+    ],
+    "asked_aucpext": [
+     74,
+     74
+    ],
+    "asked_c0": [
+     74,
+     74
+    ],
+    "asked_cl": [
+     73,
+     74
+    ],
+    "asked_cmax": [
+     73,
+     74
+    ],
+    "asked_half_life": [
+     74,
+     74
+    ],
+    "asked_lambda_z": [
+     74,
+     74
+    ],
+    "asked_lambda_z_points": [
+     74,
+     74
+    ],
+    "asked_mrt": [
+     74,
+     74
+    ],
+    "asked_tlag": [
+     74,
+     74
+    ],
+    "asked_tmax": [
+     74,
+     74
+    ],
+    "asked_vz": [
+     73,
+     74
+    ],
+    "auc_method": [
+     16,
+     74
+    ],
+    "compare_pair": [
+     74,
+     74
+    ],
+    "dose_has_unit": [
+     73,
+     74
+    ],
+    "is_not_available": [
+     63,
+     74
+    ],
+    "route": [
+     61,
+     74
+    ]
+   }
+  },
+  "reviewer's rules": {
+   "rows": 74,
+   "exact_rows": 1,
+   "per_question": {
+    "analysis": [
+     57,
+     74
+    ],
+    "asked_adj_r2": [
+     73,
+     74
+    ],
+    "asked_aucinf": [
+     68,
+     74
+    ],
+    "asked_auclast": [
+     54,
+     74
+    ],
+    "asked_aucpext": [
+     71,
+     74
+    ],
+    "asked_c0": [
+     71,
+     74
+    ],
+    "asked_cl": [
+     65,
+     74
+    ],
+    "asked_cmax": [
+     52,
+     74
+    ],
+    "asked_half_life": [
+     65,
+     74
+    ],
+    "asked_lambda_z": [
+     73,
+     74
+    ],
+    "asked_lambda_z_points": [
+     72,
+     74
+    ],
+    "asked_mrt": [
+     71,
+     74
+    ],
+    "asked_tlag": [
+     70,
+     74
+    ],
+    "asked_tmax": [
+     67,
+     74
+    ],
+    "asked_vz": [
+     65,
+     74
+    ],
+    "auc_method": [
+     55,
+     74
+    ],
+    "compare_pair": [
+     74,
+     74
+    ],
+    "dose_has_unit": [
+     74,
+     74
+    ],
+    "is_not_available": [
+     68,
+     74
+    ],
+    "route": [
+     65,
+     74
+    ]
+   }
+  },
+  "best constant": {
+   "rows": 74,
+   "exact_rows": 0,
+   "per_question": {
+    "analysis": [
+     45,
+     74
+    ],
+    "asked_adj_r2": [
+     73,
+     74
+    ],
+    "asked_aucinf": [
+     68,
+     74
+    ],
+    "asked_auclast": [
+     54,
+     74
+    ],
+    "asked_aucpext": [
+     71,
+     74
+    ],
+    "asked_c0": [
+     71,
+     74
+    ],
+    "asked_cl": [
+     65,
+     74
+    ],
+    "asked_cmax": [
+     52,
+     74
+    ],
+    "asked_half_life": [
+     65,
+     74
+    ],
+    "asked_lambda_z": [
+     73,
+     74
+    ],
+    "asked_lambda_z_points": [
+     72,
+     74
+    ],
+    "asked_mrt": [
+     71,
+     74
+    ],
+    "asked_tlag": [
+     70,
+     74
+    ],
+    "asked_tmax": [
+     67,
+     74
+    ],
+    "asked_vz": [
+     65,
+     74
+    ],
+    "auc_method": [
+     57,
+     74
+    ],
+    "compare_pair": [
+     70,
+     74
+    ],
+    "dose_has_unit": [
+     69,
+     74
+    ],
+    "is_not_available": [
+     63,
+     74
+    ],
+    "route": [
+     40,
+     74
+    ]
+   }
+  }
+ },
+ "heldout100": {
+  "27B, one call per row": {
+   "rows": 100,
+   "exact_rows": 79,
+   "per_question": {
+    "analysis": [
+     100,
+     100
+    ],
+    "asked_adj_r2": [
+     100,
+     100
+    ],
+    "asked_aucinf": [
+     98,
+     100
+    ],
+    "asked_auclast": [
+     99,
+     100
+    ],
+    "asked_aucpext": [
+     100,
+     100
+    ],
+    "asked_c0": [
+     100,
+     100
+    ],
+    "asked_cl": [
+     99,
+     100
+    ],
+    "asked_cmax": [
+     100,
+     100
+    ],
+    "asked_half_life": [
+     100,
+     100
+    ],
+    "asked_lambda_z": [
+     99,
+     100
+    ],
+    "asked_lambda_z_points": [
+     100,
+     100
+    ],
+    "asked_mrt": [
+     100,
+     100
+    ],
+    "asked_tlag": [
+     100,
+     100
+    ],
+    "asked_tmax": [
+     100,
+     100
+    ],
+    "asked_vz": [
+     99,
+     100
+    ],
+    "auc_method": [
+     95,
+     100
+    ],
+    "compare_pair": [
+     100,
+     100
+    ],
+    "dose_has_unit": [
+     99,
+     100
+    ],
+    "is_not_available": [
+     90,
+     100
+    ],
+    "route": [
+     100,
+     100
+    ]
+   }
+  },
+  "27B, one call per question": {
+   "rows": 100,
+   "exact_rows": 49,
+   "per_question": {
+    "analysis": [
+     98,
+     100
+    ],
+    "asked_adj_r2": [
+     99,
+     100
+    ],
+    "asked_aucinf": [
+     96,
+     100
+    ],
+    "asked_auclast": [
+     100,
+     100
+    ],
+    "asked_aucpext": [
+     100,
+     100
+    ],
+    "asked_c0": [
+     99,
+     100
+    ],
+    "asked_cl": [
+     94,
+     100
+    ],
+    "asked_cmax": [
+     100,
+     100
+    ],
+    "asked_half_life": [
+     97,
+     100
+    ],
+    "asked_lambda_z": [
+     81,
+     100
+    ],
+    "asked_lambda_z_points": [
+     100,
+     100
+    ],
+    "asked_mrt": [
+     100,
+     100
+    ],
+    "asked_tlag": [
+     99,
+     100
+    ],
+    "asked_tmax": [
+     99,
+     100
+    ],
+    "asked_vz": [
+     94,
+     100
+    ],
+    "auc_method": [
+     91,
+     100
+    ],
+    "compare_pair": [
+     86,
+     100
+    ],
+    "dose_has_unit": [
+     100,
+     100
+    ],
+    "is_not_available": [
+     90,
+     100
+    ],
+    "route": [
+     100,
+     100
+    ]
+   }
+  },
+  "trained 0.8B": {
+   "rows": 100,
+   "exact_rows": 97,
+   "per_question": {
+    "analysis": [
+     100,
+     100
+    ],
+    "asked_adj_r2": [
+     100,
+     100
+    ],
+    "asked_aucinf": [
+     100,
+     100
+    ],
+    "asked_auclast": [
+     100,
+     100
+    ],
+    "asked_aucpext": [
+     100,
+     100
+    ],
+    "asked_c0": [
+     100,
+     100
+    ],
+    "asked_cl": [
+     100,
+     100
+    ],
+    "asked_cmax": [
+     100,
+     100
+    ],
+    "asked_half_life": [
+     100,
+     100
+    ],
+    "asked_lambda_z": [
+     100,
+     100
+    ],
+    "asked_lambda_z_points": [
+     100,
+     100
+    ],
+    "asked_mrt": [
+     100,
+     100
+    ],
+    "asked_tlag": [
+     100,
+     100
+    ],
+    "asked_tmax": [
+     100,
+     100
+    ],
+    "asked_vz": [
+     100,
+     100
+    ],
+    "auc_method": [
+     100,
+     100
+    ],
+    "compare_pair": [
+     100,
+     100
+    ],
+    "dose_has_unit": [
+     100,
+     100
+    ],
+    "is_not_available": [
+     97,
+     100
+    ],
+    "route": [
+     100,
+     100
+    ]
+   }
+  },
+  "reviewer's rules": {
+   "rows": 100,
+   "exact_rows": 30,
+   "per_question": {
+    "analysis": [
+     95,
+     100
+    ],
+    "asked_adj_r2": [
+     94,
+     100
+    ],
+    "asked_aucinf": [
+     91,
+     100
+    ],
+    "asked_auclast": [
+     86,
+     100
+    ],
+    "asked_aucpext": [
+     92,
+     100
+    ],
+    "asked_c0": [
+     94,
+     100
+    ],
+    "asked_cl": [
+     82,
+     100
+    ],
+    "asked_cmax": [
+     89,
+     100
+    ],
+    "asked_half_life": [
+     85,
+     100
+    ],
+    "asked_lambda_z": [
+     93,
+     100
+    ],
+    "asked_lambda_z_points": [
+     93,
+     100
+    ],
+    "asked_mrt": [
+     92,
+     100
+    ],
+    "asked_tlag": [
+     96,
+     100
+    ],
+    "asked_tmax": [
+     88,
+     100
+    ],
+    "asked_vz": [
+     82,
+     100
+    ],
+    "auc_method": [
+     98,
+     100
+    ],
+    "compare_pair": [
+     98,
+     100
+    ],
+    "dose_has_unit": [
+     100,
+     100
+    ],
+    "is_not_available": [
+     100,
+     100
+    ],
+    "route": [
+     100,
+     100
+    ]
+   }
+  },
+  "best constant": {
+   "rows": 100,
+   "exact_rows": 5,
+   "per_question": {
+    "analysis": [
+     63,
+     100
+    ],
+    "asked_adj_r2": [
+     94,
+     100
+    ],
+    "asked_aucinf": [
+     91,
+     100
+    ],
+    "asked_auclast": [
+     86,
+     100
+    ],
+    "asked_aucpext": [
+     92,
+     100
+    ],
+    "asked_c0": [
+     94,
+     100
+    ],
+    "asked_cl": [
+     82,
+     100
+    ],
+    "asked_cmax": [
+     89,
+     100
+    ],
+    "asked_half_life": [
+     85,
+     100
+    ],
+    "asked_lambda_z": [
+     93,
+     100
+    ],
+    "asked_lambda_z_points": [
+     93,
+     100
+    ],
+    "asked_mrt": [
+     92,
+     100
+    ],
+    "asked_tlag": [
+     96,
+     100
+    ],
+    "asked_tmax": [
+     88,
+     100
+    ],
+    "asked_vz": [
+     82,
+     100
+    ],
+    "auc_method": [
+     88,
+     100
+    ],
+    "compare_pair": [
+     94,
+     100
+    ],
+    "dose_has_unit": [
+     84,
+     100
+    ],
+    "is_not_available": [
+     90,
+     100
+    ],
+    "route": [
+     45,
+     100
+    ]
+   }
+  }
+ }
+}
