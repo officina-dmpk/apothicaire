@@ -921,3 +921,76 @@ rerun from a copy outside the repository that writes nothing under `ood/` and al
   order ("2+1" renumbered "3+2"), `T_NOT_SUPPORTED` is `refusal:not-supported` and a gold `not_supported` expects a refusal.
   `ood/rows.jsonl` was not regenerated (the Bonsai run of the same day reads it): `python decision/eval_ood.py --convert-only` updates
   the 74 rows to the current question set (7 `analysis` options, both pair orders) and the direction of ood-015 and 072.
+
+## Baseline: the 27B on the closed questions
+
+The control both independent reviews asked for (next step 3): the generic local model (Ternary-Bonsai-2-27B-PTQ1_0, llama.cpp server of `optchat/start_servers.sh`) answers the
+same 20 closed questions as the trained 0.8B, on the same rows, scored by the same function (`eval_ood.score_rows`). `decision/decider_bonsai.py`: the prompt is the state JSON and, per
+question, its instructions and the description of every option; temperature 0, thinking off, no chain of thought; the answer is one JSON object constrained by the server's grammar
+(`response_format` json_schema, which works on this build) to the offered options; a strict parser records and counts any value outside the options as `invalid` (scored wrong, never repaired).
+Two variants: `decide` (one call per row) and `decide_per_question` (one call per question). One fixed prompt, not tuned afterwards. Tests with a fake server: `tests/test_decider_bonsai.py`.
+
+```
+bash optchat/start_servers.sh                                                       # about 15 s; stop with taskkill /IM llama-server.exe /F
+python decision/eval_ood.py --decider decision.decider_bonsai:decide --no-run       # the 74 requests (or :decide_per_question)
+python decision/bonsai_baseline.py run --decider decision.decider_bonsai:decide --out DIR   # 5 first rows of each of the 20 held-out exercises
+python decision/bonsai_baseline.py compare --out decision/runs/2026-10-10-bonsai-closed-questions
+```
+
+**Provenance.** Both runs used a `git archive` of commit 6a51a65 (the engine role changed the question set afterwards, commits bc47025 and 8c5a003): `make_dataset.py` is blob
+`03223bd628fdca80d27f1bb0a977eefa3cb05241`, the 74 rows are the committed `ood/rows.jsonl` (old question set, 6 `analysis` options), `heldout.jsonl` regenerated there has sha256
+`ed8e58135f89b21dbc6f05302e29f61cf19d18789bcee6948fecbd8034aede3d` and the gold of its 720 rows equals the gold stored in the 0.8B run file of Step 3, so the 0.8B column is on the identical
+100 rows (the first 5 rows, in file order, of each of the 20 held-out exercises) and questions. The raw replies of all 3654 calls (all `finish_reason` stop, **0 invalid answers** in the four runs:
+the grammar rules them out; the invalid path is exercised by the unit tests only), the per-row labels, the 20-question tables and the standard `eval_ood.py` reports (per tag, confusions, every wrong
+decision) are in [`runs/2026-10-10-bonsai-closed-questions/`](runs/2026-10-10-bonsai-closed-questions/comparison.txt) and `ood/runs/2026-10-10-bonsai-27b-{row,question}/`. Re-running on the current
+data files uses the new question set and gives different rows; use commit 6a51a65 to reproduce. Reviewer's rules and the best constant are computed on the same rows
+(`ood/rules_decider.py`; the constant is chosen with the gold of these rows, an upper bound for any constant).
+
+**The reviewer's 74 requests**
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 68.9 % | 74.3 % | 37.8 % | 77.0 % | 60.8 % |
+| `route` | 94.6 % | 94.6 % | 82.4 % | 87.8 % | 54.1 % |
+| `auc_method` | 18.9 % | 23.0 % | 21.6 % | 74.3 % | 77.0 % |
+| `dose_has_unit` | 97.3 % | 97.3 % | 98.6 % | 100.0 % | 93.2 % |
+| `is_not_available` | 85.1 % | 86.5 % | 85.1 % | 91.9 % | 85.1 % |
+| `compare_pair` | 95.9 % | 21.6 % | 100.0 % | 100.0 % | 94.6 % |
+| `asked_<parameter>` (mean of 14) | 98.2 % | 96.5 % | 98.6 % | 90.4 % | 90.4 % |
+| macro-average of the seven | 79.9 % | 70.5 % | 74.9 % | 88.8 % | 79.3 % |
+| all 20 questions, per decision | 91.8 % | 87.4 % | 90.3 % | 89.9 % | 86.6 % |
+| **all 20 right on a request** | 7/74 | 1/74 | 4/74 | 1/74 | 0/74 |
+| invalid answers | 0 | 0 | n/a | n/a | n/a |
+
+**100 held-out rows (5 per exercise, 20 exercises)**
+
+| question | 27B, one call per row | 27B, one call per question | trained 0.8B | reviewer's rules | best constant |
+|---|---|---|---|---|---|
+| `analysis` | 100.0 % | 98.0 % | 100.0 % | 95.0 % | 63.0 % |
+| `route` | 100.0 % | 100.0 % | 100.0 % | 100.0 % | 45.0 % |
+| `auc_method` | 95.0 % | 91.0 % | 100.0 % | 98.0 % | 88.0 % |
+| `dose_has_unit` | 99.0 % | 100.0 % | 100.0 % | 100.0 % | 84.0 % |
+| `is_not_available` | 90.0 % | 90.0 % | 97.0 % | 100.0 % | 90.0 % |
+| `compare_pair` | 100.0 % | 86.0 % | 100.0 % | 98.0 % | 94.0 % |
+| `asked_<parameter>` (mean of 14) | 99.6 % | 97.0 % | 100.0 % | 89.8 % | 89.8 % |
+| macro-average of the seven | 97.7 % | 94.6 % | 99.6 % | 97.3 % | 79.1 % |
+| all 20 questions, per decision | 98.9 % | 96.2 % | 99.8 % | 92.4 % | 86.0 % |
+| **all 20 right on a row** | 79/100 | 49/100 | 97/100 | 30/100 | 5/100 |
+| invalid answers | 0 | 0 | n/a | n/a | n/a |
+
+Cost (RTX 3060): 27B one call per row 11.0 s per row on both sets (about 1470 prompt and 220 generated tokens), one call per question 25.3 s and 26.9 s per row, 7.55 GB in `nvidia-smi`
+(0.70 GB other processes); the trained 0.8B 0.175 s per row, 1.9 GB torch peak.
+
+Reading.
+
+1. **On unfamiliar wording the generic 27B beats the trained 0.8B, on `analysis` and `route`.** `analysis` 68.9 % (74.3 % per question) against 37.8 %: on the 62 first requests the 27B gets
+   39 right (47 per question) where the 0.8B gets 16, and both are right on the 12 follow-ups; its own errors are fits (20 requests answered `fit_pk2` or `fit_pk1` that want an NCA or nothing).
+   `route` 94.6 % against 82.4 % (the 0.8B misses the infusions and the short oral forms). Complete vectors 7/74 against 4/74; macro 79.9 % against 74.9 % (and 79.3 % for the best constant), but the
+   reviewer's rules (88.8 %) stay ahead of both models on `analysis` and `auc_method`; on 74 rows a difference under about 8 points is noise, the `analysis` gap (31 points) is not.
+2. **Where it does not.** `auc_method` collapses for both (27B 18.9 % and 23.0 %, 0.8B 21.6 %, constant 77.0 %): 57 gold labels are `linear`, mostly for requests naming no method, and the 27B reads
+   "the request names no AUC method" literally (`not_applicable` for 55 of them), a convention no model can know; `is_not_available`: 0 of 11 true cases for the 27B too (0 of 10 on the 100 rows);
+   `compare_pair` is exact for the 0.8B and 95.9 % for the 27B with all questions in view, 21.6 % alone (it answers `none_available` for 56 requests that compare nothing).
+3. **In distribution the 0.8B is clearly ahead:** 99.8 % per decision and 97/100 complete vectors against 98.9 % and 79/100 for the 27B (96.2 % and 49/100 per question), 92.4 % and 30/100 for the rules.
+   The margin of the 0.8B is +0.9 point per decision and +18 complete vectors per 100 in distribution, and -1.5 point (90.3 % against 91.8 %) and -3 complete vectors per 74 on the reviewer's requests:
+   training bought the generator's wordings, not the task. Limits: one untuned prompt without examples, one quantisation, one reviewer as author, 74 and 100 rows, decisions only (the harness was
+   not run with the 27B).
