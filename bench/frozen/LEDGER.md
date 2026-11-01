@@ -200,3 +200,38 @@ Dated entries, never edited in place (FROZEN_SET.md, header and §9).
   violations). Exercises passed on all three seeds: v1 14 / 25, v2 6 / 25, v3 5 / 25. Exercises with an unverifiable quantity shown:
   v1 3 / 25, v2 17 / 25, v3 5 / 25. Regenerations: 183, as note N1 expected. Gate v1 stays the demo gate; gate v3 stays behind its
   flag, development tier only.
+
+## 2026-11-01: rubric 2026-11-01, false negatives, before the case freeze
+
+- The scorer was still free to change: no `MANIFEST.json`, no prediction on a frozen case, and the human labelling of §7 had no trace of
+  having been run. Reading the failed turns of the development runs showed right answers scored WRONG. The change is on the side RT-B1
+  warned about (the scorer widened after reading the runs, and it helps the system under test): it is declared here, it is development
+  data only, and the blind labelling of §7 is what checks it. The rules of §6.2 stay; their reading changes (§6.2, amendment).
+- Fixed: a threshold of another quantity read as a verdict ("verdict: both"); the French names of the method; a value before the method
+  in parentheses; a label of another parameter inside a method heading (ex18 seed 1 t7: the "dose 200 mg" of the heading, not the en
+  dash); a count of points in words; "Absolue :" under a heading "Différence". The oracle is not changed. The mutation suite takes the
+  same layouts in both directions: 1 153 / 1 153 CORRECT, 1 700 / 1 700 WRONG.
+- Figures, side by side: `bench/runs/RUBRIC-RESCORE-2026-11-01.md` (`bench/rubric_review.py`), each run against the gold it ran with; the
+  stored runs are not rewritten. The old scorer gives back 4 800 of the 4 800 stored outcomes; every turn that moves goes from WRONG to
+  CORRECT (33 turns), and none of the five runs of October 9 to 18 moves.
+
+| | turns CORRECT, published | now | exercises passed, published | now |
+|---|---|---|---|---|
+| v1 (demo gate) | 583 / 600 | 585 | 14 / 25 | 15 |
+| v2 | 562 / 600 | 563 | 6 / 25 | 6 |
+| 27B + scope | 587 / 600 | 594 | 14 / 25 | 20 |
+| Sonnet 5.5 + scope | 596 / 600 | 598 | 21 / 25 | 23 |
+| v3 | 557 / 600 | 561 | 5 / 25 | 6 |
+
+- **No reading above is rewritten**: the published figures keep their rubric and every decision stands until Abdou says otherwise. What the
+  new figures would touch: the demo gate of §8 does not change (15 against 6). `FRONTIER_ARM.md` §9: 20 falls in the row "≥ 19" instead of
+  "14 to 18", and both give "no difference detected" (exact McNemar p = 0.45), but the row's premise of a gap of at most 2 no longer holds,
+  since Sonnet + scope also rises (gap 3). The sentence "no effect on the exercises passed" for the scope instruction on the 27B no longer
+  fits the figures: 15 both, 0 only without it, 5 only with it, p = 0.0625. Gate v3 stays killed: 561 is still below 562, by one turn.
+- Correction to the entry "gold regenerated after Caladrius T-111". It says no verdict of `bench/score.py` can move; that was checked up to
+  9 significant digits. Answers that quote a raw 16-digit value do move: scored against today's `bench/exercises/`, 7 turns of the hosted
+  runs (6 of Sonnet + scope, 1 of Sonnet) go from CORRECT to WRONG with "adjusted R2: contradiction". So a stored run is rescored
+  against the gold it ran with (`run_bench.py --rescore` uses today's), and a frozen run must use the engine binary of the gold.
+- Known false negatives left open for the labelling, not fixed here: another percentage in the answer read as a contradiction (11 turns of
+  Opus, "AUC(0-inf) ... −1,839 %"); a difference in a table column or under a heading without a label; a "verdict: none" where the answer
+  says "bien en dessous" without the word threshold (v1 seed 2, ex14 t4).

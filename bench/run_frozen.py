@@ -299,7 +299,8 @@ def analyse(tier, c1="v1", c2="v2", base=None, extra=()):
     infos = [x for g in runs for x in infos_of[g]]
     ids = sorted({i for i in (infos[0]["exercises"] if infos else [])} | {i for g in runs for s in runs[g] for i in runs[g][s]})
     configs = {g: config_section(runs[g], ids) for g in runs}
-    res = {"tier": tier, "base": os.path.relpath(base, AGENT).replace(os.sep, "/"), "rubric": score.RUBRIC_VERSION, "exercises": ids,
+    rubrics = sorted({t["rubric"]["rubric"] for g in runs for s in runs[g] for r in runs[g][s].values() for t in r["turns"] if t.get("rubric")})
+    res = {"tier": tier, "base": os.path.relpath(base, AGENT).replace(os.sep, "/"), "rubric": ", ".join(rubrics) or score.RUBRIC_VERSION, "exercises": ids,
            "confirmatory": bool(infos) and all(x.get("confirmatory") for x in infos),
            "notes": sorted({n for x in infos for n in x.get("notes", [])}), "models": sorted({x["model"] for x in infos}),
            "c1": c1, "c2": c2, "configurations": configs, "replay": replay_section(base, runs),

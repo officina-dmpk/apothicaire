@@ -303,11 +303,13 @@ def _eol(text, pos):
     e = text.find(chr(10), pos)
     return len(text) if e < 0 else e
 
-def _spans(text, item, marks):
+def _spans(text, item, marks, rubric=False):
     """[[(lo, hi)]] one list of text spans per label of `item` in which its numbers are claimed. A key label: from the label to
     the next label of the turn or the end of the line (plus a number written right before it, if the label allows it: "7 points").
     A method label (the two AUC of the compare turn): the same, and in the lines that follow it up to the next method label, the
-    part after an AUC(0-tlast) label ("Avec la méthode linéaire :" then one line per parameter)."""
+    part after an AUC(0-tlast) label ("Avec la méthode linéaire :" then one line per parameter). `rubric`: the marks hold the label
+    of every parameter, so a label in the heading ("méthode X (dose 200 mg) :") does not end those lines, and the value may stand
+    before the method in parentheses ("passe de 73 402,9 h·ng/mL (méthode linéaire)")."""
     by_method = item.get("by_method")
     tag = ("method", item["method"]) if by_method else ("key", item["key"])
     out = []
@@ -320,14 +322,15 @@ def _spans(text, item, marks):
         if by_method:
             # "<value> avec la méthode linéaire": the value written right before the method label, in the same line
             lo = max(marks[i - 1][1] if i else 0, text.rfind(chr(10), 0, a) + 1)
-            if _LEAD_RE.search(text[lo:a]):
+            if (_RUBRIC_LEAD_RE if rubric else _LEAD_RE).search(text[lo:a]):
                 lead = [n for n in gate.extract_numbers(text[lo:a]) if n.exempt not in _SKIP_EXEMPT]
                 if lead: spans.append((lo + lead[-1].start, lo + lead[-1].end))
+            if rubric: nxt = next((m[0] for m in marks[i + 1:] if m[2][0] == "method"), len(text))
             pos = _eol(text, b) + 1
             while pos < nxt:
                 end = min(_eol(text, pos), nxt)
                 m = re.compile(_ALIASES["auclast"][0], re.I).search(text, pos, end)
-                if m: spans.append((m.end(), end))
+                if m: spans.append((m.end(), next((x[0] for x in marks if m.end() <= x[0] < end), end) if rubric else end))
                 pos = _eol(text, pos) + 1
         elif _ALIASES.get(item["key"], (0, False))[1]:
             ls = text.rfind(chr(10), 0, a) + 1
@@ -539,11 +542,12 @@ def compare_usage(prior_calls, turn_calls, truth=None):
 #   5. no dump          outside turn 1, more than 3 quantities the turn did not ask for (`DUMP_LIMIT`); a forbidden value
 #                       (the `must_not` lists of scripts.py: converted or computed by the model) fails at any count
 #   6. verdict          turn 4 states whether the extrapolation is acceptable, and the verdict matches the gold
-#                       (acceptable when AUC % extrapolated <= 20 %; between 18 % and 22 % either verdict passes)
+#                       (acceptable when AUC % extrapolated <= 20 %; between 18 % and 22 % either verdict passes); a comparison
+#                       with a threshold counts only when it speaks of the extrapolation (`_other_quantity`)
 #   7. turn specifics   recall: dose with its unit, route and AUC method, no other route stated; compare: the
 #                       lin-up/log-down AUC(0-tlast), the difference and the percentage (the linear AUC optional, but right
 #                       if stated); not available: says it is not calculated and states no value labelled with the parameter
-RUBRIC_VERSION = "2026-10-21"
+RUBRIC_VERSION = "2026-11-01"
 DUMP_LIMIT = 3
 VERDICT_THRESHOLD, VERDICT_BAND = 20.0, (18.0, 22.0)
 NEGATION_RE = re.compile(r"\bnot\b|\bisn'?t\b|\bwasn'?t\b|n'(?:est|était|a|ont|avait)\s+(?:pas|plus)\b|\bne\b[^.;:\n|]{0,40}?\b(?:pas|plus)\b|"
@@ -561,8 +565,16 @@ RUBRIC_ALIASES = {**_ALIASES,
 RUBRIC_ALIASES["aucpext.obs"] = (r"aucpext|auc[ _]?%[ _]?ext|(?:pourcentage|part|fraction|%)[^.;:\n|]{0,25}extrapol|"
                                  r"\bauc\s?(?:\(\s?0\s?-\s?(?:inf|∞)\w*\s?\)\s?)?extrapol|extrapolat\w*\s+(?:de\s+l'|of\s+the\s+)auc|"
                                  r"extrapol\w*[^.;:\n|\d]{0,12}(?:%|pourcent)", True)
+# "Absolue : -939 h·ng/mL" under the heading "Différence (...)"; the percentage has its "Relative :" in the oracle's alias
+RUBRIC_ALIASES["compare.difference"] = (_ALIASES["compare.difference"][0] + r"|\babsolue?\b", False)
 _UNASKED_SKIP = {"dose", "compare.percent", "compare.difference"}
-_RUBRIC_LUD_RE = re.compile(r"lin(?:[ée]a(?:r|ire))?[\s_-]*up[\s_/-]*log[\s_-]*down|lin_up_log_down", re.I)
+_RUBRIC_LUD_RE = re.compile(r"lin(?:[ée]a(?:r|ire))?[\s_-]*(?:up|haut|montante?|ascendante?)[\s_/-]*"
+                            r"log(?:arithmique)?[\s_-]*(?:down|(?:avant-)?bas|descendante?)|lin_up_log_down", re.I)
+_RUBRIC_LEAD_RE = re.compile(_LEAD_RE.pattern + r"|\(\s*(?:m[ée]thode\s+|method\s+)?[*_`\s]*$", re.I)
+# a count of points written in words ("Trois points ont servi", "Nombre de points : trois"): the gate reads digits only
+_COUNT_WORDS = {w: k for k, ws in enumerate(("deux two", "trois three", "quatre four", "cinq five", "six", "sept seven", "huit eight", "neuf nine",
+                                             "dix ten", "onze eleven", "douze twelve"), 2) for w in ws.split()}
+_COUNT_RE = re.compile(rf"\b({'|'.join(_COUNT_WORDS)})(?=\s+points?\b)|(?<=points)\s*:\s*[*_`]*({'|'.join(_COUNT_WORDS)})\b", re.I)
 # the quality thresholds an answer quotes next to the extrapolation or the regression (GATE_V2.md, named conventions)
 THRESHOLDS = (20.0, 0.9, 2.0)
 _ABSTAIN_RE = re.compile(r"je ne (?:peux|sais) pas|n'ai pas pu|ne suis pas en mesure|impossible|cannot|can't|unable|could not", re.I)
@@ -571,6 +583,12 @@ _VERDICT_NEG_RE = re.compile(r"\b(?:in|un)acceptables?\b|(?:\bnon|\bpas|\bnot|n'
                              r"\babove\s+the\s+threshold|\bexceeds\b", re.I)
 _VERDICT_POS_RE = re.compile(r"\bacceptables?\b|ne\s+d[ée]passe\s+pas|en[- ]dessous\s+du\s+seuil|sous\s+le\s+seuil|inf[ée]rieure?\s+au\s+seuil|"
                              r"\bbelow\s+the\s+threshold|within\s+the\s+(?:limit|threshold)", re.I)
+_VERDICT_COMPARISON_RE = re.compile(r"seuil|limit|threshold|d[ée]passe|exceeds", re.I)
+_VERDICT_QUOTED_RE = re.compile(r"\s*(?:(?:le|la|ce|the)\s+(?:seuil|limite|threshold)\s*)?(?:minimale?|minimum|maximale?|maximum)?\s*"
+                                r"(?:de|of|:|=)?\s*(\d+(?:[.,]\d+)?)", re.I)
+_VERDICT_SUBJECT_RE = re.compile(r"(?P<aumc>aumc\w*(?:[\s.]+extrapol\w*)?)|(?P<extrapolation>extrap|aucpext)|(?<![a-z])r\s?[²2](?!\d)|r[- ]?squared|\bspan\b|"
+                                 r"[ée]tendue|port[ée]e|demi-vies?|half-lives?|\bpoints?\b|λz|lambda|r[ée]gression|\bpente\b|\bslope\b", re.I)
+_SENTENCE_RE = re.compile(r"[;!?\n]|\.(?=\s|$)")
 _ROUTE_WORDS = {"oral": r"\borale?s?\b|\boral\b|extravasculaire|per os", "iv_bolus": r"\bbolus\b",
                 "iv_infusion": r"perfusion|infusion"}
 _UNIT_EQUIV = {"ug/ml": "mg/l", "ng/ul": "mg/l", "ug/l": "ng/ml", "pg/ul": "ng/ml", "mg/ml": "g/l"}
@@ -680,6 +698,14 @@ def _numbers(answer):
     nums = [n for n in nums if not _REF_BEFORE_RE.search(answer[max(0, n.start - 12):n.start])]
     return allnums, nums
 
+def _spelled_counts(answer):
+    """The counts of points written in words, as numbers of the gate (2 significant digits, like a digit it reads)."""
+    out = []
+    for m in _COUNT_RE.finditer(answer):
+        g = m.lastindex
+        out.append(gate.Num(m.group(g), m.start(g), m.end(g), "", [(D(_COUNT_WORDS[m.group(g).lower()]), 2, True)]))
+    return out
+
 _UNIT_LEAD_RE = re.compile(r"[\s*_`]*(?:\|[\s*_`]*)?")
 
 def _rubric_unit(answer, allnums, n, vocab):
@@ -697,7 +723,7 @@ def _label_claims(answer, text, item, marks, vocab, allnums, nums, lookback=Fals
     tag = ("method", item["method"]) if item.get("by_method") else ("key", item["key"])
     starts = {a for a, _, t in marks if t == tag}
     out, seen = [], set()
-    for spans, label_start in zip(_spans(text, item, marks), sorted(starts)):
+    for spans, label_start in zip(_spans(text, item, marks, rubric=True), sorted(starts)):
         if lookback:                                                     # a number before the label, in the same clause
             lo = _clause_start(text, label_start)
             before = [n for n in nums if lo <= n.start and n.end <= label_start]
@@ -734,16 +760,34 @@ _VERDICT_ECHO_RE = re.compile(r"(?:est[- ]ce\s+(?:que\s+)?(?:c'est\s+|l'extrapol
                               r"acceptabilit[ée]|acceptability", re.I)
 _VERDICT_YESNO_RE = re.compile(r"[\s*_:`»«\"'-]*(oui|yes|non|no)\b", re.I)
 
+def _other_quantity(answer, m):
+    """Does the verdict phrase `m` compare another quantity than the extrapolation with its threshold ("R² ajusté = 0,99, au-dessus
+    du seuil de 0,9", "le span ratio dépasse le seuil de 2")? The threshold it quotes decides (0.9, 2: another quantity; 20: the
+    extrapolation, unless the subject is the AUMC); without one, the last quantity named before it in the sentence, if any."""
+    if not _VERDICT_COMPARISON_RE.search(m.group(0)): return False
+    lo = 0
+    for b in _SENTENCE_RE.finditer(answer, 0, m.start()): lo = b.end()
+    subject = None
+    for subject in _VERDICT_SUBJECT_RE.finditer(answer, lo, m.start()): pass
+    q = _VERDICT_QUOTED_RE.match(answer, m.end())
+    q = float(q.group(1).replace(",", ".")) if q else None
+    if q in THRESHOLDS[1:]: return True
+    if subject is None: return False
+    return bool(subject.group("aumc")) if q == VERDICT_THRESHOLD else not subject.group("extrapolation")
+
 def verdict_of(answer):
     """'acceptable', 'not_acceptable', 'both' or None: the acceptability verdict an answer states (closed phrase lists). The echo
-    of the question ("Est-ce acceptable ?", "Acceptabilité :") is not a verdict; a "oui" or "non" right after it is."""
+    of the question ("Est-ce acceptable ?", "Acceptabilité :") is not a verdict; a "oui" or "non" right after it is. The threshold
+    of another quantity is no verdict on the extrapolation (`_other_quantity`)."""
     echoes = list(_VERDICT_ECHO_RE.finditer(answer))
     yesno = [_VERDICT_YESNO_RE.match(answer, m.end()) for m in echoes]
     answer = _mask(answer, [(m.start(), m.end()) for m in echoes])
-    neg = list(_VERDICT_NEG_RE.finditer(answer)) + [y for y in yesno if y and y.group(1).lower() in ("non", "no")]
+    neg = [m for m in _VERDICT_NEG_RE.finditer(answer) if not _other_quantity(answer, m)] + \
+          [y for y in yesno if y and y.group(1).lower() in ("non", "no")]
     pos_yes = [y for y in yesno if y and y.group(1).lower() in ("oui", "yes")]
     masked = _mask(answer, [(m.start(), m.end()) for m in neg])
-    pos = [m for m in _VERDICT_POS_RE.finditer(masked) if not _VERDICT_NEG_RE.search(answer[max(0, m.start() - 12):m.end()])] + pos_yes
+    pos = [m for m in _VERDICT_POS_RE.finditer(masked) if not _VERDICT_NEG_RE.search(answer[max(0, m.start() - 12):m.end()])
+           and not _other_quantity(answer, m)] + pos_yes
     if neg and pos: return "both"
     return "not_acceptable" if neg else ("acceptable" if pos else None)
 
@@ -835,7 +879,8 @@ def rubric_turn(answer, turn, meta, tool_results=(), usage=None, badge_mark="\n\
     legit = _legit_values(meta, csv_numbers)
     reasons, verdicts = [], []
     for it in items:
-        claims = _label_claims(answer, text, it, marks, vocab, allnums, nums, lookback=RUBRIC_ALIASES.get(it["key"], (0, False))[1])
+        pool = sorted(nums + _spelled_counts(answer), key=lambda n: n.start) if it["key"] == "lambda.z.n.points" else nums
+        claims = _label_claims(answer, text, it, marks, vocab, allnums, pool, lookback=RUBRIC_ALIASES.get(it["key"], (0, False))[1])
         stated, contra, detail = _item_verdict(claims, it, required_unit=(kind == "recall" and it["key"] == "dose"), legit=legit)
         if it.get("optional") and not stated and not contra and detail in ("not stated with its label", "negated"): stated = True
         verdicts.append({"label": it["label"], "ok": stated, "detail": detail, "claimed": [c["raw"] for c in claims[:4]]})

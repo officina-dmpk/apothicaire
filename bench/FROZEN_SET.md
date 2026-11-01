@@ -216,9 +216,25 @@ the code takes this one; each is tested in `tests/test_bench_score.py` (class `T
   absolute values, since the question asks for the difference "en valeur absolue". A percentage is labelled by its %
   sign; a difference by its label or by the AUC unit in a clause that says it is a difference ("de moins", "écart").
 
-On the development set the mutation suite (`bench/mutations.py`, run by the tests) builds 1 024 correct answers and
-variants and 1 525 mutations from the gold of the 25 exercises: all 1 024 score CORRECT and all 1 525 score WRONG. The
-seven probes of the triage (RT-B3) are among the tests.
+Amendment (2026-11-01, rubric version 2026-11-01, before the case freeze). False negatives read in the failed turns of
+the development runs; the rules above do not change, their reading does (`bench/frozen/LEDGER.md`, same date). Each has
+a test:
+
+- Rule 6: a comparison with a threshold ("dépasse le seuil", "au-dessus du seuil", "sous le seuil", in both directions)
+  counts as a verdict only if it speaks of the extrapolation. The threshold it quotes decides (0.9 or 2: another
+  quantity; 20: the extrapolation, unless the subject is the AUMC); without one, the last quantity named before it in
+  the sentence, if any.
+- Rule 1, labels: the French names of the method ("linéaire-haut/log-avant-bas", "linéaire-montante/log-descendante");
+  the count of points in words, 2 to 12 ("Trois points", "Nombre de points : trois"), for that item only; "Absolue :"
+  as a label of the difference.
+- Rule 1, attachment: under a method heading the lines run to the next method label, so a label of another parameter
+  in the heading ("méthode X (dose 200 mg) :") does not end them; a value may stand before the method in parentheses
+  ("passe de x (méthode linéaire) à y (linear-up/log-down)").
+
+On the development set the mutation suite (`bench/mutations.py`, run by the tests) builds 1 153 correct answers and
+variants and 1 700 mutations from the gold of the 25 exercises: all 1 153 score CORRECT and all 1 700 score WRONG. The
+seven probes of the triage (RT-B3) are among the tests. Since 2026-11-01 it also takes the layouts above, in both
+directions: a canonical answer built from the gold never takes them, so it could not see these false negatives.
 
 ### 6.3 Success of an exercise and aggregation over sampling seeds
 
@@ -255,6 +271,11 @@ the list of mutations are part of the report. The seven probes of the triage (RT
 **Agreement with a human.** Abdou labels 40 turns drawn at random (seeded) from the development runs, without seeing
 the scorer's verdict. Every disagreement is resolved before the freeze, by fixing the scorer or by writing the case
 into the rubric; the agreement before resolution is reported.
+
+Implementation (2026-11-01). `python bench/rubric_review.py sample` draws 5 turns of each of the 8 turn kinds from the
+eight three-seed development configurations, seed 20261101, without reading a verdict, and writes `bench/labelling/`:
+`SHEET.md` (question, gold, answer), `labels.csv` (to fill) and `sample.json` (which run each turn comes from).
+`python bench/rubric_review.py agreement` compares the labels with the rubric.
 
 ## 8. Development set, confirmation set and the demo-gate decision
 

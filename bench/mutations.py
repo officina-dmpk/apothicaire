@@ -71,6 +71,16 @@ def canonical(turn, meta, digits=6, comma=False, table=False, unit_map=None):
         out.append("C'est acceptable." if pext <= score.VERDICT_THRESHOLD else "Ce n'est pas acceptable.")
     return "\n".join(out)
 
+def _count_word(n):
+    """A count written in words as an answer writes it, or None out of the closed list of the rubric."""
+    return next((w.capitalize() for w, k in score._COUNT_WORDS.items() if k == n), None)
+
+def _compare_values(turn, meta):
+    """The strings of the compare turn: linear AUC, lin-up/log-down AUC, difference, percentage, unit."""
+    items, (d, p) = _items(turn, meta)
+    lud = next(i for i in items if i["method"] == "lin_up_log_down")
+    return num(scripts.truth_value(meta, "auclast")), num(lud["value"]), num(d["value"]), num(p["value"]), unit_of(lud)
+
 def _swap_unit(u):
     """Another spelling of the same unit (an exact rewriting), or None."""
     for a, b in (("h·mg/L", "mg·h/L"), ("h*mg/L", "mg*h/L"), ("h·ng/mL", "ng·h/mL"), ("h*ng/mL", "ng*h/mL"), ("mg/L", "µg/mL"),
@@ -87,6 +97,23 @@ def variants(turn, meta):
         out.append(("markdown table", canonical(turn, meta, table=True)))
         alt = canonical(turn, meta, unit_map=lambda u: _swap_unit(u) or u)
         if alt != out[0][1]: out.append(("unit rewritten", alt))
+    # the layouts read in the stored development runs, which a canonical answer built from the gold never takes (2026-11-01)
+    if turn["kind"] == "half_life":
+        r2 = num(scripts.truth_value(meta, "adj.r.squared"))
+        out.append(("other thresholds", canonical(turn, meta) + f"\nLe R² ajusté ({r2}) est au-dessus du seuil de 0,9, et le span ratio dépasse le seuil de 2."))
+    if turn["kind"] == "compare":
+        lin, lud, d, p, u = _compare_values(turn, meta)
+        out += [("method in French", canonical(turn, meta).replace("lin-up/log-down", "linéaire-haut/log-avant-bas")),
+                ("values before the methods", f"L'AUC(0–tlast) passe de {lin} {u} (méthode linéaire) à {lud} {u} (méthode linear-up/log-down).\n"
+                                              f"Différence = {d} {u}\nPourcentage = {p} %"),
+                ("method heading", f"Avec la méthode linear-up/log-down (analyse 3, dose {num(meta['dose']['amount'])} {unit_of(meta['dose'])}) :\n\n"
+                                   f"- AUC(0–tlast) : {lud} {u}\n\nDifférence = {d} {u}\nPourcentage = {p} %"),
+                ("difference heading", f"AUC(0-tlast) lin-up/log-down = {lud} {u}\n\n**Différence (log-down moins linéaire) :**\n"
+                                       f"- Absolue : {d} {u}\n- Relative : {p} %")]
+    if turn["kind"] == "lambda_z_regression":
+        items, _ = _items(turn, meta); n, r2 = items
+        word = _count_word(int(n["value"]))
+        if word: out.append(("count in words", f"{word} points ont servi à la régression de λz, et le R² ajusté est de {num(r2['value'])}."))
     return out
 
 def _value_text(item, digits=6):
@@ -134,6 +161,9 @@ def mutations(turn, meta):
         out.append(("verdict reversed", base.replace("C'est acceptable.", "@@").replace("Ce n'est pas acceptable.", "C'est acceptable.")
                     .replace("@@", "Ce n'est pas acceptable.")))
         out.append(("verdict missing", "\n".join(base.split("\n")[:-1])))
+        if scripts.truth_value(meta, "aucpext.obs") <= score.VERDICT_THRESHOLD:         # the threshold of the extrapolation still decides
+            out += [("verdict by the threshold", "\n".join(base.split("\n")[:-1]) + "\nL'extrapolation dépasse le seuil de 20 %."),
+                    ("both verdicts by the threshold", base + "\nL'extrapolation est au-dessus du seuil de 20 %.")]
     if kind != "import_nca":
         p = meta["ground_truth"]["nca"]["linear"]["parameters"]
         dump = " ; ".join(f"{k} = {num(x['value'])}" for k, x in p.items() if x["value"])
@@ -142,6 +172,19 @@ def mutations(turn, meta):
         lin = scripts.truth_value(meta, "auclast")
         out.append(("stale result", base.replace(f"= {v}", f"= {num(lin)}", 1)))
         out.append(("difference missing", "\n".join(l for l in base.split("\n") if not l.startswith("Différence"))))
+        lin, lud, d, p, u = _compare_values(turn, meta)
+        tail = f"\nDifférence = {d} {u}\nPourcentage = {p} %"
+        wrong = num(alts[0]["value"] * factor)
+        out += [("stale, values before the methods", f"L'AUC(0-tlast) passe de {lin} {u} (méthode linéaire) à {lin} {u} (linear-up/log-down)." + tail),
+                ("methods swapped, values before them", f"L'AUC(0-tlast) passe de {lud} {u} (méthode linéaire) à {lin} {u} (linear-up/log-down)." + tail),
+                ("stale under a method heading", f"Avec la méthode linear-up/log-down (dose {num(meta['dose']['amount'])} {unit_of(meta['dose'])}) :\n\n"
+                                                 f"- AUC(0-tlast) : {lin} {u}" + tail),
+                ("difference heading, wrong value", f"AUC(0-tlast) lin-up/log-down = {lud} {u}\n\n**Différence (log-down moins linéaire) :**\n"
+                                                    f"- Absolue : {wrong} {u}\n- Relative : {p} %")]
+    if kind == "lambda_z_regression":
+        n, r2 = items
+        word = _count_word(int(n["value"]) + 1)
+        if word: out.append(("count in words, wrong", f"{word} points ont servi à la régression de λz, et le R² ajusté est de {num(r2['value'])}."))
     return out
 
 def run(dirs, verbose=True):

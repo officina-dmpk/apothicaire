@@ -237,6 +237,72 @@ class TestRubric(unittest.TestCase):
         for v in ("C'est acceptable.", "Ce n'est pas acceptable."):            # 18-22 %: either verdict, if the value is stated
             self.assertTrue(score.rubric_turn("t½ = 3,30899 h ; % de l'AUC extrapolé : 19,5 %. " + v, tb, band)["correct"])
 
+    def test_a_threshold_of_another_quantity_is_no_verdict(self):
+        """Stored answers the rubric of 2026-10-21 read as "both verdicts": the R² or the span ratio above its threshold."""
+        for a in ("**Verdict : acceptable.** L'extrapolation post-tlast (2,7 %) est bien en dessous du seuil de 20 %, et le R² ajusté de la "
+                  "régression λz (0,9977) dépasse le seuil de 0,9.",                                       # ex07 seed 2, 27B + scope
+                  "**Verdict : acceptable.** L'extrapolation de l'AUC (1,70 %) est bien en dessous du seuil de 20 %, et le ratio d'étendue "
+                  "(span ratio = 4,57) dépasse le seuil minimal de 2,0.",                                  # ex22 seed 3, 27B + scope
+                  "**Verdict : acceptable.** Le pourcentage extrapolé est nettement inférieur au seuil de 20 % utilisé par Caladrius. La "
+                  "régression de λz est bonne (adj. R² de 0.999389, rapport d'étendue de 2.91, supérieur au seuil de 2).",   # ex01 seed 1, Sonnet + scope
+                  "**Acceptable ?** Oui :\n- La durée couverte vaut 2,9 demi-vies, au-dessus du seuil de 2.",
+                  "C'est acceptable. Le rapport d'étendue n'est que modérément au-dessus du seuil.",
+                  "La valeur extrapolée est en dessous du seuil et le R² est au-dessus du seuil : c'est acceptable."):
+            with self.subTest(a=a): self.assertEqual(score.verdict_of(a), "acceptable")
+        # the threshold of the extrapolation still decides, whatever is written next to it
+        for a in ("L'extrapolation (25 %) dépasse le seuil de 20 %, malgré un R² de 0,99.", "25 % dépasse le seuil.",
+                  "L'AUC extrapolée, calculée sur 3 points, dépasse le seuil de 20 %.",
+                  "L'extrapolation est au-dessus du seuil de 20 %. Le R² ajusté dépasse le seuil de 0,9.",
+                  "Ce n'est pas acceptable, et le span ratio est sous le seuil de 2.", "The extrapolation exceeds 20 %; R² is above the threshold of 0.9."):
+            with self.subTest(a=a): self.assertEqual(score.verdict_of(a), "not_acceptable")
+        self.assertEqual(score.verdict_of("C'est acceptable. L'extrapolation est au-dessus du seuil de 20 %."), "both")
+        self.assertEqual(score.verdict_of("L'AUMC extrapolée dépasse le seuil de 20 %, mais l'AUC extrapolée est sous le seuil de 20 %."), "acceptable")
+        self.assertIsNone(score.verdict_of("Le span ratio est sous le seuil de 2."))                # a threshold of another quantity alone says nothing
+        self.assertIsNone(score.verdict_of("Le R² ajusté dépasse le seuil de 0,9."))
+
+    def test_method_labels_and_layouts_of_the_compare_turn(self):
+        """Stored compare answers the rubric of 2026-10-21 failed: the lin-up/log-down AUC, right, was not read."""
+        cases = {"ex08_oral_1": "**AUC(0-tlast) :**\n- Méthode linéaire : 46 762,6 min·ng/mL\n- Méthode linéaire-haut/log-avant-bas : 42 680,3 "
+                                "min·ng/mL\n\n**Différence :**\n- Valeur absolue : **4 082,31 min·ng/mL**\n- Pourcentage : **8,73 %**",
+                 "ex18_pk2_iv_bolus": "Avec la méthode **linear-up/log-down** (analyse #3, bolus IV, dose 200 mg) :\n\n- **AUC(0–tlast)** : 1 660 490 "
+                                      "min·ng/mL\n\nComparaison avec la méthode linéaire (analyse #2, AUC(0–tlast) = 1 701 680 min·ng/mL) :\n\n"
+                                      "- **Différence en valeur absolue** : −41 195,6 min·ng/mL (la méthode lin-up/log-down donne une AUC plus faible)\n"
+                                      "- **Différence en pourcentage** : −2,42 %",
+                 "ex04_oral_1_lag": "L'AUC(0–tlast) passe de **73 402,9 h·ng/mL** (méthode linéaire) à **68 899,9 h·ng/mL** (méthode linear-up/log-down)."
+                                    "\n\n- **Différence en valeur absolue** : **4 503 h·ng/mL**\n- **Différence en pourcentage** : **6,13463 %**",
+                 "ex15_oral_0": "L'AUC(0–tlast) passe de **92,0519 h·mg/L** (méthode linéaire) à **85,5868 h·mg/L** (méthode linear-up/log-down).\n\n"
+                                "- **Différence en valeur absolue** : −6,46509 h·mg/L\n- **Différence en pourcentage** : −7,02331 %"}
+        for ex, a in cases.items():
+            with self.subTest(ex):
+                t7, meta = self.turn(ex, 6)
+                self.assertTrue(score.rubric_turn(a, t7, meta)["correct"], score.rubric_turn(a, t7, meta)["reasons"])
+        t7, meta = self.turn("ex04_oral_1_lag", 6)
+        stale = cases["ex04_oral_1_lag"].replace("68 899,9", "73 402,9")                            # the linear value under the other method
+        swapped = cases["ex04_oral_1_lag"].replace("73 402,9", "@").replace("68 899,9", "73 402,9").replace("@", "68 899,9")
+        for a in (stale, swapped):
+            self.assertIn("AUC(0-tlast) lin-up/log-down: not stated with its label", score.rubric_turn(a, t7, meta)["reasons"])
+        t7, meta = self.turn("ex18_pk2_iv_bolus", 6)
+        self.assertFalse(score.rubric_turn(cases["ex18_pk2_iv_bolus"].replace("1 660 490", "1 701 680"), t7, meta)["correct"])     # stale, under a heading
+
+    def test_difference_under_a_heading(self):
+        t7, meta = self.turn("ex25_oral_1", 6)                       # seed 3, Sonnet + scope
+        a = ("**AUC(0-tlast)**\n\n| Méthode | Valeur |\n|---|---|\n| Linéaire (analyse n°2) | 16951.2 h·ng/mL |\n| Linear-up/log-down (analyse n°3) | "
+             "16012.2 h·ng/mL |\n\n**Différence (log-down moins linéaire) :**\n- Absolue : -939.022 h·ng/mL\n- Relative : -5.53956 %\n\nLa méthode "
+             "linear-up/log-down donne donc une AUC(0-tlast) plus faible. Aucun flag qualité n'a été levé pour cette analyse.")
+        self.assertTrue(score.rubric_turn(a, t7, meta)["correct"], score.rubric_turn(a, t7, meta)["reasons"])
+        self.assertFalse(score.rubric_turn(a.replace("-939.022", "-1234.56"), t7, meta)["correct"])
+        self.assertFalse(score.rubric_turn(a.replace("-5.53956", "-7.53956"), t7, meta)["correct"])
+
+    def test_a_count_written_in_words(self):
+        t5, meta = self.turn("ex06_oral_0", 4)                       # seed 1, 27B + scope: 3 points
+        a = "Trois points ont servi à la régression de λz (aux temps 5,7 h, 8,8 h et 14 h), et le R² ajusté est de **0,999966**."
+        self.assertTrue(score.rubric_turn(a, t5, meta)["correct"], score.rubric_turn(a, t5, meta)["reasons"])
+        self.assertTrue(score.rubric_turn("Nombre de points : trois. R² ajusté = 0,999966.", t5, meta)["correct"])
+        for w in ("Deux points ont servi à la régression", "Quatre points ont servi à la régression", "Ce ne sont pas trois points qui ont servi à la régression"):
+            with self.subTest(w): self.assertFalse(score.rubric_turn(a.replace("Trois points ont servi à la régression", w), t5, meta)["correct"])
+        self.assertEqual(score.rubric_turn("Sept points", self.turn("ex01_iv_bolus", 1)[0], meta)["reasons"][:1],
+                         score.rubric_turn("", self.turn("ex01_iv_bolus", 1)[0], meta)["reasons"][:1])                # other turns do not read the word
+
     def test_compare_difference_and_percentage_are_required(self):
         t7, meta = self.turn("ex02_oral_1", 6)
         lin, lud = self.sc.truth_value(meta, "auclast"), self.sc.truth_value(meta, "auclast", "lin_up_log_down")
@@ -248,6 +314,15 @@ class TestRubric(unittest.TestCase):
         self.assertFalse(score.rubric_turn(full.replace(f"= {lud:.6g}", f"= {lin:.6g}"), t7, meta)["correct"])            # stale
         self.assertFalse(score.rubric_turn(full + f" Méthode linéaire : {lin * 1.1:.6g} h·ng/mL.", t7, meta)["correct"])   # optional but wrong
         self.assertTrue(score.rubric_turn(full + f" Méthode linéaire : {lin:.6g} h·ng/mL.", t7, meta)["correct"])
+
+    def test_the_draw_of_the_human_labelling_holds_no_verdict(self):
+        from bench import rubric_review as rr
+        picks, _ = rr.draw()
+        self.assertEqual(picks, rr.draw()[0])                        # seeded
+        self.assertEqual(len({p["id"] for p in picks}), 40)
+        kinds = [rr._stored_turn(p)[1]["kind"] for p in picks]
+        self.assertEqual({k: kinds.count(k) for k in kinds}, {k: 5 for k in self.sc.KINDS})
+        for p in picks: self.assertEqual(set(p), {"config", "folder", "seed", "exercise", "turn", "gold", "id"})
 
     def test_outcome_classes_in_order(self):
         rub = lambda ok: {"correct": ok, "items": [{"ok": ok}], "reasons": [] if ok else ["x"]}
